@@ -12,6 +12,7 @@ una mano y con el menor esfuerzo posible.
 - ✅ Estado: **Fase 1** (auth, hogar compartido, estados, lista automática, tiempo real, offline) y **Fase 2**
   (códigos de barras con Open Food Facts, foto del producto recortada sin fondo)
 - 📱 Versión web (PWA) y app de iPhone para el App Store, con el mismo código y la misma base
+- 🔑 Sin correos ni contraseñas: se entra con «Empezar» y el hogar se comparte con un código
 
 ---
 
@@ -77,23 +78,31 @@ publicación de **Realtime**. Para verificarlo: **Database → Publications → 
 Las fotos de productos van al bucket privado **product-images**, que crean las migraciones (Storage → Buckets). Cada
 hogar solo puede leer y escribir su carpeta.
 
-### 4. Ingreso con código por correo
-Kvar entra con un **código de 6 dígitos** (no con link mágico: en iPhone el link abre Safari y no la app instalada).
+### 4. Ingreso sin correo (un interruptor)
+Kvar entra **sin correo ni contraseña**: al tocar «Empezar», Supabase crea un usuario propio de ese teléfono. Lo que
+se comparte es el **hogar**, con su código de invitación.
 
-1. **Authentication → Providers → Email**: activado. Podés desactivar «Confirm email» si querés: el código ya confirma.
-2. **Authentication → Email Templates → Magic Link**: el cuerpo tiene que incluir el código. Por ejemplo:
+- **Authentication → Sign In / Providers** → activá **Allow anonymous sign-ins** → **Save**.
+
+Nada más: no hace falta configurar correos.
+
+Cosas a saber:
+- Si alguien borra la app o cierra sesión, vuelve con «Empezar» y se suma de nuevo con el código del hogar
+  (Ajustes → Hogar). Los productos y la lista no se pierden mientras quede alguien en el hogar.
+- La seguridad no cambia: cada usuario, con o sin correo, solo ve los hogares a los que se unió.
+
+#### Opcional: entrar con correo
+La pantalla de ingreso también tiene «Entrar con mi correo» (código de 6 dígitos). Para usarlo, Supabase exige un
+servidor de correo propio (SMTP) antes de dejar cambiar las plantillas:
+1. **Authentication → Emails → SMTP Settings**: por ejemplo con Gmail (`smtp.gmail.com`, puerto `465`, tu dirección
+   y una *contraseña de aplicación* de Google).
+2. **Emails → Magic link or OTP** y **Confirm sign up** → **Source**: el cuerpo tiene que incluir `{{ .Token }}`:
 
    ```html
-   <h2>Tu código para entrar a Kvar</h2>
-   <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
-   <p>Vence en una hora. Si no lo pediste, ignorá este correo.</p>
+   <h2>Kvar</h2>
+   <p>Tu código para entrar:</p>
+   <p style="font-size:32px;letter-spacing:8px"><strong>{{ .Token }}</strong></p>
    ```
-
-   Hacé lo mismo en **Confirm signup** para la primera vez de cada usuario.
-3. **Authentication → URL Configuration**: poné en **Site URL** la URL donde despliegues (y `http://localhost:5173`
-   en Redirect URLs para desarrollo).
-4. El servidor de correo incluido en Supabase tiene un límite bajo de envíos por hora. Para uso real configurá un
-   SMTP propio en **Project Settings → Authentication → SMTP Settings** (Resend, Postmark, etc.).
 
 ### 5. (Fases 2+) Secretos de Edge Functions
 Las llamadas a IA, Open Food Facts y push se hacen solo desde Edge Functions. Los secretos se cargan en Supabase, no

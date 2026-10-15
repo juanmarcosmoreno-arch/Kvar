@@ -179,8 +179,9 @@ real, PWA offline.
 - Sesión guardada en el almacenamiento de iOS (Preferences), no en el del navegador.
 
 **Notas de implementación**
-- Ingreso con **código de 6 dígitos por correo** (OTP): en iOS el link mágico abre Safari en lugar de la PWA instalada,
-  que tiene su propio almacenamiento.
+- Ingreso **sin correo**: «Empezar» crea un usuario propio del teléfono (*anonymous sign-in* de Supabase); lo que se
+  comparte es el hogar, con su código. Evita configurar el envío de correos. El ingreso con **código de 6 dígitos por
+  correo** queda como opción (requiere SMTP propio en Supabase); nunca link mágico, porque en iOS abre Safari y no la app.
 - «Qué cocino» muestra un adelanto; la búsqueda muestra el ícono de escaneo deshabilitado (Fase 2).
 - El bloque «Vence pronto» aparece solo cuando hay productos con vencimiento (se cargan desde la Fase 4).
 

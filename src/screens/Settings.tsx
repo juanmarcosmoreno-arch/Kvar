@@ -60,6 +60,14 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
     await supabase.auth.signOut();
   };
 
+  // Quien entró sin correo solo puede volver con el código del hogar: se avisa antes de salir
+  const [anonymous, setAnonymous] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  useEffect(() => {
+    if (isDemo) return;
+    void supabase.auth.getSession().then(({ data }) => setAnonymous(Boolean(data.session?.user?.is_anonymous)));
+  }, []);
+
   const [deleting, setDeleting] = useState<'idle' | 'confirm' | 'busy'>('idle');
   const alone = view.members.length <= 1;
   const deleteAccount = async () => {
@@ -184,7 +192,25 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
         <Section title="Cuenta">
           <div className="grid gap-2">
             <button className="btn-ghost w-full" onClick={onSwitchHousehold}>Crear otro hogar o sumarme a uno</button>
-            {!isDemo && <button className="btn w-full text-out" onClick={signOut}>Cerrar sesión</button>}
+            {!isDemo && !confirmSignOut && (
+              <button className="btn w-full text-out" onClick={() => (anonymous ? setConfirmSignOut(true) : void signOut())}>
+                Cerrar sesión
+              </button>
+            )}
+            {confirmSignOut && (
+              <div className="card space-y-3 p-4">
+                <p className="font-medium">Para volver vas a necesitar el código del hogar</p>
+                <p className="text-sm text-muted">
+                  Entraste sin correo. Si cerrás sesión, para volver tocás «Empezar» y te sumás con el código{' '}
+                  <strong className="font-mono text-ink">{view.household.invite_code}</strong>.
+                  {alone && ' Sos la única persona en este hogar: anotá el código antes de salir.'}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button className="btn-ghost" onClick={() => setConfirmSignOut(false)}>Cancelar</button>
+                  <button className="btn bg-out text-white" onClick={() => void signOut()}>Cerrar sesión</button>
+                </div>
+              </div>
+            )}
           </div>
           {deleting === 'idle' ? (
             <button className="btn w-full text-sm text-muted" onClick={() => setDeleting('confirm')}>

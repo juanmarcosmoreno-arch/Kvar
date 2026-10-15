@@ -3,15 +3,30 @@ import finalFrame from '../assets/brand/kvar-intro-final.webp';
 import { supabase } from '../lib/supabase';
 
 /**
- * Ingreso con código de 6 dígitos por correo (OTP).
- * Se evita el link mágico porque en iPhone abre Safari y no la app instalada.
+ * Ingreso sin correo: «Empezar» crea un usuario propio del teléfono (anonymous sign-in de
+ * Supabase). Lo que se comparte es el hogar, con su código de invitación.
+ * El ingreso con código por correo queda como opción, para quien configure el envío de correos.
  */
 export function Login() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [step, setStep] = useState<'start' | 'email' | 'code'>('start');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const start = async () => {
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase.auth.signInAnonymously();
+    setBusy(false);
+    if (error) {
+      setError(
+        /anonymous/i.test(error.message)
+          ? 'Falta activar «Allow anonymous sign-ins» en Supabase (Authentication → Sign In / Providers).'
+          : traducir(error.message),
+      );
+    }
+  };
 
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +49,20 @@ export function Login() {
 
   return (
     <AuthLayout>
-      {step === 'email' ? (
+      {step === 'start' ? (
+        <div className="space-y-4">
+          <h1 className="text-2xl font-semibold">Bienvenido</h1>
+          <p className="text-muted">
+            Sin correos ni contraseñas. Empezá y creá tu hogar, o sumate al de alguien con su código.
+          </p>
+          <button className="btn-primary w-full" onClick={() => void start()} disabled={busy}>
+            {busy ? 'Un segundo…' : 'Empezar'}
+          </button>
+          <button type="button" className="btn w-full text-sm text-muted" onClick={() => setStep('email')}>
+            Entrar con mi correo
+          </button>
+        </div>
+      ) : step === 'email' ? (
         <form onSubmit={sendCode} className="space-y-4">
           <h1 className="text-2xl font-semibold">Entrá a tu hogar</h1>
           <p className="text-muted">Te mandamos un código por correo. Sin contraseñas.</p>
@@ -50,6 +78,9 @@ export function Login() {
           />
           <button className="btn-primary w-full" disabled={busy || !email.includes('@')}>
             {busy ? 'Enviando…' : 'Mandame el código'}
+          </button>
+          <button type="button" className="btn w-full text-muted" onClick={() => { setStep('start'); setError(null); }}>
+            Volver
           </button>
         </form>
       ) : (
