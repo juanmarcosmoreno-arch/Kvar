@@ -1,10 +1,10 @@
 import { useRef, useState, type PointerEvent } from 'react';
 import { cycleStatus, worseStatus } from '../domain/status';
 import type { Product } from '../domain/types';
-import { categoryIcon } from '../lib/categoryIcon';
 import { setQuantity, setStatus } from '../store/actions';
 import { Icon } from './Icon';
-import { STATUS_BG, STATUS_SOFT, StatusPill } from './Status';
+import { ProductThumb } from './ProductThumb';
+import { STATUS_BG, STATUS_TEXT, StatusPill } from './Status';
 
 const THRESHOLD = 72;
 
@@ -59,7 +59,7 @@ export function ProductRow({
         </div>
       )}
       <div
-        className="card relative flex min-h-[64px] touch-pan-y select-none items-center gap-3 pl-3 pr-2"
+        className="card relative flex min-h-[60px] touch-pan-y select-none items-center gap-3 pl-3 pr-2"
         style={{ transform: `translateX(${dx}px)`, transition: dx === 0 ? 'transform 180ms ease-out' : 'none' }}
         onPointerDown={onDown}
         onPointerMove={onMove}
@@ -67,12 +67,10 @@ export function ProductRow({
         onPointerCancel={onUp}
       >
         <button className="flex min-h-[56px] flex-1 items-center gap-3 text-left" onClick={() => !swiped.current && onOpen()}>
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sunken text-2xl" aria-hidden>
-            {categoryIcon(categoryName)}
-          </span>
+          <ProductThumb product={product} categoryName={categoryName} />
           <span className="min-w-0 flex-1">
             <span className="flex items-center gap-1.5">
-              <span className="truncate font-semibold">{product.name}</span>
+              <span className="truncate font-medium">{product.name}</span>
               {product.is_staple && <Icon name="star" size={14} className="shrink-0 text-low" fill="currentColor" aria-label="Básico" />}
             </span>
             <span className="block truncate text-sm text-muted">
@@ -92,7 +90,7 @@ export function ProductRow({
               <Icon name="minus" size={20} />
             </button>
             <span
-              className={`inline-flex min-w-[2.5rem] justify-center rounded-lg px-2 py-1 text-sm font-bold tabular-nums ${STATUS_SOFT[product.status]}`}
+              className={`inline-flex min-w-[2.25rem] justify-center rounded-full border border-current px-2 py-0.5 text-sm tabular-nums ${STATUS_TEXT[product.status]}`}
             >
               {product.quantity ?? 0}
             </span>

@@ -68,7 +68,7 @@ export function Inventory() {
             <button
               key={f.id}
               onClick={() => setStatusFilter(f.id)}
-              className={`chip ${status === f.id ? 'bg-primary/15 font-semibold text-primary' : 'text-muted'}`}
+              className={`chip ${status === f.id ? 'border-primary/40 bg-primary/10 text-primary' : 'border-transparent text-muted'}`}
             >
               {f.id !== 'all' && f.id !== 'staple' && <StatusDot status={f.id} size={8} />}
               {f.label}
@@ -80,9 +80,9 @@ export function Inventory() {
             <button
               key={l.id}
               onClick={() => setLocation(location === l.id ? null : l.id)}
-              className={`chip ${location === l.id ? 'bg-primary text-on-primary' : 'bg-surface shadow-card'}`}
+              className={`chip ${location === l.id ? 'border-primary bg-primary text-on-primary' : 'bg-surface text-ink'}`}
             >
-              <span aria-hidden>{locationIcon(l.icon, l.name)}</span>
+              <Icon name={locationIcon(l.icon, l.name)} size={16} />
               {l.name}
             </button>
           ))}
@@ -92,9 +92,9 @@ export function Inventory() {
             <button
               key={c.id}
               onClick={() => setCategory(category === c.id ? null : c.id)}
-              className={`chip ${category === c.id ? 'bg-primary text-on-primary' : 'bg-surface shadow-card'}`}
+              className={`chip ${category === c.id ? 'border-primary bg-primary text-on-primary' : 'bg-surface text-ink'}`}
             >
-              <span aria-hidden>{categoryIcon(c.name)}</span>
+              <Icon name={categoryIcon(c.name)} size={16} />
               {c.name}
             </button>
           ))}
@@ -107,7 +107,7 @@ export function Inventory() {
         ))}
         {products.length === 0 && (
           <EmptyCard
-            emoji="🫙"
+            icon="box"
             title={view.products.length ? 'Nada con estos filtros' : 'Todavía no hay productos'}
             hint={view.products.length ? 'Probá sacando algún filtro.' : 'Agregá lo que tenés en casa; solo hace falta el nombre.'}
             action={{ label: 'Agregar producto', run: () => ui.openAdd({ name: q, location_id: location, category_id: category }) }}

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/brand/kvar-house.svg" alt="Kvar" width="160" />
+  <img src="public/brand/kvar-mark.svg" alt="Kvar" width="96" />
 </p>
 
 # Kvar
@@ -134,7 +134,7 @@ de Supabase. Ver `supabase/tests/`.
 ### Logo e íconos
 Los SVG de `public/brand/` son una versión vectorial del logo. Si tenés el ícono original en alta resolución, guardalo
 como `public/brand/kvar-icon.png` (cuadrado, 1024 px) y corré `npm run icons`: los PNG de la PWA se generan desde ese
-archivo. Para el logo grande de la pantalla de ingreso, reemplazá `public/brand/kvar-house.svg`.
+archivo. La pantalla de ingreso usa `public/brand/kvar-mark.svg`.
 
 ## Estructura
 

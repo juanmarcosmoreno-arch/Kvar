@@ -1,7 +1,7 @@
 /** "Kvar" con la hoja sobre la K, como en el logo. */
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`relative inline-flex items-end font-round font-extrabold tracking-tight text-forest dark:text-primary ${className}`}>
+    <span className={`relative inline-flex items-end font-semibold tracking-tight text-forest dark:text-primary ${className}`}>
       <span className="relative">
         K
         <svg viewBox="0 0 40 40" className="absolute -right-[0.18em] -top-[0.12em] h-[0.55em] w-[0.55em]" aria-hidden>

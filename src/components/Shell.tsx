@@ -61,11 +61,11 @@ export function Shell({ children }: { children: ReactNode }) {
 function BigAction({ icon, title, hint, onClick }: { icon: IconName; title: string; hint: string; onClick: () => void }) {
   return (
     <button onClick={onClick} className="card flex min-h-[72px] items-center gap-4 px-4 text-left active:scale-[0.99]">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-on-primary">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
         <Icon name={icon} />
       </span>
       <span>
-        <span className="block font-round text-lg font-bold">{title}</span>
+        <span className="block text-lg font-semibold">{title}</span>
         <span className="block text-sm text-muted">{hint}</span>
       </span>
     </button>
@@ -77,7 +77,7 @@ function TabBar({ onFab }: { onFab: () => void }) {
   const count = view ? openCount(view.list) : 0;
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur"
       aria-label="Principal"
     >
       <div className="mx-auto grid max-w-lg grid-cols-5 items-end px-2">
@@ -87,9 +87,9 @@ function TabBar({ onFab }: { onFab: () => void }) {
           <button
             onClick={onFab}
             aria-label="Acciones rápidas"
-            className="-mt-6 mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-leaf text-white shadow-fab active:scale-95 dark:bg-primary dark:text-on-primary"
+            className="-mt-5 mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-fab active:scale-95"
           >
-            <Icon name="plus" size={32} strokeWidth={2.5} />
+            <Icon name="plus" size={26} strokeWidth={2} />
           </button>
         </div>
         <Tab to="/lista" icon="cart" label="Lista" badge={count} />
@@ -120,9 +120,9 @@ function Tab({ to, icon, label, badge }: { to: string; icon: IconName; label: st
       }
     >
       <span className="relative">
-        <Icon name={icon} size={26} />
+        <Icon name={icon} size={24} strokeWidth={1.6} />
         {badge ? (
-          <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-out px-1 text-center text-[11px] font-bold leading-[18px] text-white">
+          <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-out px-1 text-center text-[11px] font-semibold leading-[18px] text-white">
             {badge > 99 ? '99+' : badge}
           </span>
         ) : null}
@@ -136,7 +136,7 @@ export function Header({ title, right, left }: { title: ReactNode; right?: React
   return (
     <header className="flex min-h-[64px] items-center gap-2 px-5 pt-2">
       {left}
-      <h1 className="flex-1 font-round text-[1.75rem] font-bold leading-tight">{title}</h1>
+      <h1 className="flex-1 text-[1.6rem] font-semibold leading-tight tracking-tight">{title}</h1>
       {right}
     </header>
   );

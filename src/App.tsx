@@ -121,7 +121,7 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
 function Splash({ message }: { message?: string }) {
   return (
     <div className="flex min-h-full flex-col items-center justify-center gap-4 p-8 text-center">
-      <img src="/brand/kvar-house.svg" alt="" className="h-24 w-auto animate-pulse" />
+      <img src="/brand/kvar-mark.svg" alt="" className="h-14 w-14 animate-pulse rounded-2xl" />
       {message && <p className="text-muted">{message}</p>}
     </div>
   );

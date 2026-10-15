@@ -43,8 +43,9 @@ Cómo se aplica en la Fase 1:
 ## 3. Idioma y estética
 
 - Interfaz en **español de Uruguay, con voseo**: «Escaneá», «Confirmá», «¿Se terminó algo?».
-- **Estética nórdica, cálida y minimalista:** mucho espacio, tipografía limpia y redondeada, tarjetas suaves, paleta
-  sobria con tres colores de estado. Modo claro y oscuro (automático o elegido en Ajustes).
+- **Estética nórdica, fina y minimalista** (nada caricaturesco): mucho espacio, tipografía del sistema (SF Pro en
+  iPhone) con pesos medios, bordes de un pelo en lugar de sombras, íconos de línea finos, paleta sobria con tres
+  colores de estado. Modo claro y oscuro (automático o elegido en Ajustes).
 
 ### Guía de estilo
 
@@ -57,12 +58,14 @@ Cómo se aplica en la Fase 1:
 | Tomate · **No hay** | `#EB5D4A` |
 | Crema (fondo) | `#F5F3EE` |
 
-- Logo: casa con despensa (frascos, botella, tomate, lata, pasta, cartón de leche) y la palabra «Kvar» con una hoja
-  sobre la K. Lema: «Tu hogar siempre provisto».
+- Marca: la palabra «Kvar» con una hoja sobre la K. Lema: «Tu hogar siempre provisto». (La ilustración de la casa con
+  la despensa queda para material de comunicación; dentro de la app se usa la versión sobria.)
 - Ícono de app: «K» crema con hoja verde sobre verde bosque.
-- Íconos de categoría ilustrados (en la Fase 1 se usan emoji, que en iOS se ven bien y funcionan offline).
+- Íconos de línea finos (trazo 1,5–1,75) para categorías, lugares y navegación.
+- **Imagen del producto real:** cuando hay foto, la miniatura muestra el producto recortado, sin fondo, sobre el
+  fondo neutro de la tarjeta. Si no hay foto, el ícono de línea de su categoría.
 - Barra inferior: Inicio · Productos · **+** (acción rápida, central) · Lista · Cocino. Ajustes desde el engranaje.
-- Filtros como chips; estados como pastillas de color suave.
+- Filtros como chips de borde fino; estados como punto de color + texto.
 
 ## 4. Funcionalidad completa
 
@@ -111,6 +114,10 @@ Cómo se aplica en la Fase 1:
 3. **Foto del producto o de varios juntos** (feria, verdulería, a granel): la IA identifica qué hay y el usuario confirma.
 4. **Voz:** «Compré leche, dos paquetes de fideos y yerba», «Se terminó el aceite», «¿Hay arroz?».
 5. **Correo de confirmación de pedidos online del súper:** leer el detalle y cargar la compra.
+
+6. **Foto del producto con recorte automático:** al dar de alta o editar un producto, «Sacale una foto». La app
+   recorta el sujeto, **quita el fondo** y la guarda como imagen de ese producto real (la miniatura que se ve en
+   Inicio, Productos, Lista). Sin pasos extra: sacás la foto, ves el recorte y confirmás con un toque.
 
 Las **equivalencias aprendidas** (código de barras, texto de ticket, texto de voz → producto) se guardan **por hogar**
 en la tabla `product_aliases`. La normalización y el emparejamiento están en `src/domain/aliases.ts` (con tests):
@@ -161,11 +168,22 @@ real, PWA offline.
 - «Qué cocino» muestra un adelanto; la búsqueda muestra el ícono de escaneo deshabilitado (Fase 2).
 - El bloque «Vence pronto» aparece solo cuando hay productos con vencimiento (se cargan desde la Fase 4).
 
-### Fase 2 — Código de barras y voz
+### Fase 2 — Código de barras, foto del producto y voz
 - Escaneo con cámara (ZXing `@zxing/browser`, funciona en Safari iOS con `getUserMedia`).
 - Edge Function `barcode-lookup`: consulta Open Food Facts, cachea en `barcode_cache`.
 - Código desconocido → hoja mínima (nombre, categoría, lugar) una sola vez → alias `barcode` en `product_aliases`.
 - Escanear algo que ya existe → propone «¿Se terminó?» / «¿Compraste?».
+- **Foto del producto con recorte sin fondo:**
+  - Cámara con `<input type="file" accept="image/*" capture="environment">` (funciona en la PWA de iOS).
+  - Recorte **en el dispositivo** con un modelo de segmentación en WebAssembly (p. ej. `@imgly/background-removal`):
+    no necesita claves, no manda la foto a terceros y funciona offline una vez descargado el modelo (se descarga la
+    primera vez que se usa, no al instalar la app).
+  - Si el dispositivo no puede (memoria o navegador viejo): Edge Function `cutout` con el proveedor configurado en
+    `IMAGE_CUTOUT_PROVIDER`.
+  - Se ajusta al contorno del sujeto, se reduce a 512 px y se guarda como PNG/WebP con transparencia en el bucket
+    privado `product-images/<household_id>/<product_id>.png` (columna `products.image_path`, ya creada). Sin conexión,
+    la foto queda en la cola y se sube al reconectar.
+  - La misma foto sirve después (Fase 3) para que la IA proponga nombre y categoría.
 - Voz: Web Speech API donde exista; si no, grabación → Edge Function `voice-parse` (transcripción + interpretación con
   IA) → lista de acciones propuestas a confirmar. Alias `voice`.
 
@@ -224,7 +242,7 @@ Todas las tablas tienen `household_id` y políticas RLS basadas en `is_member(ho
 | `household_members` | 1 | Miembros y rol |
 | `locations` | 1 | Lugares (editables, ordenables) |
 | `categories` | 1 | Categorías; su orden ordena la lista de compras |
-| `products` | 1 (+2, 4, 5) | Estado, conteo, umbral, básico, sin identificar; marca/imagen OFF; vencimiento y predicción; etiquetas de ingrediente |
+| `products` | 1 (+2, 4, 5) | Estado, conteo, umbral, básico, sin identificar; marca/imagen OFF; foto propia recortada (`image_path`); vencimiento y predicción; etiquetas de ingrediente |
 | `product_events` | 1 | Historial de cambios (fuente para aprender el consumo) |
 | `shopping_list_items` | 1 | Lista; motivo `out/low/manual/recipe/plan/predicted` |
 | `product_aliases` | 2–3, 6 | Equivalencias aprendidas por hogar (`barcode/receipt/voice/photo/email`) |
@@ -232,6 +250,7 @@ Todas las tablas tienen `household_id` y políticas RLS basadas en `is_member(ho
 | `imports` | 2–3, 6 | Tickets, fotos, audio y correos en revisión |
 | `product_lots` | 4 | Lotes con vencimiento / fecha de ingreso al freezer |
 | `push_subscriptions` | 4 | Suscripciones de push web |
+| `storage: product-images` | 2 | Fotos recortadas, bucket privado con RLS por hogar |
 | `recipes`, `recipe_ingredients`, `recipe_feedback` | 5 | Recetas propias/importadas/IA y preferencias |
 | `meal_plans`, `meal_plan_entries` | 6 | Plan semanal |
 

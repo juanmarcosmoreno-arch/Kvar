@@ -13,7 +13,7 @@ export function ToastView() {
         <span className="flex-1 py-1.5 text-sm">{t.message}</span>
         {t.action && (
           <button
-            className="min-h-tap shrink-0 px-2 text-sm font-bold text-lime"
+            className="min-h-tap shrink-0 px-2 text-sm font-semibold text-lime"
             onClick={() => {
               t.action!.run();
               dismissToast();

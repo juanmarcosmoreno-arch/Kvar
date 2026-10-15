@@ -18,6 +18,7 @@ export function product(over: Partial<Product> = {}): Product {
     is_staple: false,
     unidentified: false,
     expires_on: null,
+    image_url: null,
     notes: null,
     status_changed_at: '2026-10-01T00:00:00.000Z',
     created_at: '2026-10-01T00:00:00.000Z',

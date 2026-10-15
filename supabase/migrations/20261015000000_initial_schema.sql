@@ -126,7 +126,9 @@ create table public.products (
   unidentified      boolean not null default false,
   -- Fase 2: datos de Open Food Facts
   brand             text,
-  image_url         text,
+  image_url         text,  -- imagen externa (Open Food Facts)
+  -- Fase 2: foto propia recortada sin fondo, en Storage: product-images/<household_id>/<product_id>.png
+  image_path        text,
   off_data          jsonb,
   -- Fase 4: vencimiento "principal" (los lotes viven en product_lots)
   expires_on        date,
@@ -799,6 +801,26 @@ revoke all on function public.regenerate_invite_code(uuid) from public, anon;
 grant execute on function public.create_household(text, text) to authenticated;
 grant execute on function public.join_household(text, text) to authenticated;
 grant execute on function public.regenerate_invite_code(uuid) to authenticated;
+
+-- =============================================================================
+-- Storage: fotos de productos recortadas (Fase 2). Bucket privado por hogar:
+-- la primera carpeta del path es el household_id.
+-- =============================================================================
+do $$
+begin
+  if exists (select 1 from information_schema.schemata where schema_name = 'storage') then
+    insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+    values ('product-images', 'product-images', false, 2097152, array['image/png', 'image/webp'])
+    on conflict (id) do nothing;
+
+    execute $p$
+      create policy product_images_member on storage.objects for all to authenticated
+      using (bucket_id = 'product-images' and public.is_member(((storage.foldername(name))[1])::uuid))
+      with check (bucket_id = 'product-images' and public.is_member(((storage.foldername(name))[1])::uuid))
+    $p$;
+  end if;
+end;
+$$;
 
 -- =============================================================================
 -- Realtime

@@ -34,7 +34,7 @@ export function Onboarding({ onReady }: { onReady: (householdId: string) => void
     <AuthLayout>
       {mode === 'choose' && (
         <div className="space-y-3">
-          <h1 className="font-round text-2xl font-bold">¡Bienvenido a Kvar!</h1>
+          <h1 className="text-2xl font-semibold">¡Bienvenido a Kvar!</h1>
           <p className="text-muted">Kvar es «lo que queda» en sueco. Empezá creando tu hogar o sumate al de alguien.</p>
           <button className="btn-primary w-full" onClick={() => setMode('create')}>Crear mi hogar</button>
           <button className="btn-ghost w-full" onClick={() => setMode('join')}>Tengo un código</button>
@@ -42,7 +42,7 @@ export function Onboarding({ onReady }: { onReady: (householdId: string) => void
       )}
       {mode === 'create' && (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void run(() => createHousehold(home.trim() || 'Casa', name.trim() || null)); }}>
-          <h1 className="font-round text-2xl font-bold">Tu hogar</h1>
+          <h1 className="text-2xl font-semibold">Tu hogar</h1>
           {nameField}
           <input className="field" placeholder="Nombre del hogar" value={home} onChange={(e) => setHome(e.target.value)} />
           <p className="text-sm text-muted">Te dejo armados los lugares (Heladera, Freezer, Alacena, Baño, Limpieza) y las categorías. Los podés cambiar después.</p>
@@ -52,7 +52,7 @@ export function Onboarding({ onReady }: { onReady: (householdId: string) => void
       )}
       {mode === 'join' && (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void run(() => joinHousehold(code, name.trim() || null)); }}>
-          <h1 className="font-round text-2xl font-bold">Sumate a un hogar</h1>
+          <h1 className="text-2xl font-semibold">Sumate a un hogar</h1>
           {nameField}
           <input
             className="field text-center font-mono text-xl uppercase tracking-[0.3em]"

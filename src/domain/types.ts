@@ -52,6 +52,8 @@ export interface Product {
   is_staple: boolean;
   unidentified: boolean;
   expires_on: string | null;
+  /** Foto del producto recortada sin fondo (Fase 2) */
+  image_url: string | null;
   notes: string | null;
   status_changed_at: string;
   created_at: string;

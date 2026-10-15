@@ -25,15 +25,15 @@ export default {
         cream: '#F5F3EE',
       },
       fontFamily: {
-        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
-        round: ['ui-rounded', '"SF Pro Rounded"', '"Nunito"', 'system-ui', 'sans-serif'],
+        // SF Pro en iPhone: sobria, sin cargar fuentes (funciona offline)
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'system-ui', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'sans-serif'],
       },
       borderRadius: {
-        card: '1.25rem',
+        card: '1rem',
       },
       boxShadow: {
-        card: '0 1px 2px rgb(27 43 33 / 0.04), 0 4px 16px rgb(27 43 33 / 0.05)',
-        fab: '0 6px 20px rgb(27 94 63 / 0.35)',
+        card: '0 1px 2px rgb(27 43 33 / 0.04)',
+        fab: '0 4px 14px rgb(27 94 63 / 0.22)',
       },
       spacing: {
         'safe-t': 'env(safe-area-inset-top)',

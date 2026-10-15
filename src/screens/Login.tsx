@@ -36,7 +36,7 @@ export function Login() {
     <AuthLayout>
       {step === 'email' ? (
         <form onSubmit={sendCode} className="space-y-4">
-          <h1 className="font-round text-2xl font-bold">Entrá a tu hogar</h1>
+          <h1 className="text-2xl font-semibold">Entrá a tu hogar</h1>
           <p className="text-muted">Te mandamos un código por correo. Sin contraseñas.</p>
           <input
             className="field"
@@ -54,7 +54,7 @@ export function Login() {
         </form>
       ) : (
         <form onSubmit={verify} className="space-y-4">
-          <h1 className="font-round text-2xl font-bold">Revisá tu correo</h1>
+          <h1 className="text-2xl font-semibold">Revisá tu correo</h1>
           <p className="text-muted">
             Escribí el código que te mandamos a <strong className="text-ink">{email}</strong>.
           </p>
@@ -92,9 +92,9 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-full max-w-sm flex-col justify-center px-6 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-[calc(env(safe-area-inset-top)+24px)]">
       <div className="mb-8 flex flex-col items-center text-center">
-        <img src="/brand/kvar-house.svg" alt="" className="h-32 w-auto" />
-        <Wordmark className="mt-1 text-5xl" />
-        <span className="mt-2 text-xs font-medium uppercase tracking-[0.3em] text-muted">Tu hogar siempre provisto</span>
+        <img src="/brand/kvar-mark.svg" alt="" className="h-16 w-16 rounded-[1.1rem]" />
+        <Wordmark className="mt-4 text-4xl" />
+        <span className="mt-2 text-[11px] uppercase tracking-[0.32em] text-muted">Tu hogar siempre provisto</span>
       </div>
       {children}
     </div>

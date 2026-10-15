@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { searchProducts } from '../domain/aliases';
 import { frequentProducts } from '../domain/status';
-import { categoryIcon } from '../lib/categoryIcon';
 import { createProduct, setStatus } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
+import { ProductThumb } from './ProductThumb';
 import { Sheet } from './Sheet';
 
 /** "¿Se terminó algo?": un toque y va a la lista. */
@@ -40,7 +40,7 @@ export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => v
               }}
               className="card flex min-h-[64px] items-center gap-2.5 px-3 text-left active:scale-[0.98] disabled:opacity-50"
             >
-              <span className="text-2xl" aria-hidden>{categoryIcon(p.category_id ? catName.get(p.category_id) : null)}</span>
+              <ProductThumb product={p} categoryName={p.category_id ? catName.get(p.category_id) : undefined} size="sm" />
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{p.name}</span>
                 {p.status === 'out' && <span className="text-xs text-out">Ya está en la lista</span>}

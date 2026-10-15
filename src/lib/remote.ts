@@ -4,7 +4,7 @@ import type { Household, Member, Snapshot } from '../domain/types';
 import { supabase } from './supabase';
 
 const PRODUCT_COLS =
-  'id,household_id,name,category_id,location_id,status,track_quantity,quantity,low_threshold,unit,is_staple,unidentified,expires_on,notes,status_changed_at,created_at,updated_at';
+  'id,household_id,name,category_id,location_id,status,track_quantity,quantity,low_threshold,unit,is_staple,unidentified,expires_on,image_url,notes,status_changed_at,created_at,updated_at';
 const ITEM_COLS = 'id,household_id,product_id,name,quantity,note,reason,checked_at,checked_by,created_at';
 
 export class PermanentError extends Error {}
@@ -116,6 +116,7 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
             is_staple: p.is_staple,
             unidentified: p.unidentified,
             expires_on: p.expires_on,
+            image_url: p.image_url,
             notes: p.notes,
             status_changed_at: p.status_changed_at,
           },

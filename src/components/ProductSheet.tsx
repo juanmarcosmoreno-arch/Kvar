@@ -47,7 +47,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
             <Icon name="minus" />
           </button>
           <div className="text-center">
-            <div className="font-round text-3xl font-bold tabular-nums">{product.quantity ?? 0}</div>
+            <div className="text-3xl font-semibold tabular-nums">{product.quantity ?? 0}</div>
             <div className="text-xs text-muted">{product.unit ?? 'unidades'}</div>
           </div>
           <button className="btn-ghost min-w-[56px]" aria-label="Sumar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}>

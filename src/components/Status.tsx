@@ -8,9 +8,16 @@ export const STATUS_SOFT: Record<StockStatus, string> = {
   out: 'bg-out/15 text-[#B53A2A] dark:text-out',
 };
 
+export const STATUS_TEXT: Record<StockStatus, string> = {
+  ok: 'text-muted',
+  low: 'text-[#9A6300] dark:text-low',
+  out: 'text-[#B53A2A] dark:text-out',
+};
+
 export function StatusPill({ status, className = '' }: { status: StockStatus; className?: string }) {
   return (
-    <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${STATUS_SOFT[status]} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-line/80 px-2.5 py-1 text-[13px] ${STATUS_TEXT[status]} ${className}`}>
+      <StatusDot status={status} size={7} />
       {STATUS_LABEL[status]}
     </span>
   );
@@ -34,11 +41,11 @@ export function StatusPicker({ value, onChange }: { value: StockStatus; onChange
             role="radio"
             aria-checked={active}
             onClick={() => onChange(s)}
-            className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-2xl border-2 text-sm font-semibold transition ${
-              active ? `border-transparent ${STATUS_BG[s]} text-white` : 'border-line bg-surface text-ink'
+            className={`flex min-h-[52px] items-center justify-center gap-2 rounded-xl border text-sm transition ${
+              active ? `${STATUS_SOFT[s]} border-current font-medium` : 'border-line bg-surface text-ink'
             }`}
           >
-            {!active && <StatusDot status={s} size={10} />}
+            <StatusDot status={s} size={8} />
             {STATUS_LABEL[s]}
           </button>
         );

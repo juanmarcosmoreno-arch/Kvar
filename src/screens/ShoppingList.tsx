@@ -80,13 +80,13 @@ export function ShoppingList() {
         </form>
 
         {groups.length === 0 && (
-          <EmptyCard emoji="🧺" title="No falta nada" hint="Cuando marques que algo no hay, aparece acá solo." />
+          <EmptyCard icon="cart" title="No falta nada" hint="Cuando marques que algo no hay, aparece acá solo." />
         )}
 
         {groups.map((g) => (
           <section key={g.key} className="space-y-2">
-            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
-              <span aria-hidden className="text-base">{categoryIcon(g.key === 'none' ? null : g.title)}</span>
+            <h2 className="section-title flex items-center gap-2">
+              <Icon name={categoryIcon(g.key === 'none' ? null : g.title)} size={15} />
               {g.title}
             </h2>
             <ul className="card divide-y divide-line">
@@ -97,7 +97,7 @@ export function ShoppingList() {
                     onClick={() => buy(item)}
                     aria-label={`Marcar ${itemName(item, byId)} como comprado`}
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-line" />
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-muted/50" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">
                         {itemName(item, byId)}
@@ -126,7 +126,7 @@ export function ShoppingList() {
         {checked.length > 0 && (
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Comprado</h2>
+              <h2 className="section-title">Comprado</h2>
               <button className="min-h-tap px-2 text-sm font-semibold text-primary" onClick={clearChecked}>
                 Limpiar
               </button>
@@ -136,8 +136,8 @@ export function ShoppingList() {
                 <li key={item.id}>
                   <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => unpurchaseItem(item)}
                     aria-label={`Desmarcar ${itemName(item, byId)}`}>
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ok text-white">
-                      <Icon name="check" size={16} strokeWidth={3} />
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ok text-white">
+                      <Icon name="check" size={14} strokeWidth={2.5} />
                     </span>
                     <span className="truncate text-muted line-through">{itemName(item, byId)}</span>
                   </button>

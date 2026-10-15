@@ -4,7 +4,7 @@ import { searchProducts } from '../domain/aliases';
 import { openCount } from '../domain/shoppingList';
 import { daysUntil, expiringSoon, expiryLabel, frequentProducts, needsAttention } from '../domain/status';
 import { Header } from '../components/Shell';
-import { Icon } from '../components/Icon';
+import { Icon, type IconName } from '../components/Icon';
 import { ProductRow } from '../components/ProductRow';
 import { SyncBadge } from '../components/SyncBadge';
 import { Wordmark } from '../components/Wordmark';
@@ -28,7 +28,7 @@ export function Home() {
   return (
     <>
       <Header
-        title={<Wordmark className="text-[2.1rem]" />}
+        title={<Wordmark className="text-[1.9rem]" />}
         right={
           <>
             <SyncBadge />
@@ -45,7 +45,7 @@ export function Home() {
           <label className="relative block">
             <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
             <input
-              className="field rounded-full pl-12 pr-12 shadow-card"
+              className="field rounded-full pl-12 pr-12"
               placeholder="Buscar un producto…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -70,11 +70,11 @@ export function Home() {
             <div className="card overflow-hidden">
               <button
                 onClick={ui.openRanOut}
-                className="flex min-h-[72px] w-full items-center gap-4 bg-primary px-5 text-left text-on-primary active:opacity-90"
+                className="flex min-h-[68px] w-full items-center gap-4 bg-primary px-5 text-left text-on-primary active:opacity-90"
               >
                 <span className="flex-1">
-                  <span className="block font-round text-xl font-bold">¿Se terminó algo?</span>
-                  <span className="block text-sm opacity-80">Tocalo y va directo a la lista</span>
+                  <span className="block text-lg font-medium">¿Se terminó algo?</span>
+                  <span className="block text-sm opacity-75">Tocalo y va directo a la lista</span>
                 </span>
                 <Icon name="chevron" />
               </button>
@@ -84,9 +84,9 @@ export function Home() {
                     <button
                       key={p.id}
                       onClick={() => setStatus(p, 'out', 'quick_out')}
-                      className="chip min-h-tap bg-sunken text-ink active:scale-95"
+                      className="chip min-h-tap bg-surface text-ink active:scale-95"
                     >
-                      <span aria-hidden>{categoryIcon(cat.get(p.category_id ?? ''))}</span>
+                      <Icon name={categoryIcon(cat.get(p.category_id ?? ''))} size={16} className="text-muted" />
                       {p.name}
                     </button>
                   ))}
@@ -99,10 +99,10 @@ export function Home() {
         {/* Bloque 2: amarillo y rojo */}
         {!q.trim() && (
           <section className="space-y-3">
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-center justify-between">
               <h2 className="section-title">Para reponer</h2>
               {listCount > 0 && (
-                <Link to="/lista" className="text-sm font-semibold text-primary">
+                <Link to="/lista" className="text-sm text-primary">
                   Ver lista ({listCount})
                 </Link>
               )}
@@ -115,7 +115,7 @@ export function Home() {
               </div>
             ) : (
               <EmptyCard
-                emoji="🌿"
+                icon="leaf"
                 title={view.products.length ? 'Está todo en orden' : 'Empezá agregando lo que hay'}
                 hint={view.products.length ? 'Cuando algo quede poco o se termine, aparece acá.' : 'Con el botón + cargás tus productos de a uno, solo con el nombre.'}
                 action={!view.products.length ? { label: 'Agregar producto', run: () => ui.openAdd() } : undefined}
@@ -147,12 +147,14 @@ export function Home() {
 }
 
 export function EmptyCard({
-  emoji, title, hint, action,
-}: { emoji: string; title: string; hint: string; action?: { label: string; run: () => void } }) {
+  icon, title, hint, action,
+}: { icon: IconName; title: string; hint: string; action?: { label: string; run: () => void } }) {
   return (
     <div className="card flex flex-col items-center gap-2 px-6 py-8 text-center">
-      <span className="text-4xl" aria-hidden>{emoji}</span>
-      <p className="font-round text-lg font-bold">{title}</p>
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-sunken text-muted">
+        <Icon name={icon} size={22} />
+      </span>
+      <p className="font-medium">{title}</p>
       <p className="text-sm text-muted">{hint}</p>
       {action && (
         <button className="btn-primary mt-2" onClick={action.run}>

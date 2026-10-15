@@ -56,6 +56,7 @@ export function createProduct(input: NewProduct): Product | null {
     is_staple: input.is_staple ?? false,
     unidentified: input.unidentified ?? false,
     expires_on: null,
+    image_url: null,
     notes: null,
     status_changed_at: at,
     created_at: at,

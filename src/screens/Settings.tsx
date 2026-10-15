@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Shell';
-import { Icon } from '../components/Icon';
+import { Icon, type IconName } from '../components/Icon';
 import { Toggle } from '../components/Toggle';
 import type { Category, Location } from '../domain/types';
 import { isStandalone } from '../lib/auth';
@@ -86,7 +86,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             />
             <div className="rounded-2xl bg-sunken p-4 text-center">
               <p className="text-sm text-muted">Código de invitación</p>
-              <p className="font-mono text-3xl font-bold tracking-[0.25em]">{view.household.invite_code}</p>
+              <p className="font-mono text-3xl font-semibold tracking-[0.25em]">{view.household.invite_code}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button className="btn-primary" onClick={share}>
@@ -187,7 +187,7 @@ function EditableList<T extends { id: string; name: string }>({
   items, icon, onRename, onDelete, onAdd, onMove, placeholder,
 }: {
   items: T[];
-  icon: (t: T) => string;
+  icon: (t: T) => IconName;
   onRename: (t: T, name: string) => void;
   onDelete: (t: T) => void;
   onAdd: (name: string) => void;
@@ -200,7 +200,7 @@ function EditableList<T extends { id: string; name: string }>({
     <div className="card divide-y divide-line">
       {items.map((it, i) => (
         <div key={it.id} className="flex min-h-[56px] items-center gap-1 pl-4 pr-1">
-          <span aria-hidden className="text-xl">{icon(it)}</span>
+          <Icon name={icon(it)} size={18} className="text-muted" />
           <input
             defaultValue={it.name}
             key={it.name}
