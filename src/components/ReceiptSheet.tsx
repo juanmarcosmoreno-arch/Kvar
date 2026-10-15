@@ -65,7 +65,7 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
   };
 
   const confirm = () => {
-    const { updated, created } = applyReceipt(review, parsed?.store ?? null);
+    const { updated, created } = applyReceipt(review, parsed?.store ?? null, { date: parsed?.date, total: parsed?.total });
     toast(m.capture.receipt.applied(updated, created));
     close();
   };

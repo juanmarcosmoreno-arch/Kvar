@@ -6,6 +6,7 @@
  *     estado del servidor  +  operaciones pendientes  =  lo que ve el usuario
  */
 import { applyStatusToList } from './shoppingList';
+import type { PurchaseLine } from './spending';
 import { resolveStock } from './status';
 import type {
   Category, EventSource, Household, Location, Product, ProductAlias, Recipe, RecipeFeedback, ShoppingItem, Snapshot,
@@ -35,6 +36,8 @@ export type Op =
   /** Dos productos que son lo mismo: `sourceId` pasa a ser `targetId` (códigos, lista, recetas) y se borra */
   | { kind: 'merge_products'; id: string; at: string; sourceId: string; targetId: string }
   | { kind: 'remove_alias'; id: string; at: string; aliasId: string }
+  /** Precios de un ticket (para Gastos). No cambian lo que se ve en el stock. */
+  | { kind: 'record_purchases'; id: string; at: string; lines: PurchaseLine[] }
   | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
   /** La foto ya está guardada en el teléfono (IndexedDB) bajo `path`; se sube al sincronizar. */
   | { kind: 'set_image'; id: string; at: string; productId: string; path: string; previousPath: string | null };
@@ -210,6 +213,8 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       return { ...s, feedback: [...(s.feedback ?? []), op.feedback] };
     case 'merge_products':
       return mergeProducts(s, op.sourceId, op.targetId);
+    case 'record_purchases':
+      return s;
     case 'remove_alias':
       return { ...s, aliases: s.aliases?.filter((a) => a.id !== op.aliasId) };
     case 'set_image':

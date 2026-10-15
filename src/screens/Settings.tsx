@@ -1,3 +1,4 @@
+import { CURRENCIES, currency, currencyName, setCurrency } from '../lib/currency';
 import { replayIntro } from '../components/IntroSplash';
 import { peopleLabel, Stepper } from '../components/Stepper';
 import { useEffect, useState } from 'react';
@@ -193,6 +194,10 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
           />
         </Section>
 
+        <Section title={m.money.settings.title} hint={m.money.settings.hint}>
+          <CurrencyPicker />
+        </Section>
+
         <Section title={m.common.language.title} hint={m.common.language.hint}>
           <div className="card divide-y divide-line" role="radiogroup" aria-label={m.common.language.title}>
             {([{ code: 'auto', name: m.common.language.auto }, ...LANGUAGES] as { code: LangChoice; name: string }[]).map((l) => (
@@ -347,5 +352,26 @@ function EditableList<T extends { id: string; name: string }>({
         {draft.trim() && <button className="min-h-tap px-3 font-semibold text-primary">{m.common.add}</button>}
       </form>
     </div>
+  );
+}
+
+function CurrencyPicker() {
+  const [code, setCode] = useState(currency());
+  return (
+    <select
+      className="field appearance-none"
+      value={code}
+      onChange={(e) => {
+        setCurrency(e.target.value);
+        setCode(e.target.value);
+      }}
+      aria-label={m.money.settings.title}
+    >
+      {[...new Set([code, ...CURRENCIES])].map((c) => (
+        <option key={c} value={c}>
+          {currencyName(c)} ({c})
+        </option>
+      ))}
+    </select>
   );
 }

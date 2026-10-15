@@ -191,6 +191,18 @@ do $$ begin
           where p.name = 'Azúcar') >= 2, 'el historial también';
 end $$;
 
+-- Gastos: una línea de ticket; cargarla de nuevo no duplica
+insert into public.purchase_lines (id, household_id, product_id, name, quantity, unit_price, total, receipt_key)
+values ('30000000-0000-0000-0000-000000000001', current_setting('kvar.hh')::uuid,
+        (select id from public.products where name = 'Azúcar'), 'Azúcar 1 kg', 2, 60, 120, 't1')
+on conflict (id) do nothing;
+insert into public.purchase_lines (id, household_id, name, total)
+values ('30000000-0000-0000-0000-000000000001', current_setting('kvar.hh')::uuid, 'Azúcar 1 kg', 120)
+on conflict (id) do nothing;
+do $$ begin
+  assert (select count(*) from public.purchase_lines) = 1, 'una sola línea';
+end $$;
+
 insert into public.recipe_feedback (household_id, catalog_key, recipe_title, action)
 values (current_setting('kvar.hh')::uuid, 'catalog:fideos-con-tuco', 'Fideos con tuco', 'cooked');
 reset role;

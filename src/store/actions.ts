@@ -13,6 +13,7 @@ import { isHouseRecipe, missingForList, type Suggestion } from '../domain/recipe
 import { nowIso, uuid } from '../lib/id';
 import { imagePath, imageStore } from '../lib/images';
 import { localizedSeeds } from '../domain/seeds';
+import { receiptKey, stableLineId, type PurchaseLine } from '../domain/spending';
 import { dispatch, getView } from './store';
 import { toast } from './toast';
 import { m } from '../i18n';
@@ -247,7 +248,11 @@ export function applyQuantity(product: Product, mode: QuantityMode, amount: numb
  * Aplica un ticket revisado: marca como comprado lo que ya existía (sumando unidades si lleva
  * conteo), crea lo nuevo y aprende las equivalencias para el próximo ticket.
  */
-export function applyReceipt(review: ReviewLine[], store: string | null): { updated: number; created: number } {
+export function applyReceipt(
+  review: ReviewLine[],
+  store: string | null,
+  ticket: { date?: string | null; total?: number | null } = {},
+): { updated: number; created: number } {
   const view = getView();
   if (!view) return { updated: 0, created: 0 };
   const plan = planReceipt(review, store);
@@ -276,6 +281,7 @@ export function applyReceipt(review: ReviewLine[], store: string | null): { upda
     const productId = l.productId ?? (l.newName ? createdIds.get(l.newName) : undefined);
     if (productId) learnAlias(productId, 'receipt', l.text);
   }
+  recordReceiptPrices(review, store, ticket, createdIds);
   return { updated, created: createdIds.size };
 }
 
@@ -427,4 +433,33 @@ export function mergeProducts(keep: Product, duplicate: Product) {
 
 export function removeAlias(aliasId: string) {
   dispatch({ kind: 'remove_alias', ...base(), aliasId });
+}
+
+/** Guarda el precio de cada línea del ticket (Gastos). El mismo ticket cargado dos veces no se duplica. */
+function recordReceiptPrices(
+  review: ReviewLine[],
+  store: string | null,
+  ticket: { date?: string | null; total?: number | null },
+  createdIds: Map<string, string>,
+) {
+  const view = getView();
+  if (!view) return;
+  const included = review.filter((r) => r.include && r.line.amount > 0);
+  if (!included.length) return;
+  const key = receiptKey(store, ticket.date ?? null, ticket.total ?? null, included.length);
+  // Fecha del ticket (al mediodía, para que no cambie de día por la zona horaria); si no, ahora
+  const boughtAt = ticket.date ? new Date(`${ticket.date}T12:00:00`).toISOString() : nowIso();
+  const lines: PurchaseLine[] = included.map((r, i) => ({
+    id: stableLineId(view.household.id, key, i),
+    household_id: view.household.id,
+    product_id: r.productId ?? (r.newName ? createdIds.get(r.newName) ?? null : null),
+    name: r.line.clean || r.line.description,
+    quantity: r.line.quantity > 0 ? r.line.quantity : 1,
+    unit_price: r.line.unitPrice > 0 ? r.line.unitPrice : null,
+    total: r.line.amount,
+    store,
+    bought_at: boughtAt,
+    receipt_key: key,
+  }));
+  dispatch({ kind: 'record_purchases', ...base(), lines });
 }

@@ -240,6 +240,13 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
     case 'merge_products':
       check(await supabase.rpc('merge_products', { p_source: op.sourceId, p_target: op.targetId }));
       return;
+    case 'record_purchases': {
+      const res = await supabase.from('purchase_lines').upsert(op.lines, { onConflict: 'id', ignoreDuplicates: true });
+      // Sin la migración de gastos los precios se pierden, pero no traban la cola
+      if (res.error && /purchase_lines|PGRST205|42P01/.test(`${res.error.code} ${res.error.message}`)) return;
+      check(res);
+      return;
+    }
     case 'remove_alias':
       check(await supabase.from('product_aliases').delete().eq('id', op.aliasId));
       return;

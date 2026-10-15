@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { productStats } from '../domain/stats';
 import type { Product } from '../domain/types';
 import { formatDate, formatDecimal, m } from '../i18n';
-import { useEvents } from '../lib/stats';
+import { formatCurrency } from '../lib/currency';
+import { useEvents, usePurchases } from '../lib/stats';
+import { priceOf } from '../domain/spending';
 import { MonthColumns } from './charts/MonthColumns';
 
 const DAY = 86_400_000;
@@ -10,6 +12,8 @@ const DAY = 86_400_000;
 /** Consumo de un producto (en su ficha): cuánto dura, cada cuánto se compra, por mes y cuándo se terminaría. */
 export function ProductStats({ product }: { product: Product }) {
   const data = useEvents(product.household_id);
+  const purchases = usePurchases(product.household_id);
+  const price = purchases.status === 'ready' ? priceOf(purchases.lines, product.id) : null;
   const t = m.stats.product;
   const s = useMemo(() => {
     if (data.status !== 'ready') return null;
@@ -18,6 +22,22 @@ export function ProductStats({ product }: { product: Product }) {
   }, [data, product]);
 
   if (data.status !== 'ready' || !s) return null;
+  const priceBlock = price && (
+    <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
+      <div>
+        <div className="text-sm text-muted">{m.money.product.price}</div>
+        <div className="text-xl font-semibold">{formatCurrency(price.last, { cents: price.last < 100 })}</div>
+      </div>
+      <div className="text-right text-sm text-muted">
+        {price.change != null && Math.abs(price.change) >= 0.01 && (
+          <div className={price.change > 0 ? 'text-[#B53A2A] dark:text-out' : 'text-[#2E7A4A] dark:text-ok'}>
+            {m.money.product.change(`${formatDecimal(Math.abs(price.change) * 100, 0)} %`, price.change > 0)}
+          </div>
+        )}
+        <div>{m.money.product.paid(formatDate(price.lastAt))}</div>
+      </div>
+    </div>
+  );
   const counted = product.track_quantity && s.usedPerMonth != null && s.used > 0;
   const enough = s.bought + s.ranOut >= 2;
 
@@ -32,7 +52,10 @@ export function ProductStats({ product }: { product: Product }) {
     <section className="space-y-3">
       <h3 className="section-title">{t.title}</h3>
       {!enough ? (
-        <p className="text-sm text-muted">{t.noData}</p>
+        <>
+          <p className="text-sm text-muted">{t.noData}</p>
+          {priceBlock && <div className="card p-4">{priceBlock}</div>}
+        </>
       ) : (
         <div className="card space-y-4 p-4">
           <div className="grid grid-cols-2 gap-3">
@@ -53,6 +76,7 @@ export function ProductStats({ product }: { product: Product }) {
             {s.lastBought && <p>{t.lastBought(formatDate(s.lastBought))}</p>}
             {s.ranOut > 0 && <p>{t.ranOut}: {t.times(s.ranOut)}</p>}
           </div>
+          {priceBlock}
         </div>
       )}
     </section>

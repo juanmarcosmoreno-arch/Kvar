@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MonthColumns } from '../components/charts/MonthColumns';
+import { SpendingView } from '../components/SpendingView';
 import { RankBars, StatTile } from '../components/charts/RankBars';
 import { Icon } from '../components/Icon';
 import { Header } from '../components/Shell';
@@ -25,6 +26,7 @@ export function Stats() {
   const [months, setMonths] = useState<(typeof RANGES)[number]>(6);
   const [measure, setMeasure] = useState<'bought' | 'ranOut'>('bought');
   const [table, setTable] = useState(false);
+  const [tab, setTab] = useState<'consumption' | 'spending'>('consumption');
   const data = useEvents(view.household.id);
   const t = m.stats;
 
@@ -62,6 +64,23 @@ export function Stats() {
           ))}
         </div>
 
+        <div className="grid grid-cols-2 rounded-full bg-sunken p-1" role="tablist">
+          {(['consumption', 'spending'] as const).map((k) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={tab === k}
+              onClick={() => setTab(k)}
+              className={`min-h-[40px] rounded-full text-sm ${tab === k ? 'bg-surface font-semibold shadow-sm' : 'text-muted'}`}
+            >
+              {k === 'consumption' ? m.money.tabConsumption : m.money.tabSpending}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'spending' && <SpendingView months={months} />}
+
+        {tab === 'consumption' && (<>
         {data.status === 'loading' && <p className="text-muted">{t.loading}</p>}
         {data.status === 'error' && <p className="card p-4 text-muted">{t.error}</p>}
         {data.status === 'ready' && data.cached && <p className="text-sm text-muted">{t.offline}</p>}
@@ -201,6 +220,7 @@ export function Stats() {
             )}
           </>
         )}
+        </>)}
       </div>
     </>
   );

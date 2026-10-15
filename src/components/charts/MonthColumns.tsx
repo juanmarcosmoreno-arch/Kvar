@@ -13,11 +13,13 @@ export interface MonthValue {
  * (énfasis, no categorías). Cada columna se puede tocar o enfocar para ver el valor; el mes actual lleva
  * su valor escrito arriba. Eje con valores redondos y líneas de fondo finas.
  */
-export function MonthColumns({ data, label, format = (n) => formatDecimal(n, 1) }: {
+export function MonthColumns({ data, label, format = (n) => formatDecimal(n, 1), formatAxis }: {
   data: MonthValue[];
   /** Qué se cuenta («Compras»), para el lector de pantalla y el detalle */
   label: string;
   format?: (n: number) => string;
+  /** Formato corto para el eje (por defecto, el mismo) */
+  formatAxis?: (n: number) => string;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(320);
@@ -32,7 +34,7 @@ export function MonthColumns({ data, label, format = (n) => formatDecimal(n, 1) 
   }, []);
 
   const height = 168;
-  const pad = { top: 22, right: 4, bottom: 24, left: 30 };
+  const pad = { top: 22, right: 4, bottom: 24, left: formatAxis ? 48 : 30 };
   const ticks = niceTicks(Math.max(...data.map((d) => d.value), 0));
   const top = ticks[ticks.length - 1] || 1;
   const plotW = width - pad.left - pad.right;
@@ -63,7 +65,7 @@ export function MonthColumns({ data, label, format = (n) => formatDecimal(n, 1) 
           <g key={t}>
             <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} className="stroke-line" strokeWidth={1} />
             <text x={pad.left - 6} y={y(t)} dy="0.32em" textAnchor="end" className="fill-muted text-[11px] tabular-nums">
-              {format(t)}
+              {(formatAxis ?? format)(t)}
             </text>
           </g>
         ))}

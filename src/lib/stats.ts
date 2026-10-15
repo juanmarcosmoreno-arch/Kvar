@@ -1,8 +1,9 @@
 /** Historial para las estadísticas: se trae de Supabase al abrirlas y se guarda para verlo sin conexión. */
 import { get, set } from 'idb-keyval';
 import { useEffect, useState } from 'react';
+import type { PurchaseLine } from '../domain/spending';
 import type { StockEvent } from '../domain/stats';
-import { demoEvents, isDemo } from './demo';
+import { demoEvents, demoPurchases, isDemo } from './demo';
 import { supabase } from './supabase';
 
 const MONTHS_BACK = 13;
@@ -69,6 +70,64 @@ export function useEvents(householdId: string | undefined): State {
     let alive = true;
     request(householdId).then(
       (r) => alive && setState({ status: 'ready', events: r.events, cached: r.cached }),
+      () => alive && setState({ status: 'error' }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [householdId]);
+  return state;
+}
+
+// --- Gastos: líneas de tickets con precio ---------------------------------------------------------------
+export async function loadPurchases(householdId: string): Promise<{ lines: PurchaseLine[]; cached: boolean }> {
+  if (isDemo) return { lines: demoPurchases(), cached: false };
+  const since = new Date();
+  since.setMonth(since.getMonth() - MONTHS_BACK, 1);
+  const key = `kvar-gastos:${householdId}`;
+  try {
+    const lines: PurchaseLine[] = [];
+    for (let from = 0; from < MAX; from += PAGE) {
+      const { data, error } = await supabase
+        .from('purchase_lines')
+        .select('id,household_id,product_id,name,quantity,unit_price,total,store,bought_at,receipt_key')
+        .eq('household_id', householdId)
+        .gte('bought_at', since.toISOString())
+        .order('bought_at', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) {
+        // Sin la migración de gastos: no hay precios todavía
+        if (/purchase_lines|PGRST205|42P01/.test(`${error.code} ${error.message}`)) return { lines: [], cached: false };
+        throw new Error(error.message);
+      }
+      for (const r of (data ?? []) as PurchaseLine[]) lines.push({ ...r, quantity: Number(r.quantity), total: Number(r.total), unit_price: r.unit_price == null ? null : Number(r.unit_price) });
+      if (!data || data.length < PAGE) break;
+    }
+    void set(key, lines).catch(() => {});
+    return { lines, cached: false };
+  } catch (e) {
+    const saved = await get<PurchaseLine[]>(key).catch(() => undefined);
+    if (saved) return { lines: saved, cached: true };
+    throw e;
+  }
+}
+
+type PurchasesState = { status: 'loading' } | { status: 'ready'; lines: PurchaseLine[]; cached: boolean } | { status: 'error' };
+const purchasesMemo = new Map<string, { at: number; promise: Promise<{ lines: PurchaseLine[]; cached: boolean }> }>();
+
+export function usePurchases(householdId: string | undefined): PurchasesState {
+  const [state, setState] = useState<PurchasesState>({ status: 'loading' });
+  useEffect(() => {
+    if (!householdId) return;
+    let alive = true;
+    let hit = purchasesMemo.get(householdId);
+    if (!hit || Date.now() - hit.at > FRESH) {
+      hit = { at: Date.now(), promise: loadPurchases(householdId) };
+      purchasesMemo.set(householdId, hit);
+      hit.promise.catch(() => purchasesMemo.delete(householdId));
+    }
+    hit.promise.then(
+      (r) => alive && setState({ status: 'ready', lines: r.lines, cached: r.cached }),
       () => alive && setState({ status: 'error' }),
     );
     return () => {
