@@ -30,6 +30,29 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Si la app no logra arrancar, se muestra el error en pantalla en lugar de dejarla en blanco
+      (function () {
+        function show(msg) {
+          var root = document.getElementById('root');
+          if (!root || root.childElementCount > 0) return;
+          root.innerHTML =
+            '<div style="font:15px -apple-system,system-ui,sans-serif;padding:calc(env(safe-area-inset-top) + 32px) 24px 24px;color:#1B2B21;background:#F5F3EE;min-height:100%">' +
+            '<p style="font-size:20px;font-weight:600;margin:0 0 12px">Kvar no pudo arrancar</p>' +
+            '<p style="margin:0 0 12px;color:#687268">Copiá este mensaje y mandáselo a quien te ayuda con la app:</p>' +
+            '<pre style="white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #E2DDD1;border-radius:12px;padding:12px;font-size:13px;user-select:text;-webkit-user-select:text"></pre></div>';
+          root.querySelector('pre').textContent = msg;
+        }
+        window.addEventListener('error', function (e) {
+          show((e.message || 'Error') + (e.filename ? '\n' + e.filename + ':' + e.lineno : '') + '\n' + navigator.userAgent);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          show('Promesa rechazada: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason) + '\n' + navigator.userAgent);
+        });
+        // Si a los 8 segundos no se dibujó nada, también se avisa
+        setTimeout(function () { show('La app no se dibujó (sin error visible).\n' + location.href + '\n' + navigator.userAgent); }, 8000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

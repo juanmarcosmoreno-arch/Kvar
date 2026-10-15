@@ -10,7 +10,6 @@ const config: CapacitorConfig = {
     // Los márgenes de la muesca y la barra de inicio los maneja el CSS con env(safe-area-inset-*)
     contentInset: 'never',
     backgroundColor: '#F5F3EE',
-    scheme: 'Kvar',
   },
   plugins: {
     SplashScreen: {
