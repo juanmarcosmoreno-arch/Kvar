@@ -1,3 +1,4 @@
+import { replayIntro } from '../components/IntroSplash';
 import { peopleLabel, Stepper } from '../components/Stepper';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -200,6 +201,9 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
               </button>
             ))}
           </div>
+          <button className="btn-ghost mt-2 w-full" onClick={replayIntro}>
+            Ver la bienvenida de nuevo
+          </button>
         </Section>
 
         <Section title="Cuenta">

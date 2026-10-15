@@ -3,7 +3,8 @@ import introMp4 from '../assets/brand/stoka-intro.mp4';
 import introWebm from '../assets/brand/stoka-intro.webm';
 import finalFrame from '../assets/brand/stoka-intro-final.webp';
 
-const SEEN_KEY = 'kvar:intro-visto'; // clave interna: se mantiene para no repetir la bienvenida
+// Clave por versión de la bienvenida: si cambia el video, cada dispositivo lo ve una vez más
+const SEEN_KEY = 'stoka:intro-v2';
 
 export function introSeen(): boolean {
   try {
@@ -11,6 +12,16 @@ export function introSeen(): boolean {
   } catch {
     return true;
   }
+}
+
+/** «Ver la bienvenida de nuevo» (Ajustes): se olvida que se vio y se recarga la app. */
+export function replayIntro() {
+  try {
+    localStorage.removeItem(SEEN_KEY);
+  } catch {
+    /* modo privado */
+  }
+  window.location.reload();
 }
 
 function markSeen() {

@@ -22,4 +22,4 @@ const page = [
 
 writeFileSync(resolve(dir, 'kvar-demo.html'), page);
 const extra = existsSync(resolve(dir, 'assets')) ? readdirSync(resolve(dir, 'assets')) : [];
-console.log(`kvar-demo.html: ${(page.length / 1024).toFixed(0)} KB · archivos aparte: ${extra.join(', ') || 'ninguno'}`);
+console.log(`kvar-demo.html: ${(page.length / 1024).toFixed(0)} KB · archivos aparte (van junto al HTML, en la raíz): ${extra.join(', ') || 'ninguno'}`);
