@@ -18,7 +18,7 @@ una mano y con el menor esfuerzo posible.
 
 ## Requisitos
 
-- Node.js 20 o más nuevo
+- Node.js 22 o más nuevo (`node -v`; lo pide Capacitor 8 para la app de iPhone). Instalalo desde nodejs.org (LTS)
 - Una cuenta de [Supabase](https://supabase.com) (el plan gratis alcanza)
 - Opcional: Postgres 15+ local para correr la prueba de RLS (`npm run test:db`)
 
