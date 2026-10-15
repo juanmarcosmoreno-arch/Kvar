@@ -11,9 +11,18 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "bash supabase/tests/run-local.sh",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "ios": "npm run build && node scripts/sync-ios-version.mjs && cap sync ios && cap open ios",
+    "ios:sync": "npm run build && node scripts/sync-ios-version.mjs && cap sync ios",
+    "ios:release": "npm run build && node scripts/sync-ios-version.mjs --bump && cap sync ios && cap open ios"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@supabase/supabase-js": "^2.117.3",
     "idb-keyval": "^6.3.0",
     "lucide-react": "^0.460.0",
@@ -22,6 +31,7 @@
     "react-router-dom": "^6.30.6"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",

@@ -3,7 +3,9 @@ import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-do
 import { Shell } from './components/Shell';
 import { pendingInvite, useSession } from './lib/auth';
 import { persist } from './lib/persist';
-import { fetchMemberships, joinHousehold } from './lib/remote';
+import { fetchMemberships, fetchMinVersion, joinHousehold } from './lib/remote';
+import { APP_VERSION } from './lib/platform';
+import { mustUpdate } from './domain/version';
 import { isConfigured } from './lib/supabase';
 import { applyTheme } from './lib/theme';
 import { Cook } from './screens/Cook';
@@ -13,6 +15,7 @@ import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { Settings } from './screens/Settings';
 import { SetupMissing } from './screens/SetupMissing';
+import { UpdateRequired } from './screens/UpdateRequired';
 import { ShoppingList } from './screens/ShoppingList';
 import { closeHousehold, openHousehold, useStore, useView } from './store/store';
 import { toast } from './store/toast';
@@ -20,6 +23,11 @@ import { toast } from './store/toast';
 export default function App() {
   useEffect(() => applyTheme(), []);
   const { session, loading } = useSession();
+  const minVersion = useMinVersion();
+
+  if (isConfigured && minVersion && mustUpdate(APP_VERSION, minVersion)) {
+    return <UpdateRequired minimum={minVersion} />;
+  }
 
   return (
     <Routes>
@@ -32,6 +40,20 @@ export default function App() {
       />
     </Routes>
   );
+}
+
+/** Consulta la versión mínima al abrir y cada vez que la app vuelve al frente. */
+function useMinVersion(): string | null {
+  const [min, setMin] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isConfigured) return;
+    const check = () => void fetchMinVersion().then((v) => v && setMin(v));
+    check();
+    const onVisible = () => document.visibilityState === 'visible' && check();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+  return min;
 }
 
 /** Link de invitación: guarda el código y sigue con el flujo normal. */

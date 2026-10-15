@@ -2,3 +2,4 @@
 grant usage on schema public to anon, authenticated;
 grant all on all tables in schema public to authenticated;
 grant execute on all functions in schema public to authenticated;
+grant select on public.app_config to anon;

@@ -113,6 +113,37 @@ do $$ begin
   assert (select count(*) from public.products where name = 'hackeado') = 0, 'update ajeno sin efecto';
 end $$;
 
+-- Borrar cuenta: Bruno se va del hogar compartido (el hogar de Ana sigue)
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select public.delete_my_account();
+-- Carla era la única de su hogar: se borra el hogar entero
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
+select public.delete_my_account();
+reset role;
+do $$ begin
+  assert (select count(*) from auth.users) = 1, 'quedan solo los datos de Ana';
+  assert (select count(*) from public.households) = 1, 'el hogar de Carla se borró';
+  assert (select count(*) from public.household_members) = 1, 'Bruno salió del hogar de Ana';
+  assert (select count(*) from public.products) = 3, 'los productos de Ana siguen';
+  assert (select count(*) from public.product_events where user_id is null) > 0, 'eventos de Bruno anonimizados';
+end $$;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+
+-- Ana se va: era la única que quedaba, el hogar se borra
+select public.delete_my_account();
+reset role;
+do $$ begin
+  assert (select count(*) from public.households) = 0, 'sin miembros no queda hogar';
+  assert (select count(*) from public.product_events) = 0, 'ni sus datos';
+end $$;
+
+-- La versión mínima se lee sin sesión
+set local role anon;
+do $$ begin
+  assert (select value from public.app_config where key = 'min_client_version') is not null, 'anon lee app_config';
+end $$;
+
 -- anon no ve nada
 reset role;
 set local role anon;

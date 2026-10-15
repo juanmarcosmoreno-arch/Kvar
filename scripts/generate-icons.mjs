@@ -33,4 +33,31 @@ for (const j of jobs) {
   await page.screenshot({ path: resolve(out, j.name), omitBackground: false });
   console.log('✓', j.name);
 }
+
+// iOS nativo (Capacitor): ícono 1024 sin transparencia y pantalla de arranque crema con el ícono al centro.
+const iosAssets = resolve(root, 'ios/App/App/Assets.xcassets');
+if (existsSync(iosAssets)) {
+  await page.setViewportSize({ width: 1024, height: 1024 });
+  await page.setContent(
+    `<html><body style="margin:0;background:#1B5E3F"><img src="${src('kvar-mark-maskable.svg')}" style="width:1024px;height:1024px;display:block"></body></html>`,
+  );
+  await page.waitForLoadState('networkidle');
+  // JPEG intermedio = sin canal alfa (App Store rechaza íconos con transparencia)
+  const jpg = await page.screenshot({ type: 'jpeg', quality: 100 });
+  await page.setContent(`<html><body style="margin:0"><img src="data:image/jpeg;base64,${jpg.toString('base64')}" style="display:block"></body></html>`);
+  await page.waitForLoadState('networkidle');
+  await page.screenshot({ path: resolve(iosAssets, 'AppIcon.appiconset/AppIcon-512@2x.png') });
+  console.log('✓ iOS AppIcon 1024');
+
+  await page.setViewportSize({ width: 2732, height: 2732 });
+  await page.setContent(
+    `<html><body style="margin:0;background:#F5F3EE;display:flex;align-items:center;justify-content:center;height:2732px"><img src="${src('kvar-mark.svg')}" style="width:360px;height:360px;border-radius:80px"></body></html>`,
+  );
+  await page.waitForLoadState('networkidle');
+  for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
+    await page.screenshot({ path: resolve(iosAssets, 'Splash.imageset', name) });
+  }
+  console.log('✓ iOS Splash');
+}
+
 await browser.close();

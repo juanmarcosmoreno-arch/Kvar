@@ -10,6 +10,7 @@ una mano y con el menor esfuerzo posible.
 
 - 📄 Especificación completa y fases: [`docs/SPEC.md`](docs/SPEC.md)
 - ✅ Estado: **Fase 1** (auth, hogar compartido, estados, lista automática, tiempo real, offline)
+- 📱 Versión web (PWA) y app de iPhone para el App Store, con el mismo código y la misma base
 
 ---
 
@@ -117,6 +118,53 @@ variables.
 Para compartir el hogar: **Ajustes → Invitar** manda un link `https://tu-dominio/unirse/CODIGO`; la otra persona entra
 con su correo y queda en el mismo hogar. También puede escribir el código a mano.
 
+## App de iPhone (App Store)
+
+La app de iPhone es esta misma app empaquetada con [Capacitor](https://capacitorjs.com): mismo código y misma base
+que la versión web. El proyecto de Xcode está en `ios/` y usa Swift Package Manager (no hace falta CocoaPods).
+
+### Requisitos
+- Una Mac con Xcode al día (Apple exige compilar con una versión reciente para subir al App Store) y la cuenta de Apple Developer.
+- El `.env` completo (las variables `VITE_` quedan dentro de la app al compilar). Completá también `VITE_PUBLIC_URL`
+  con la dirección de la versión web: los links de invitación que se comparten desde el iPhone apuntan ahí.
+
+### Antes de la primera subida
+1. **Elegí el identificador de la app** (por ejemplo `uy.tunombre.kvar`) y cambialo en `capacitor.config.ts` (`appId`)
+   y en Xcode (*Signing & Capabilities → Bundle Identifier*). Una vez registrado en App Store Connect no se cambia.
+2. En Xcode: *Signing & Capabilities → Team* = tu equipo de Apple Developer.
+3. En [App Store Connect](https://appstoreconnect.apple.com): *Apps → +* con ese identificador.
+4. Vas a necesitar una **política de privacidad** con URL pública (Apple la pide). Kvar guarda: correo, productos,
+   lista y el historial de cambios del hogar, en Supabase.
+
+### Probar en tu iPhone
+```bash
+npm run ios          # build web + sincroniza ios/ + abre Xcode
+```
+En Xcode elegí tu iPhone conectado y tocá ▶︎.
+
+### Subir a TestFlight / App Store
+```bash
+npm run ios:release  # igual que ios, pero sube el número de build
+```
+En Xcode: *Product → Archive* → *Distribute App* → *App Store Connect*. A los minutos aparece en TestFlight; desde ahí
+se invita a la otra persona del hogar o se manda a revisión.
+
+La versión visible (por ejemplo 0.1.0) sale de `package.json` (`"version"`); cambiala ahí antes de cada versión nueva.
+
+### Actualizaciones y compatibilidad
+Las personas actualizan la app del App Store en momentos distintos, así que la base tiene que seguir funcionando con
+versiones viejas:
+- En las migraciones, **solo agregar** (tablas, columnas con valor por defecto, funciones). No renombrar ni borrar lo
+  que use una versión publicada.
+- Si un cambio rompe compatibilidad, subí la versión mínima y las apps viejas muestran «Actualizá Kvar»:
+  ```sql
+  update app_config set value = '0.3.0' where key = 'min_client_version';
+  ```
+
+### Ícono y pantalla de arranque
+`npm run icons` genera también el ícono de iOS (1024 px, sin transparencia, como exige Apple) y la pantalla de
+arranque, a partir de `public/brand/`.
+
 ## Scripts
 
 | Comando | Qué hace |
@@ -126,7 +174,9 @@ con su correo y queda en el mismo hogar. También puede escribir el código a ma
 | `npm run preview` | Sirve el build (para probar offline/PWA) |
 | `npm test` | Tests unitarios (estados, lista de compras, equivalencias, operaciones offline) |
 | `npm run test:db` | Levanta un Postgres efímero, aplica la migración y prueba RLS y la lógica SQL |
-| `npm run icons` | Regenera los PNG de la PWA desde `public/brand/*.svg` |
+| `npm run icons` | Regenera los íconos de la PWA y de iOS desde `public/brand/*.svg` |
+| `npm run ios` | Build + sincroniza el proyecto de Xcode + lo abre |
+| `npm run ios:release` | Lo mismo, subiendo el número de build para TestFlight |
 
 `npm run test:db` necesita los binarios de Postgres (`initdb`, `pg_ctl`, `psql`); usa un stub mínimo del esquema `auth`
 de Supabase. Ver `supabase/tests/`.
@@ -148,6 +198,7 @@ src/
 supabase/
   migrations/    esquema completo con RLS
   tests/         prueba de RLS y de la lógica SQL
+ios/             proyecto de Xcode (Capacitor)
 docs/SPEC.md     especificación del producto por fases
 ```
 

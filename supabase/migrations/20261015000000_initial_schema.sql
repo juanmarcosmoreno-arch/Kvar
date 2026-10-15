@@ -51,6 +51,7 @@ create table public.households (
   invite_code  text not null unique default upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 8)),
   -- Preferencias del hogar
   list_on_low  boolean not null default false, -- agregar a la lista al pasar a "Queda poco"
+  default_servings integer not null default 2 check (default_servings between 1 and 20), -- personas a comer (Fase 5)
   created_by   uuid references auth.users (id) on delete set null default auth.uid(),
   created_at   timestamptz not null default now()
 );
@@ -278,7 +279,7 @@ create table public.recipes (
   title         text not null,
   source        text not null default 'own' check (source in ('own', 'imported', 'ai')),
   source_url    text,
-  servings      integer,
+  servings      integer check (servings is null or servings between 1 and 50), -- porciones de la receta original
   total_minutes integer,
   meal_types    text[] not null default '{}', -- almuerzo, cena, vianda, dulce
   constraints   text[] not null default '{}', -- sin_horno, una_olla
@@ -297,6 +298,10 @@ create table public.recipe_ingredients (
   household_id uuid not null references public.households (id) on delete cascade,
   product_id   uuid references public.products (id) on delete set null,
   name         text not null,
+  -- Cantidad estructurada para escalar según las personas ("200 g" → quantity 200, unit 'g').
+  -- amount guarda el texto original o lo que no se escala ("a gusto", "1 pizca").
+  quantity     numeric check (quantity is null or quantity > 0),
+  unit         text,
   amount       text,
   optional     boolean not null default false,
   sort_order   integer not null default 0
@@ -335,6 +340,7 @@ create table public.meal_plan_entries (
   day          date not null,
   meal         text not null check (meal in ('almuerzo', 'cena', 'vianda', 'dulce')),
   recipe_id    uuid references public.recipes (id) on delete set null,
+  servings     integer check (servings is null or servings between 1 and 50), -- personas para esa comida
   title        text not null,
   done         boolean not null default false
 );
@@ -801,6 +807,62 @@ revoke all on function public.regenerate_invite_code(uuid) from public, anon;
 grant execute on function public.create_household(text, text) to authenticated;
 grant execute on function public.join_household(text, text) to authenticated;
 grant execute on function public.regenerate_invite_code(uuid) to authenticated;
+
+-- =============================================================================
+-- Configuración global de la app (lectura pública)
+-- min_client_version: las versiones de la app más viejas que esta piden actualizar.
+-- Se sube solo cuando un cambio de la base deja de ser compatible con apps viejas
+-- (las apps del App Store no se actualizan todas al mismo tiempo).
+-- =============================================================================
+create table public.app_config (
+  key        text primary key,
+  value      text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.app_config enable row level security;
+create policy app_config_read on public.app_config for select to anon, authenticated using (true);
+insert into public.app_config (key, value) values ('min_client_version', '0.1.0');
+
+-- =============================================================================
+-- Borrar la cuenta desde la app (requisito del App Store)
+-- - Los hogares donde sos el único miembro se borran con todos sus datos.
+-- - En los hogares compartidos te vas; si eras quien lo creó, pasa al miembro más antiguo.
+-- - El historial de eventos queda, sin tu usuario (user_id pasa a null).
+-- =============================================================================
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'No autenticado' using errcode = '28000';
+  end if;
+
+  delete from public.households h
+   where exists (select 1 from public.household_members m where m.household_id = h.id and m.user_id = uid)
+     and not exists (select 1 from public.household_members m where m.household_id = h.id and m.user_id <> uid);
+
+  update public.household_members m
+     set role = 'owner'
+   where (m.household_id, m.user_id) in (
+     select distinct on (o.household_id) o.household_id, o.user_id
+       from public.household_members o
+      where o.user_id <> uid
+        and o.household_id in (
+          select household_id from public.household_members where user_id = uid and role = 'owner'
+        )
+      order by o.household_id, o.joined_at
+   );
+
+  delete from auth.users where id = uid; -- en cascada: membresías, suscripciones push
+end;
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
 
 -- =============================================================================
 -- Storage: fotos de productos recortadas (Fase 2). Bucket privado por hogar:

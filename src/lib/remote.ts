@@ -201,3 +201,15 @@ export async function joinHousehold(code: string, displayName: string | null): P
 export async function regenerateInviteCode(householdId: string): Promise<string> {
   return check(await supabase.rpc('regenerate_invite_code', { p_household_id: householdId })) as string;
 }
+
+/** Versión mínima de la app que la base acepta (null si no se pudo leer, p. ej. sin conexión). */
+export async function fetchMinVersion(): Promise<string | null> {
+  const { data, error } = await supabase.from('app_config').select('value').eq('key', 'min_client_version').maybeSingle();
+  if (error) return null;
+  return (data as { value: string } | null)?.value ?? null;
+}
+
+/** Borra la cuenta del usuario actual (y los hogares donde era el único miembro). */
+export async function deleteMyAccount(): Promise<void> {
+  check(await supabase.rpc('delete_my_account'));
+}

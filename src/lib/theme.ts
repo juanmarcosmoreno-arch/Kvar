@@ -1,3 +1,5 @@
+import { isNative } from './platform';
+
 export type Theme = 'system' | 'light' | 'dark';
 
 const KEY = 'kvar:theme';
@@ -17,6 +19,12 @@ export function applyTheme(t: Theme = getTheme()) {
   document
     .querySelectorAll('meta[name="theme-color"]')
     .forEach((m) => m.setAttribute('content', dark ? '#0E1611' : '#F5F3EE'));
+  if (isNative) {
+    // Texto de la barra de estado de iOS acorde al tema
+    void import('@capacitor/status-bar').then(({ StatusBar, Style }) =>
+      StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {}),
+    );
+  }
 }
 
 export function setTheme(t: Theme) {

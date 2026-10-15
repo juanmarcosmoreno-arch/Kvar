@@ -5,8 +5,9 @@ import { Icon, type IconName } from '../components/Icon';
 import { Toggle } from '../components/Toggle';
 import type { Category, Location } from '../domain/types';
 import { isStandalone } from '../lib/auth';
+import { APP_VERSION, isNative, PUBLIC_URL } from '../lib/platform';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
-import { regenerateInviteCode } from '../lib/remote';
+import { deleteMyAccount, regenerateInviteCode } from '../lib/remote';
 import { supabase } from '../lib/supabase';
 import { getTheme, setTheme, type Theme } from '../lib/theme';
 import {
@@ -23,7 +24,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
   const [theme, setThemeState] = useState<Theme>(getTheme());
   useEffect(() => setHhName(view.household.name), [view.household.name]);
 
-  const link = `${window.location.origin}/unirse/${view.household.invite_code}`;
+  const link = `${PUBLIC_URL}/unirse/${view.household.invite_code}`;
 
   const share = async () => {
     const text = `Sumate a «${view.household.name}» en Kvar: ${link}  (código ${view.household.invite_code})`;
@@ -54,6 +55,20 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
     await supabase.auth.signOut();
   };
 
+  const [deleting, setDeleting] = useState<'idle' | 'confirm' | 'busy'>('idle');
+  const alone = view.members.length <= 1;
+  const deleteAccount = async () => {
+    setDeleting('busy');
+    try {
+      await deleteMyAccount();
+      await resetLocal();
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      setDeleting('confirm');
+      toast('No se pudo borrar la cuenta. ¿Tenés conexión?');
+    }
+  };
+
   return (
     <>
       <Header
@@ -65,7 +80,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
         }
       />
       <div className="space-y-8 px-5 pb-6">
-        {!isStandalone() && (
+        {!isNative && !isStandalone() && (
           <div className="card space-y-1 border border-lime/50 p-4">
             <p className="font-semibold">Instalá Kvar en tu iPhone</p>
             <p className="text-sm text-muted">
@@ -166,8 +181,30 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             <button className="btn-ghost w-full" onClick={onSwitchHousehold}>Crear otro hogar o sumarme a uno</button>
             <button className="btn w-full text-out" onClick={signOut}>Cerrar sesión</button>
           </div>
+          {deleting === 'idle' ? (
+            <button className="btn w-full text-sm text-muted" onClick={() => setDeleting('confirm')}>
+              Borrar mi cuenta
+            </button>
+          ) : (
+            <div className="card space-y-3 border-out/40 p-4">
+              <p className="font-medium">¿Borrar tu cuenta para siempre?</p>
+              <p className="text-sm text-muted">
+                {alone
+                  ? `Sos la única persona en «${view.household.name}», así que también se borran el hogar, sus productos y su lista.`
+                  : `Salís de «${view.household.name}». El hogar y sus datos quedan para los demás miembros.`}{' '}
+                No se puede deshacer.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button className="btn-ghost" onClick={() => setDeleting('idle')} disabled={deleting === 'busy'}>Cancelar</button>
+                <button className="btn bg-out text-white" onClick={deleteAccount} disabled={deleting === 'busy' || !online}>
+                  {deleting === 'busy' ? 'Borrando…' : 'Sí, borrar'}
+                </button>
+              </div>
+              {!online && <p className="text-xs text-muted">Necesitás conexión para borrar la cuenta.</p>}
+            </div>
+          )}
         </Section>
-        <p className="text-center text-xs text-muted">Kvar · «lo que queda»</p>
+        <p className="text-center text-xs text-muted">Kvar {APP_VERSION} · «lo que queda»</p>
       </div>
     </>
   );

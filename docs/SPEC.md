@@ -133,21 +133,28 @@ Un alias aprendido siempre gana; la corrección del usuario reemplaza la anterio
 ### 4.7 Qué cocino
 - Cruza el stock con recetas y muestra tres grupos: **«Tenés todo»**, **«Te falta 1 cosa»** (con un toque se agrega a
   la lista) y **«Para aprovechar lo que vence»** (prioridad a lo que vence antes o lleva tiempo en el freezer).
-- Filtros: tiempo (rápido / con tiempo), cantidad de personas, tipo (almuerzo, cena, vianda, dulce), restricciones
-  prácticas (sin horno, una sola olla).
+- **Cantidad de personas a comer:** arriba de las sugerencias, un selector «Para 2 · 3 · 4…» que arranca con el valor
+  del hogar (`households.default_servings`, editable en Ajustes) y se puede cambiar en cada receta. **Las cantidades de
+  los ingredientes se escalan** según las personas (receta para 4 con 400 g de fideos → para 2 muestra 200 g), con
+  redondeos de cocina (½ cebolla, 1 lata; nunca 0,37 latas). Lo que no se escala («sal a gusto») se muestra tal cual.
+  Las personas también cuentan para saber si alcanza lo que hay: si hay que comprar más, la receta pasa a
+  «Te falta 1 cosa» y lo que falta va a la lista con la cantidad calculada.
+- Filtros: tiempo (rápido / con tiempo), tipo (almuerzo, cena, vianda, dulce), restricciones prácticas (sin horno,
+  una sola olla).
 - Fuentes: recetas generadas por IA con el stock real; **recetas propias del hogar** (cargadas a mano o importadas
   pegando un link), que tienen prioridad.
 - **Aprende preferencias:** si el usuario descarta siempre cierto tipo de plato, deja de proponerlo.
 - Botón **«La hice»**: pregunta «Usaste arroz, cebolla y pollo. ¿Se terminó alguno?» y actualiza el stock. No pide
   descontar cantidades.
 - **Plan semanal:** «Armame el menú de lunes a viernes» propone comidas usando primero lo que hay y lo que vence, y
-  genera la lista de compras con todo lo que falta.
+  genera la lista de compras con todo lo que falta. Cada comida del plan tiene su cantidad de personas (por ejemplo,
+  cena para 6 el viernes porque vienen amigos) y la lista suma las cantidades de todas.
 
 ---
 
 ## 5. Fases
 
-### Fase 1 — implementada
+### Fase 1 — implementada (web + app de iPhone)
 Auth, hogar compartido con invitación, productos con estados y conteo opcional, lugares y categorías, básicos,
 registro de eventos, pantallas de Inicio, Inventario y Lista de compras, lista automática, sincronización en tiempo
 real, PWA offline.
@@ -162,6 +169,15 @@ real, PWA offline.
 - [x] RLS impide que un usuario vea datos de otro hogar (probado en `supabase/tests/rls.test.sql`).
 - [x] Tests pasando y README completo.
 
+**App de iPhone (App Store)**
+- La misma app empaquetada con Capacitor (`ios/`). Comparte código y base con la versión web; una misma cuenta sirve
+  en las dos.
+- Borrar la cuenta desde Ajustes (requisito de Apple): `delete_my_account()`.
+- Versión mínima (`app_config.min_client_version`): las apps más viejas que esa piden actualizar. Regla para los
+  cambios de base: **solo agregar** (columnas con valor por defecto, funciones nuevas); nunca renombrar ni borrar algo
+  que use una versión publicada. Si un cambio rompe compatibilidad, se sube la versión mínima.
+- Sesión guardada en el almacenamiento de iOS (Preferences), no en el del navegador.
+
 **Notas de implementación**
 - Ingreso con **código de 6 dígitos por correo** (OTP): en iOS el link mágico abre Safari en lugar de la PWA instalada,
   que tiene su propio almacenamiento.
@@ -175,7 +191,9 @@ real, PWA offline.
 - Escanear algo que ya existe → propone «¿Se terminó?» / «¿Compraste?».
 - **Foto del producto con recorte sin fondo:**
   - Cámara con `<input type="file" accept="image/*" capture="environment">` (funciona en la PWA de iOS).
-  - Recorte **en el dispositivo** con un modelo de segmentación en WebAssembly (p. ej. `@imgly/background-removal`):
+  - En la **app de iPhone**: recorte con Vision de Apple (el mismo «levantar sujeto» de Fotos), en el dispositivo,
+    gratis y con la mejor calidad.
+  - En la **web**: recorte en el navegador con un modelo de segmentación en WebAssembly (p. ej. `@imgly/background-removal`):
     no necesita claves, no manda la foto a terceros y funciona offline una vez descargado el modelo (se descarga la
     primera vez que se usa, no al instalar la app).
   - Si el dispositivo no puede (memoria o navegador viejo): Edge Function `cutout` con el proveedor configurado en
@@ -210,7 +228,33 @@ real, PWA offline.
 
 ---
 
-## 6. Arquitectura
+## 6. Estrategia de IA
+
+Primero lo que es gratis y privado (en el teléfono); la IA en la nube solo para lo que de verdad la necesita.
+Todo lo que va a la nube pasa por Edge Functions: el proveedor se elige con `AI_PROVIDER` (por defecto `anthropic`,
+es decir Claude) y las claves nunca están en la app.
+
+| Tarea | App de iPhone | Versión web | Nube (Claude) |
+|---|---|---|---|
+| Recortar el fondo de la foto del producto | Vision de Apple (*subject lifting*), en el dispositivo | Modelo WebAssembly en el navegador | Solo si el dispositivo no puede |
+| Leer el texto del ticket (OCR) | Vision de Apple (`VNRecognizeTextRequest`) | — | Claude con imagen |
+| Emparejar líneas del ticket con productos | Tabla de alias + `aliases.ts` (gratis, sin IA) | igual | Solo las líneas que no se reconocen |
+| Interpretar voz («compré leche y yerba») | Reconocimiento de voz de iOS + alias; modelo de Apple en el dispositivo si está disponible | Web Speech + alias | Claude si no se entendió |
+| Identificar productos en una foto | — | — | Claude con imagen |
+| Recetas, plan semanal, importar receta de un link | — | — | Claude |
+
+- **Apple Intelligence** (framework *Foundation Models*, iOS 26 o posterior, iPhone compatible con Apple Intelligence):
+  modelo de lenguaje chico, en el dispositivo, gratis y sin conexión. Sirve para tareas cortas de texto (interpretar
+  una frase, ordenar líneas de un ticket ya leído). No está en todos los iPhone ni en la web, así que siempre hay
+  alternativa. Se usa desde un plugin nativo de Capacitor en Swift.
+- **Vision de Apple** (OCR y recorte de sujeto) funciona en todos los iPhone con iOS reciente, sin Apple Intelligence.
+- **Claude** para lo que necesita criterio y conocimiento: recetas con el stock real, plan semanal, tickets difíciles
+  y fotos de varios productos. Se usa un modelo chico y barato para tickets y fotos, y uno más capaz para recetas y
+  plan. Los modelos concretos se eligen al implementar cada fase.
+- Cada respuesta de la nube vuelve como **propuesta para confirmar**, nunca se aplica sola (principio rector).
+- Lo que el usuario confirma se guarda como alias: la próxima vez ya no hace falta IA.
+
+## 7. Arquitectura
 
 ```
 ┌───────────── PWA (Vite + React) ──────────────┐
@@ -232,7 +276,7 @@ real, PWA offline.
 - **Conflictos:** *last-write-wins* por hora del dispositivo: un cambio offline más viejo que el último aplicado queda
   en el historial pero no pisa el estado.
 
-## 7. Modelo de datos
+## 8. Modelo de datos
 
 Todas las tablas tienen `household_id` y políticas RLS basadas en `is_member(household_id)`.
 
@@ -251,7 +295,7 @@ Todas las tablas tienen `household_id` y políticas RLS basadas en `is_member(ho
 | `product_lots` | 4 | Lotes con vencimiento / fecha de ingreso al freezer |
 | `push_subscriptions` | 4 | Suscripciones de push web |
 | `storage: product-images` | 2 | Fotos recortadas, bucket privado con RLS por hogar |
-| `recipes`, `recipe_ingredients`, `recipe_feedback` | 5 | Recetas propias/importadas/IA y preferencias |
+| `recipes`, `recipe_ingredients`, `recipe_feedback` | 5 | Recetas propias/importadas/IA, porciones, ingredientes con cantidad y unidad para escalar, preferencias |
 | `meal_plans`, `meal_plan_entries` | 6 | Plan semanal |
 
 Funciones: `create_household`, `join_household`, `regenerate_invite_code`, `set_product_status`,

@@ -11,6 +11,8 @@ export interface Household {
   name: string;
   invite_code: string;
   list_on_low: boolean;
+  /** Personas a comer por defecto (Fase 5: escala las recetas) */
+  default_servings?: number;
   created_at: string;
 }
 
