@@ -6,7 +6,10 @@ import { nextQuantity, type QuantityMode } from '../domain/quantity';
 import { planReceipt, type ReviewLine } from '../domain/receipt';
 import { voiceProductName, type ResolvedVoiceAction } from '../domain/voice';
 import { guessCategoryFromName, guessLocation } from '../domain/openFoodFacts';
-import type { Category, EventSource, Location, Product, ShoppingItem, StockStatus } from '../domain/types';
+import type {
+  Category, EventSource, ListReason, Location, Product, Recipe, RecipeFeedback, ShoppingItem, StockStatus,
+} from '../domain/types';
+import { missingForList, type Suggestion } from '../domain/recipes';
 import { STATUS_LABEL } from '../domain/types';
 import { nowIso, uuid } from '../lib/id';
 import { imagePath, imageStore } from '../lib/images';
@@ -85,7 +88,9 @@ export function deleteProduct(product: Product) {
   toast(`Borré ${product.name}.`);
 }
 
-export function addListItem(input: { productId?: string; name?: string; quantity?: number | null }) {
+export function addListItem(input: {
+  productId?: string; name?: string; quantity?: number | null; note?: string | null; reason?: ListReason;
+}) {
   const view = getView();
   if (!view) return;
   const item: ShoppingItem = {
@@ -94,8 +99,8 @@ export function addListItem(input: { productId?: string; name?: string; quantity
     product_id: input.productId ?? null,
     name: input.productId ? null : input.name?.trim() || null,
     quantity: input.quantity ?? null,
-    note: null,
-    reason: 'manual',
+    note: input.note ?? null,
+    reason: input.reason ?? 'manual',
     checked_at: null,
     checked_by: null,
     created_at: nowIso(),
@@ -173,7 +178,7 @@ export function moveCategory(id: string, dir: -1 | 1) {
   ops.forEach(dispatch);
 }
 
-export function updateHousehold(patch: { name?: string; list_on_low?: boolean }) {
+export function updateHousehold(patch: { name?: string; list_on_low?: boolean; default_servings?: number }) {
   dispatch({ kind: 'update_household', ...base(), patch });
 }
 
@@ -307,4 +312,80 @@ export function applyVoice(actions: ResolvedVoiceAction[]): number {
     applied++;
   }
   return applied;
+}
+
+// -----------------------------------------------------------------------------
+// Recetas
+// -----------------------------------------------------------------------------
+
+/** Lo que falta para una receta va a la lista (lo que ya estaba no se repite). Devuelve cuántas cosas agregó. */
+export function addMissingToList(s: Suggestion): number {
+  const view = getView();
+  if (!view) return 0;
+  let added = 0;
+  for (const m of missingForList(s)) {
+    if (m.productId) {
+      const open = openItemFor(view.list, m.productId);
+      if (open) {
+        if (m.quantity && (open.quantity ?? 0) < m.quantity) setItemQuantity(open, m.quantity);
+        continue;
+      }
+      addListItem({ productId: m.productId, quantity: m.quantity, note: m.note, reason: 'recipe' });
+    } else {
+      const already = view.list.some((i) => !i.checked_at && !i.product_id && normalizeAlias(i.name ?? '') === normalizeAlias(m.name));
+      if (already) continue;
+      addListItem({ name: m.name, quantity: m.quantity, note: m.note, reason: 'recipe' });
+    }
+    added++;
+  }
+  return added;
+}
+
+export function recipeFeedback(recipe: Recipe, action: RecipeFeedback['action']) {
+  const view = getView();
+  if (!view) return;
+  const own = recipe.source !== 'catalog';
+  const feedback: RecipeFeedback = {
+    id: uuid(),
+    household_id: view.household.id,
+    recipe_id: own ? recipe.id : null,
+    catalog_key: own ? null : recipe.id,
+    recipe_title: recipe.title,
+    tags: recipe.tags,
+    action,
+    created_at: nowIso(),
+  };
+  dispatch({ kind: 'recipe_feedback', ...base(), feedback });
+}
+
+/** «No me tienta»: no se propone por unas semanas (y se aprende el tipo de plato). */
+export function dismissRecipe(recipe: Recipe) {
+  recipeFeedback(recipe, 'dismissed');
+  toast(`Listo, no te propongo ${recipe.title} por un tiempo.`);
+}
+
+/**
+ * «La hice»: lo que se terminó pasa a No hay (y a la lista), lo que queda poco a Queda poco y
+ * lo que lleva conteo descuenta lo usado.
+ */
+export function cookedRecipe(recipe: Recipe, changes: { product: Product; status?: StockStatus; quantity?: number }[]) {
+  for (const c of changes) {
+    if (c.quantity !== undefined && c.product.track_quantity) {
+      if (c.quantity !== c.product.quantity) {
+        dispatch({ kind: 'set_status', ...base(), productId: c.product.id, quantity: Math.max(0, c.quantity), source: 'recipe' });
+      }
+    } else if (c.status && c.status !== c.product.status) {
+      dispatch({ kind: 'set_status', ...base(), productId: c.product.id, status: c.status, source: 'recipe' });
+    }
+  }
+  recipeFeedback(recipe, 'cooked');
+}
+
+export function saveRecipe(recipe: Recipe) {
+  dispatch({ kind: 'save_recipe', ...base(), recipe: { ...recipe, updated_at: nowIso() } });
+}
+
+export function deleteRecipe(recipe: Recipe) {
+  dispatch({ kind: 'delete_recipe', ...base(), recipeId: recipe.id });
+  toast(`Borré ${recipe.title}.`);
 }

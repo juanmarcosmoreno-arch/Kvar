@@ -4,7 +4,8 @@
  * este navegador: las mismas operaciones que irían a Supabase se aplican acá.
  */
 import { applyOp, type Op } from '../domain/ops';
-import type { Household, Member, Product, ShoppingItem, Snapshot } from '../domain/types';
+import { parseIngredientLine } from '../domain/recipes';
+import type { Household, Member, Product, Recipe, ShoppingItem, Snapshot } from '../domain/types';
 import leche from '../assets/demo/p1.webp';
 import yerba from '../assets/demo/p2.webp';
 import tomate from '../assets/demo/p3.webp';
@@ -18,14 +19,14 @@ export const isDemo = import.meta.env.VITE_DEMO === '1';
 
 export const DEMO_USER = 'demo-juan';
 const HH = 'demo-hogar';
-const KEY = 'kvar-demo:servidor';
+const KEY = 'kvar-demo:servidor-v2'; // v2: con recetas (si cambia el ejemplo, cambia la clave)
 
 const day = 86_400_000;
 const iso = (offsetDays = 0) => new Date(Date.now() + offsetDays * day).toISOString();
 const date = (offsetDays: number) => iso(offsetDays).slice(0, 10);
 
 function seed(): Snapshot {
-  const household: Household = { id: HH, name: 'Casa', invite_code: 'K7F2A9QX', list_on_low: false, created_at: iso(-30) };
+  const household: Household = { id: HH, name: 'Casa', invite_code: 'K7F2A9QX', list_on_low: false, default_servings: 2, created_at: iso(-30) };
   const members: Member[] = [
     { household_id: HH, user_id: DEMO_USER, role: 'owner', display_name: 'Vos', joined_at: iso(-30) },
     { household_id: HH, user_id: 'demo-sofia', role: 'member', display_name: 'Sofía', joined_at: iso(-29) },
@@ -57,7 +58,22 @@ function seed(): Snapshot {
     P('p14', 'Milanesas', 'c2', 'l1', 'ok'),
     P('p15', 'Manzanas', 'c0', 'l0', 'low'),
     P('p16', 'Comida del perro', 'c10', 'l2', 'ok'),
+    P('p17', 'Cebolla', 'c0', 'l2', 'ok'),
+    P('p18', 'Papas', 'c0', 'l2', 'ok'),
+    P('p19', 'Tomate triturado', 'c4', 'l2', 'ok', { track_quantity: true, quantity: 2, low_threshold: 1, unit: 'latas' }),
+    P('p20', 'Manteca', 'c3', 'l0', 'low'),
+    P('p21', 'Carne picada', 'c2', 'l1', 'ok', { expires_on: date(1) }),
+    P('p22', 'Jamón', 'c3', 'l0', 'ok', { expires_on: date(3) }),
   ];
+  const recipeId = 'demo-receta-tuco';
+  const recipes: Recipe[] = [{
+    id: recipeId, household_id: HH, title: 'Tuco de la abuela', source: 'own', source_url: null, servings: 4,
+    total_minutes: 90, meal_types: ['almuerzo'], constraints: ['sin_horno', 'una_olla'], tags: ['pasta'],
+    steps: 'Dorá la carne con la cebolla.\nSumá el tomate y una hoja de laurel.\nCociná a fuego mínimo una hora y media.',
+    image_url: null, created_at: iso(-20), updated_at: iso(-20),
+    ingredients: ['500 g de carne picada', '2 latas de tomate triturado', '1 cebolla', '400 g de fideos', 'sal a gusto']
+      .map((line, i) => ({ id: `${recipeId}:${i}`, recipe_id: recipeId, household_id: HH, product_id: null, sort_order: i, ...parseIngredientLine(line)! })),
+  }];
   const I = (id: string, product_id: string | null, reason: ShoppingItem['reason'], extra: Partial<ShoppingItem> = {}): ShoppingItem => ({
     id, household_id: HH, product_id, name: null, quantity: null, note: null, reason, checked_at: null, checked_by: null,
     created_at: iso(-1), ...extra,
@@ -69,6 +85,8 @@ function seed(): Snapshot {
     household, members, locations, categories, products, list,
     outCounts: { p4: 6, p7: 4, p12: 3, p9: 1, p10: 1 },
     aliases: [alias('a1', 'p1', '7730000000017'), alias('a2', 'p4', '7790000000010'), alias('a3', 'p12', '7790000000027')],
+    recipes,
+    feedback: [],
   };
 }
 

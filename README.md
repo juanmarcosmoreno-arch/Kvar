@@ -56,6 +56,8 @@ Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden
 `supabase/migrations/`:
 1. [`20261015000000_initial_schema.sql`](supabase/migrations/20261015000000_initial_schema.sql)
 2. [`20261016000000_fase2_codigos_y_fotos.sql`](supabase/migrations/20261016000000_fase2_codigos_y_fotos.sql)
+3. [`20261017000000_fase5_recetas.sql`](supabase/migrations/20261017000000_fase5_recetas.sql) (recetas de la casa;
+   si ya tenías la base andando, alcanza con pegar solo esta)
 
 Cuando aparezcan migraciones nuevas (fases siguientes), se corre solo la nueva.
 

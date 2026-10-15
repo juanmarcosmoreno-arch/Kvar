@@ -118,9 +118,9 @@ export function ShoppingList() {
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-muted/50" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{itemName(item, byId)}</span>
-                      {REASON_LABEL[item.reason] && (
-                        <span className={`text-xs ${item.reason === 'out' ? 'text-out' : item.reason === 'low' ? 'text-[#9A6300] dark:text-low' : 'text-muted'}`}>
-                          {REASON_LABEL[item.reason]}
+                      {(item.note || REASON_LABEL[item.reason]) && (
+                        <span className={`block truncate text-xs ${item.reason === 'out' ? 'text-out' : item.reason === 'low' ? 'text-[#9A6300] dark:text-low' : 'text-muted'}`}>
+                          {item.note || REASON_LABEL[item.reason]}
                         </span>
                       )}
                     </span>

@@ -202,6 +202,10 @@ function subscribeRealtime(hh: string) {
   ch = ch.on('postgres_changes', { event: '*', schema: 'public', table: 'household_members', filter }, () => {
     void sync();
   });
+  // Recetas: llegan con sus ingredientes en tablas separadas; se vuelve a leer todo (pasa poco)
+  for (const table of ['recipes', 'recipe_ingredients', 'recipe_feedback']) {
+    ch = ch.on('postgres_changes', { event: '*', schema: 'public', table, filter }, () => syncSoon());
+  }
   channel = ch.subscribe((status) => {
     // Al (re)conectar el canal, se trae todo por si hubo cambios mientras tanto.
     if (status === 'SUBSCRIBED') void sync();
@@ -234,6 +238,12 @@ function applyRemote(
     outCounts = { ...outCounts, [row.id]: (outCounts[row.id] ?? 0) + 1 };
   }
   setServer({ ...s, [key]: next, outCounts });
+}
+
+let syncTimer: ReturnType<typeof setTimeout> | undefined;
+function syncSoon() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => void sync(), 400);
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;

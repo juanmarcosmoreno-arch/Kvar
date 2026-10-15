@@ -257,10 +257,27 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   agrega a la lista con motivo `predicted`.
 - Push web con VAPID (`push_subscriptions`); avisos de básicos, vencimientos y predicciones.
 
-### Fase 5 — Qué cocino
-- `recipes`, `recipe_ingredients` (vinculados a productos o por `ingredient_tags`), `recipe_feedback`.
-- Edge Function `suggest-recipes` (IA + recetas propias con prioridad), `import-recipe` (link → receta).
-- Tres grupos, filtros, preferencias aprendidas, «La hice» (eventos `consumed`, `source = recipe`).
+### Fase 5 — Qué cocino (implementada, sin IA)
+- **Recetario de Stoka** (`src/domain/recipeCatalog.ts`): ~30 recetas caseras rioplatenses que viven en la app, sin
+  conexión ni costo. Los ingredientes se escriben como en un papel y se interpretan con `parseIngredientLine`.
+- **Recetas de la casa** (`recipes`, `recipe_ingredients`): se cargan escribiendo los ingredientes uno por renglón
+  («400 g de fideos», «sal a gusto») con vista previa de cómo se entendió; se guardan enteras con la RPC
+  `save_recipe` (idempotente, cola offline) y llegan a los demás por Realtime. Tienen prioridad. Una receta del
+  recetario se puede «hacer mía» (copia editable).
+- **Cruce con el stock** (`src/domain/recipes.ts`): nombres sin plurales ni variedades («aceite» ↔ «Aceite de
+  girasol»; «leche» no es «Dulce de leche»); sal, agua y condimentos se dan por hechos; con conteo se compara
+  cuánto hay (3 huevos no alcanzan para 6 personas → comprar 3).
+- **Personas**: valor del hogar (Ajustes → Cocina), cambiable en la pantalla y en cada receta; cantidades escaladas
+  con redondeos de cocina (½ cebolla, nunca 0,37 latas, «1,5 kg»).
+- **Grupos**: «Para aprovechar lo que vence» (hasta 4, vence en ≤ 4 días), «Tenés todo», «Te falta 1 cosa» (un
+  toque → a la lista, con nota «Para …»), «Con un par de compras». Filtros: rápido, almuerzo/cena/vianda/dulce,
+  sin horno, una sola olla.
+- **«La hice»**: «Usaste fideos, cebolla y aceite. ¿Se terminó alguno?» (Queda / Queda poco / Se terminó; lo que
+  lleva conteo descuenta lo usado). Eventos con `source = recipe`.
+- **Preferencias** (`recipe_feedback`, con `catalog_key` para el recetario): «No me tienta» la saca 3 semanas; un
+  tipo de plato descartado 3 veces y nunca cocinado deja de proponerse; lo cocinado hace poco baja.
+- Pendiente: recetas generadas con IA (Apple Intelligence en el iPhone; Claude por Edge Function) e importar
+  recetas pegando un link (`import-recipe`).
 
 ### Fase 6 — Plan semanal y pedidos por correo
 - `meal_plans`, `meal_plan_entries`; «Armame el menú de lunes a viernes» → lista con motivo `plan`.

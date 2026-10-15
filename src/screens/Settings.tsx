@@ -1,3 +1,4 @@
+import { peopleLabel, Stepper } from '../components/Stepper';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Shell';
@@ -148,6 +149,18 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
               onChange={(v) => updateHousehold({ list_on_low: v })}
               label="Agregar también lo que queda poco"
               hint="Si está apagado, solo van a la lista los básicos que quedan poco y lo que no hay."
+            />
+          </div>
+        </Section>
+
+        <Section title="Cocina" hint="Con cuántos se come normalmente: las recetas ajustan las cantidades.">
+          <div className="card flex min-h-[64px] items-center justify-between gap-3 px-4">
+            <span>Personas a comer</span>
+            <Stepper
+              value={view.household.default_servings ?? 2}
+              onChange={(n) => updateHousehold({ default_servings: n })}
+              label="Personas a comer"
+              unit={peopleLabel}
             />
           </div>
         </Section>

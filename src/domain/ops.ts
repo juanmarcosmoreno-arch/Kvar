@@ -8,7 +8,8 @@
 import { applyStatusToList } from './shoppingList';
 import { resolveStock } from './status';
 import type {
-  Category, EventSource, Household, Location, Product, ProductAlias, ShoppingItem, Snapshot, StockStatus,
+  Category, EventSource, Household, Location, Product, ProductAlias, Recipe, RecipeFeedback, ShoppingItem, Snapshot,
+  StockStatus,
 } from './types';
 
 export type Op =
@@ -26,7 +27,11 @@ export type Op =
   | { kind: 'delete_location'; id: string; at: string; locationId: string }
   | { kind: 'upsert_category'; id: string; at: string; category: Category }
   | { kind: 'delete_category'; id: string; at: string; categoryId: string }
-  | { kind: 'update_household'; id: string; at: string; patch: Partial<Pick<Household, 'name' | 'list_on_low'>> }
+  | { kind: 'update_household'; id: string; at: string; patch: Partial<Pick<Household, 'name' | 'list_on_low' | 'default_servings'>> }
+  /** Receta propia con sus ingredientes (se guarda entera) */
+  | { kind: 'save_recipe'; id: string; at: string; recipe: Recipe }
+  | { kind: 'delete_recipe'; id: string; at: string; recipeId: string }
+  | { kind: 'recipe_feedback'; id: string; at: string; feedback: RecipeFeedback }
   | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
   /** La foto ya está guardada en el teléfono (IndexedDB) bajo `path`; se sube al sincronizar. */
   | { kind: 'set_image'; id: string; at: string; productId: string; path: string; previousPath: string | null };
@@ -55,6 +60,11 @@ function withStock(s: Snapshot, product: Product, wanted: { status?: StockStatus
       ? { ...s.outCounts, [product.id]: (s.outCounts[product.id] ?? 0) + 1 }
       : s.outCounts;
   return { ...s, products: upsert(s.products, updated), list, outCounts };
+}
+
+/** Como upsert, pero reemplaza la fila entera (una receta trae sus ingredientes). */
+function upsertReplace<T extends { id: string }>(arr: T[], row: T): T[] {
+  return arr.some((x) => x.id === row.id) ? arr.map((x) => (x.id === row.id ? row : x)) : [...arr, row];
 }
 
 export function applyOp(s: Snapshot, op: Op): Snapshot {
@@ -154,6 +164,13 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
           : { ...existing, product_id: a.product_id, alias: a.alias, hits: 1 };
       return { ...s, aliases: aliases.map((x) => (x === existing ? updated : x)) };
     }
+    case 'save_recipe':
+      return { ...s, recipes: upsertReplace(s.recipes ?? [], op.recipe) };
+    case 'delete_recipe':
+      return { ...s, recipes: (s.recipes ?? []).filter((r) => r.id !== op.recipeId) };
+    case 'recipe_feedback':
+      if (s.feedback?.some((f) => f.id === op.feedback.id)) return s;
+      return { ...s, feedback: [...(s.feedback ?? []), op.feedback] };
     case 'set_image':
       return {
         ...s,

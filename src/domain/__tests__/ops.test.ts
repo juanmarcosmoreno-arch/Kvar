@@ -152,3 +152,29 @@ describe('cantidades en la lista', () => {
     expect(bought.products[0]).toMatchObject({ quantity: 28, status: 'ok' });
   });
 });
+
+describe('recetas offline', () => {
+  const recipe = {
+    id: 'r1', household_id: 'hh-1', title: 'Tuco', source: 'own' as const, source_url: null, servings: 4, total_minutes: 30,
+    meal_types: [], constraints: [], tags: [], steps: null, image_url: null, created_at: at, updated_at: at,
+    ingredients: [],
+  };
+
+  it('guardar, editar y borrar una receta', () => {
+    let s = applyOp(snapshot(), { kind: 'save_recipe', id: 'o1', at, recipe });
+    expect(s.recipes).toHaveLength(1);
+    s = applyOp(s, { kind: 'save_recipe', id: 'o2', at, recipe: { ...recipe, title: 'Tuco de la abuela' } });
+    expect(s.recipes).toEqual([expect.objectContaining({ title: 'Tuco de la abuela' })]);
+    s = applyOp(s, { kind: 'delete_recipe', id: 'o3', at, recipeId: 'r1' });
+    expect(s.recipes).toEqual([]);
+  });
+
+  it('el feedback no se duplica al reintentar', () => {
+    const feedback = {
+      id: 'f1', household_id: 'hh-1', recipe_id: 'r1', catalog_key: null, recipe_title: 'Tuco', tags: [],
+      action: 'cooked' as const, created_at: at,
+    };
+    const op: Op = { kind: 'recipe_feedback', id: 'o', at, feedback };
+    expect(applyOps(snapshot(), [op, op]).feedback).toHaveLength(1);
+  });
+});

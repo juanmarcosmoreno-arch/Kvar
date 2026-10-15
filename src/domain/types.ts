@@ -101,6 +101,10 @@ export interface Snapshot {
   outCounts: Record<string, number>;
   /** Equivalencias aprendidas (código de barras, ticket, voz → producto) */
   aliases?: ProductAlias[];
+  /** Recetas propias del hogar (las del catálogo están en domain/recipeCatalog.ts) */
+  recipes?: Recipe[];
+  /** «No me tienta», «La hice»: para aprender qué proponer */
+  feedback?: RecipeFeedback[];
 }
 
 export interface ProductAlias {
@@ -118,3 +122,57 @@ export const STATUS_LABEL: Record<StockStatus, string> = {
   low: 'Queda poco',
   out: 'No hay',
 };
+
+// -----------------------------------------------------------------------------
+// Recetas (Fase 5)
+// -----------------------------------------------------------------------------
+export type MealType = 'almuerzo' | 'cena' | 'vianda' | 'dulce';
+export type RecipeConstraint = 'sin_horno' | 'una_olla';
+
+export interface RecipeIngredient {
+  id: string;
+  recipe_id: string;
+  household_id: string;
+  /** Producto del hogar elegido a mano; si es null se busca por nombre. */
+  product_id: string | null;
+  name: string;
+  /** Cantidad para `recipe.servings` personas (se escala). */
+  quantity: number | null;
+  /** g, ml, u, taza, cda, cdita, diente, lata, paquete… (ver domain/recipes.ts) */
+  unit: string | null;
+  /** Lo que no se escala: «a gusto», «1 pizca». */
+  amount: string | null;
+  optional: boolean;
+  sort_order: number;
+}
+
+export interface Recipe {
+  id: string;
+  household_id: string;
+  title: string;
+  /** catalog = recetas que trae Stoka (viven en la app, no en la base) */
+  source: 'own' | 'imported' | 'ai' | 'catalog';
+  source_url: string | null;
+  servings: number | null;
+  total_minutes: number | null;
+  meal_types: MealType[];
+  constraints: RecipeConstraint[];
+  tags: string[];
+  steps: string | null;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  ingredients: RecipeIngredient[];
+}
+
+export interface RecipeFeedback {
+  id: string;
+  household_id: string;
+  recipe_id: string | null;
+  /** Para las recetas del catálogo, que no tienen fila en `recipes`. */
+  catalog_key: string | null;
+  recipe_title: string | null;
+  tags: string[];
+  action: 'dismissed' | 'cooked' | 'liked';
+  created_at: string;
+}

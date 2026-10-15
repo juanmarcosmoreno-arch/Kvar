@@ -1,6 +1,6 @@
 /** Todo lo que habla con Supabase: lectura del hogar y envío de operaciones. */
 import type { Op } from '../domain/ops';
-import type { Household, Member, Snapshot } from '../domain/types';
+import type { Household, Member, Recipe, RecipeFeedback, Snapshot } from '../domain/types';
 import { removeImage, UploadError, uploadImage } from './images';
 import { demoServer, isDemo } from './demo';
 import { supabase } from './supabase';
@@ -41,8 +41,8 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
   if (isDemo) return demoServer.snapshot();
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
   const eventsSince = new Date(Date.now() - 120 * 86_400_000).toISOString();
-  const [household, members, locations, categories, products, list, outs, aliases] = await Promise.all([
-    supabase.from('households').select('id,name,invite_code,list_on_low,created_at').eq('id', householdId).single(),
+  const [household, members, locations, categories, products, list, outs, aliases, recipes, feedback] = await Promise.all([
+    supabase.from('households').select('id,name,invite_code,list_on_low,default_servings,created_at').eq('id', householdId).single(),
     supabase.from('household_members').select('*').eq('household_id', householdId),
     supabase.from('locations').select('id,household_id,name,icon,sort_order').eq('household_id', householdId).order('sort_order'),
     supabase.from('categories').select('id,household_id,name,icon,sort_order').eq('household_id', householdId).order('sort_order'),
@@ -63,6 +63,17 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
       .from('product_aliases')
       .select('id,household_id,product_id,kind,alias,normalized,hits')
       .eq('household_id', householdId),
+    supabase
+      .from('recipes')
+      .select('*, ingredients:recipe_ingredients(*)')
+      .eq('household_id', householdId)
+      .order('title'),
+    supabase
+      .from('recipe_feedback')
+      .select('id,household_id,recipe_id,catalog_key,recipe_title,tags,action,created_at')
+      .eq('household_id', householdId)
+      .gt('created_at', eventsSince)
+      .limit(1000),
   ]);
   const outCounts: Record<string, number> = {};
   for (const e of check(outs) as { product_id: string | null }[]) {
@@ -77,6 +88,12 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
     list: check(list) as Snapshot['list'],
     outCounts,
     aliases: check(aliases) as Snapshot['aliases'],
+    // Las recetas no frenan el resto: si la migración de la Fase 5 todavía no se aplicó, la app anda igual
+    recipes: (recipes.error ? [] : (recipes.data as Recipe[])).map((r) => ({
+      ...r,
+      ingredients: [...(r.ingredients ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    })),
+    feedback: feedback.error ? [] : (feedback.data as RecipeFeedback[]),
   };
 }
 
@@ -218,6 +235,26 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
           p_id: a.id,
         }),
       );
+      return;
+    }
+    case 'save_recipe': {
+      const { ingredients, created_at: _c, updated_at: _u, ...recipe } = op.recipe;
+      check(
+        await supabase.rpc('save_recipe', {
+          p_recipe: recipe,
+          p_ingredients: ingredients.map(({ recipe_id: _r, household_id: _h, ...i }) => i),
+        }),
+      );
+      return;
+    }
+    case 'delete_recipe':
+      check(await supabase.from('recipes').delete().eq('id', op.recipeId));
+      return;
+    case 'recipe_feedback': {
+      const res = await supabase.from('recipe_feedback').upsert(op.feedback, { onConflict: 'id', ignoreDuplicates: true });
+      // Sin la migración de la Fase 5 (catalog_key) el feedback se pierde, pero no traba la cola
+      if (res.error?.code === 'PGRST204' || res.error?.code === '42703') return;
+      check(res);
       return;
     }
     case 'set_image': {

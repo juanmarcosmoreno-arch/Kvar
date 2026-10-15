@@ -153,6 +153,30 @@ do $$ begin
   assert (select count(*) from public.products) = 3, 'los productos de Ana siguen';
   assert (select count(*) from public.product_events where user_id is null) > 0, 'eventos de Bruno anonimizados';
 end $$;
+
+-- Recetas (Fase 5): Ana guarda una receta con ingredientes; reenviarla no duplica
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select 1 as x from public.save_recipe(
+  jsonb_build_object('id', '20000000-0000-0000-0000-000000000001', 'household_id', current_setting('kvar.hh'),
+    'title', 'Tuco', 'servings', 4, 'meal_types', jsonb_build_array('cena')),
+  jsonb_build_array(
+    jsonb_build_object('name', 'fideos', 'quantity', 400, 'unit', 'g', 'sort_order', 0),
+    jsonb_build_object('name', 'leche', 'product_id', (select id from public.products where name = 'Leche'), 'sort_order', 1),
+    jsonb_build_object('name', '  ', 'sort_order', 2))) \gset ignored_
+select 1 as x from public.save_recipe(
+  jsonb_build_object('id', '20000000-0000-0000-0000-000000000001', 'household_id', current_setting('kvar.hh'),
+    'title', 'Tuco de la abuela', 'servings', 4),
+  jsonb_build_array(jsonb_build_object('name', 'fideos', 'quantity', 400, 'unit', 'g'))) \gset ignored_
+do $$ begin
+  assert (select count(*) from public.recipes) = 1, 'una receta';
+  assert (select title from public.recipes) = 'Tuco de la abuela', 'se actualiza';
+  assert (select count(*) from public.recipe_ingredients) = 1, 'ingredientes reemplazados';
+end $$;
+insert into public.recipe_feedback (household_id, catalog_key, recipe_title, action)
+values (current_setting('kvar.hh')::uuid, 'catalog:fideos-con-tuco', 'Fideos con tuco', 'cooked');
+reset role;
+
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
 
