@@ -1,0 +1,65 @@
+/**
+ * Voz en el iPhone: dictado del sistema + Apple Intelligence (plugin KvarVoice).
+ * Si Apple Intelligence no está, se interpreta con reglas en el teléfono (src/domain/voice.ts).
+ */
+import { registerPlugin, type PluginListenerHandle } from '@capacitor/core';
+import { kindFromModel, parseVoice, type VoiceAction } from '../domain/voice';
+import { isNative } from './platform';
+
+export type AIStatus = 'available' | 'notEnabled' | 'notEligible' | 'notReady' | 'unsupported';
+
+interface KvarVoicePlugin {
+  availability(): Promise<{ speech: boolean; appleIntelligence: AIStatus }>;
+  start(): Promise<void>;
+  stop(): Promise<{ text: string }>;
+  interpret(options: { text: string }): Promise<{ actions: { kind: string; product: string; quantity: number }[] }>;
+  addListener(event: 'partial', cb: (data: { text: string; final: boolean }) => void): Promise<PluginListenerHandle>;
+}
+
+const KvarVoice = registerPlugin<KvarVoicePlugin>('KvarVoice');
+
+export const canDictate = isNative;
+
+export async function voiceAvailability(): Promise<{ speech: boolean; ai: AIStatus }> {
+  if (!isNative) return { speech: false, ai: 'unsupported' };
+  try {
+    const r = await KvarVoice.availability();
+    return { speech: r.speech, ai: r.appleIntelligence };
+  } catch {
+    return { speech: false, ai: 'unsupported' };
+  }
+}
+
+export async function startDictation(onPartial: (text: string) => void): Promise<() => Promise<string>> {
+  const handle = await KvarVoice.addListener('partial', (d) => onPartial(d.text));
+  await KvarVoice.start();
+  return async () => {
+    const { text } = await KvarVoice.stop();
+    await handle.remove();
+    return text;
+  };
+}
+
+/** Frase → acciones. Apple Intelligence si está disponible; si no, reglas en el teléfono. */
+export async function interpret(text: string, ai: AIStatus): Promise<{ actions: VoiceAction[]; by: 'ai' | 'rules' }> {
+  if (isNative && ai === 'available') {
+    try {
+      const r = await KvarVoice.interpret({ text });
+      const actions = r.actions
+        .map((a) => ({ kind: kindFromModel(a.kind), product: a.product.trim(), quantity: Math.max(1, Math.round(a.quantity || 1)) }))
+        .filter((a): a is VoiceAction => a.kind !== null && a.product.length > 1);
+      if (actions.length) return { actions, by: 'ai' };
+    } catch {
+      /* si el modelo falla, se usan las reglas */
+    }
+  }
+  return { actions: parseVoice(text), by: 'rules' };
+}
+
+export const AI_HINT: Record<AIStatus, string | null> = {
+  available: null,
+  notEnabled: 'Activá Apple Intelligence en Ajustes → Apple Intelligence y Siri para que entienda mejor.',
+  notEligible: 'Este iPhone no tiene Apple Intelligence: entiendo frases simples.',
+  notReady: 'Apple Intelligence se está descargando: mientras tanto entiendo frases simples.',
+  unsupported: null,
+};

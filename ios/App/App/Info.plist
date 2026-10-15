@@ -65,6 +65,8 @@
 	<string>Stoka usa la cámara para escanear códigos de barras y sacarle foto a tus productos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Stoka puede usar una foto de tu biblioteca como imagen de un producto o para leer un ticket.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Stoka pasa a texto lo que le decís (en el teléfono) para anotar lo que compraste o se terminó.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Stoka usa el micrófono para que le digas qué compraste o qué se terminó.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>

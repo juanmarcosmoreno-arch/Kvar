@@ -6,6 +6,7 @@ import { UIContext, type AddDefaults, type ScanMode } from '../store/ui';
 import { ScanSheet } from './ScanSheet';
 import { QuantitySheet } from './QuantitySheet';
 import { ReceiptSheet } from './ReceiptSheet';
+import { VoiceSheet } from './VoiceSheet';
 import type { QuantityMode } from '../domain/quantity';
 import { DemoBar } from './DemoBar';
 import { isDemo } from '../lib/demo';
@@ -24,6 +25,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [scan, setScan] = useState<{ mode: ScanMode; productId?: string } | null>(null);
   const [quantity, setQuantityTarget] = useState<{ productId: string; mode: QuantityMode } | null>(null);
   const [receipt, setReceipt] = useState(false);
+  const [voice, setVoice] = useState(false);
 
   const ui = {
     openProduct: (id: string) => {
@@ -42,6 +44,7 @@ export function Shell({ children }: { children: ReactNode }) {
       setQuantityTarget({ productId, mode });
     },
     openReceipt: () => setReceipt(true),
+    openVoice: () => setVoice(true),
   };
 
   return (
@@ -60,6 +63,12 @@ export function Shell({ children }: { children: ReactNode }) {
             title="Se terminó algo"
             hint="Un toque y va a la lista"
             onClick={() => { setActions(false); setRanOut(true); }}
+          />
+          <BigAction
+            icon="mic"
+            title="Decíselo"
+            hint="«Compré leche», «Se terminó el aceite», «¿Hay arroz?»"
+            onClick={() => { setActions(false); setVoice(true); }}
           />
           <BigAction
             icon="barcode"
@@ -85,7 +94,6 @@ export function Shell({ children }: { children: ReactNode }) {
             hint="Solo el nombre; lo demás es opcional"
             onClick={() => { setActions(false); setAddDefaults({}); }}
           />
-          <p className="pt-1 text-center text-xs text-muted">Pronto: decíselo por voz.</p>
         </div>
       </Sheet>
 
@@ -95,6 +103,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <ScanSheet mode={scan?.mode ?? null} productId={scan?.productId} onClose={() => setScan(null)} />
       <QuantitySheet target={quantity} onClose={() => setQuantityTarget(null)} />
       <ReceiptSheet open={receipt} onClose={() => setReceipt(false)} />
+      <VoiceSheet open={voice} onClose={() => setVoice(false)} />
     </UIContext.Provider>
   );
 }

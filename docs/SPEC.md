@@ -218,7 +218,13 @@ torcida, usando la inclinación de cada pedazo) → lector de tickets → pantal
   código del súper y el texto de cada línea.
 En la web se puede pegar el texto del ticket (por ejemplo, el e-Ticket que llega por correo).
 
-**Pendiente:** voz; fotos de varios productos y líneas que no se reconocen con Claude (requiere clave de IA).
+**Voz (implementada, solo en el dispositivo):** «Decíselo» (botón + o micrófono en Inicio). El iPhone pasa la voz a
+texto (reconocimiento de voz de iOS, en el dispositivo cuando se puede) y **Apple Intelligence** (Foundation Models,
+iOS 26) la convierte en acciones: compré / se terminó / queda poco / ¿hay? / a la lista, con producto y cantidad.
+Sin Apple Intelligence se usan reglas en el teléfono (`src/domain/voice.ts`). Siempre se confirma; lo dicho distinto
+del nombre del producto se aprende como alias de voz. En la web se puede escribir la frase.
+
+**Pendiente:** fotos de varios productos y líneas que no se reconocen con Claude (requiere clave de IA).
 
 - Subida de imagen a Supabase Storage (bucket privado por hogar) → registro en `imports`.
 - Edge Function `receipt-parse` / `photo-identify` con el proveedor de `AI_PROVIDER`; resultado en `imports.result`.

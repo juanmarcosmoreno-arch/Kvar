@@ -4,6 +4,7 @@ import type { Op } from '../domain/ops';
 import { openItemFor } from '../domain/shoppingList';
 import { nextQuantity, type QuantityMode } from '../domain/quantity';
 import { planReceipt, type ReviewLine } from '../domain/receipt';
+import { voiceProductName, type ResolvedVoiceAction } from '../domain/voice';
 import { guessCategoryFromName, guessLocation } from '../domain/openFoodFacts';
 import type { Category, EventSource, Location, Product, ShoppingItem, StockStatus } from '../domain/types';
 import { STATUS_LABEL } from '../domain/types';
@@ -270,4 +271,40 @@ export function applyReceipt(review: ReviewLine[], store: string | null): { upda
     if (productId) learnAlias(productId, 'receipt', l.text);
   }
   return { updated, created: createdIds.size };
+}
+
+/** Aplica lo que se dijo por voz (ya confirmado). Devuelve cuántas acciones se aplicaron. */
+export function applyVoice(actions: ResolvedVoiceAction[]): number {
+  const view = getView();
+  if (!view) return 0;
+  let applied = 0;
+  for (const a of actions) {
+    if (!a.include || a.kind === 'ask') continue;
+    let product = a.productId ? view.products.find((p) => p.id === a.productId) ?? null : null;
+    if (!product && a.kind !== 'list') {
+      const category = guessCategoryFromName(a.product, view.categories);
+      const location = category ? guessLocation(category.name, view.locations) : null;
+      product = createProduct({
+        name: voiceProductName(a.product),
+        status: a.kind === 'bought' ? 'ok' : a.kind,
+        category_id: category?.id ?? null,
+        location_id: location?.id ?? null,
+      });
+    } else if (product) {
+      if (a.kind === 'bought') {
+        if (product.track_quantity) applyQuantity(product, 'bought', a.quantity, 'voice');
+        else markBought(product, 'voice');
+      } else if (a.kind === 'out' || a.kind === 'low') {
+        setStatus(product, a.kind, 'voice', false);
+      }
+    }
+    if (a.kind === 'list') {
+      if (product) addListItem({ productId: product.id, quantity: a.quantity > 1 ? a.quantity : null });
+      else addListItem({ name: voiceProductName(a.product), quantity: a.quantity > 1 ? a.quantity : null });
+    }
+    // Lo que se dijo distinto del nombre del producto se aprende («la yerba» → Yerba Canarias)
+    if (product && normalizeAlias(a.product) !== normalizeAlias(product.name)) learnAlias(product.id, 'voice', a.product);
+    applied++;
+  }
+  return applied;
 }

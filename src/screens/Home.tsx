@@ -45,21 +45,31 @@ export function Home() {
           <label className="relative block">
             <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
             <input
-              className="field rounded-full pl-12 pr-12"
+              className="field rounded-full pl-12 pr-[5.5rem]"
               placeholder="Buscar un producto…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               enterKeyHint="search"
               type="search"
             />
-            <button
-              type="button"
-              aria-label="Escanear un código de barras"
-              onClick={() => ui.openScan('ask')}
-              className="absolute right-1 top-1/2 flex min-h-tap min-w-tap -translate-y-1/2 items-center justify-center rounded-full text-muted"
-            >
-              <Icon name="scan" size={20} />
-            </button>
+            <span className="absolute right-1 top-1/2 flex -translate-y-1/2">
+              <button
+                type="button"
+                aria-label="Decíselo por voz"
+                onClick={ui.openVoice}
+                className="flex min-h-tap min-w-[40px] items-center justify-center rounded-full text-muted"
+              >
+                <Icon name="mic" size={20} />
+              </button>
+              <button
+                type="button"
+                aria-label="Escanear un código de barras"
+                onClick={() => ui.openScan('ask')}
+                className="flex min-h-tap min-w-[40px] items-center justify-center rounded-full text-muted"
+              >
+                <Icon name="scan" size={20} />
+              </button>
+            </span>
           </label>
 
           {q.trim() ? (
