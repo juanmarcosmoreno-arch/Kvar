@@ -243,6 +243,14 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Voz**: «Compré leche, dos paquetes de fideos y yerba», «Se terminó el aceite», «¿Hay arroz?». Reconocimiento de voz
   de iOS / Web Speech + alias; Claude solo si no se entendió.
 
+### Apple Watch (implementado)
+- Lista de compras (tocar = comprado → «Hay»), «¿Se terminó?» (un toque → «No hay» y a la lista, básicos primero)
+  y agregar a la lista dictando.
+- El iPhone le pasa al reloj, por WatchConnectivity, la dirección de Supabase, la clave pública y el código del
+  hogar (plugin `KvarWatch`). El reloj crea su propio usuario sin correo y se une al hogar como «Reloj de …»;
+  usa las mismas funciones (`purchase_list_item`, `set_product_status`) y la misma seguridad por hogar.
+- Código en `ios/StokaWatch/` (SwiftUI, watchOS 10+). El target se crea una vez en Xcode (ver README).
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

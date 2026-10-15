@@ -14,6 +14,9 @@ export const setupProblem = isDemo ? null : configProblem(rawUrl, rawKey);
 export const setupRawUrl = rawUrl ?? '';
 export const isConfigured = isDemo || setupProblem === null;
 
+/** Dirección y clave pública ya limpias (las usa también la app del Apple Watch). */
+export const supabaseConfig = { url: url ?? '', key: anonKey ?? '' };
+
 // En la app nativa la sesión va al almacenamiento de iOS (no se borra como el de WebKit).
 const nativeStorage: SupportedStorage = {
   getItem: async (key) => (await Preferences.get({ key })).value,

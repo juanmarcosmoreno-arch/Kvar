@@ -7,6 +7,7 @@ import { pendingInvite, useSession } from './lib/auth';
 import { persist } from './lib/persist';
 import { fetchMemberships, fetchMinVersion, joinHousehold } from './lib/remote';
 import { APP_VERSION } from './lib/platform';
+import { syncWatch } from './lib/watch';
 import { mustUpdate } from './domain/version';
 import { isConfigured } from './lib/supabase';
 import { applyTheme } from './lib/theme';
@@ -127,6 +128,10 @@ function HouseholdGate({ userId }: { userId: string }) {
 
 function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold: () => void }) {
   const view = useView();
+  // Apple Watch: se le pasa el hogar actual (solo si cambió)
+  useEffect(() => {
+    if (view) void syncWatch(view, userId);
+  }, [view?.household.id, view?.household.invite_code, view?.members, userId]); // eslint-disable-line react-hooks/exhaustive-deps
   const loaded = useStore((s) => s.loaded);
   const online = useStore((s) => s.online);
   if (!view) {

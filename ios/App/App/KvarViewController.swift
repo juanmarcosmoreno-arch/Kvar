@@ -7,5 +7,6 @@ class KvarViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(KvarCutoutPlugin())
         bridge?.registerPluginInstance(KvarOCRPlugin())
         bridge?.registerPluginInstance(KvarVoicePlugin())
+        bridge?.registerPluginInstance(KvarWatchPlugin())
     }
 }

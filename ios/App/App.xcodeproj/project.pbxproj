@@ -20,6 +20,7 @@
 		A1B2C3D4E5F6000000000002 /* KvarCutoutPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000001 /* KvarCutoutPlugin.swift */; };
 		A1B2C3D4E5F6000000000006 /* KvarOCRPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000005 /* KvarOCRPlugin.swift */; };
 		A1B2C3D4E5F6000000000008 /* KvarVoicePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000007 /* KvarVoicePlugin.swift */; };
+		A1B2C3D4E5F600000000000A /* KvarWatchPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000009 /* KvarWatchPlugin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		A1B2C3D4E5F6000000000001 /* KvarCutoutPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KvarCutoutPlugin.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6000000000005 /* KvarOCRPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KvarOCRPlugin.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6000000000007 /* KvarVoicePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KvarVoicePlugin.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000009 /* KvarWatchPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KvarWatchPlugin.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -77,6 +79,7 @@
 				A1B2C3D4E5F6000000000001 /* KvarCutoutPlugin.swift */,
 				A1B2C3D4E5F6000000000005 /* KvarOCRPlugin.swift */,
 				A1B2C3D4E5F6000000000007 /* KvarVoicePlugin.swift */,
+				A1B2C3D4E5F6000000000009 /* KvarWatchPlugin.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -176,6 +179,7 @@
 				A1B2C3D4E5F6000000000002 /* KvarCutoutPlugin.swift in Sources */,
 				A1B2C3D4E5F6000000000006 /* KvarOCRPlugin.swift in Sources */,
 				A1B2C3D4E5F6000000000008 /* KvarVoicePlugin.swift in Sources */,
+				A1B2C3D4E5F600000000000A /* KvarWatchPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

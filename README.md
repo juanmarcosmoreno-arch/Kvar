@@ -183,6 +183,32 @@ versiones viejas:
 `npm run icons` genera también el ícono de iOS (1024 px, sin transparencia, como exige Apple) y la pantalla de
 arranque, a partir de `public/brand/`.
 
+## App para Apple Watch
+
+En el reloj: **la lista de compras** (tocar = comprado), **«¿Se terminó?»** (un toque y va a la lista) y **agregar a
+la lista** dictando. El iPhone le pasa al reloj el hogar y su código; el reloj entra como un miembro más
+(«Reloj de Juan») y habla directo con Supabase, así funciona aunque el iPhone esté en el bolsillo.
+
+El código está en `ios/StokaWatch/`. El *target* del reloj se crea una vez en Xcode:
+
+1. **File → New → Target…** → pestaña **watchOS** → **App** → Next.
+   - Product Name: `StokaWatch`. Interface: SwiftUI. Language: Swift.
+   - **Embed in Companion Application** (o «Watch App for Existing iOS App»): **App**.
+   - Finish. Si pregunta «Activate scheme?», **Activate**.
+2. En la Terminal, dentro de `~/kvar` (si Xcode creó la carpeta con otro nombre, usá ese):
+   ```bash
+   cd "ios/App/StokaWatch Watch App"
+   rm -f ContentView.swift *App.swift
+   cp ../../StokaWatch/*.swift .
+   cd ~/kvar
+   ```
+   Si los archivos no aparecen en Xcode dentro de la carpeta del reloj: clic derecho en la carpeta →
+   **Add Files to "App"…** → elegilos → target **StokaWatch Watch App**.
+3. Ícono: en esa carpeta, **Assets → AppIcon**, arrastrá `ios/StokaWatch/AppIcon-1024.png`.
+4. Target **StokaWatch Watch App** → **Signing & Capabilities** → el mismo **Team**.
+5. Abrí Stoka en el iPhone (así le pasa el hogar al reloj). Después, arriba, elegí el esquema
+   **StokaWatch Watch App** y tu Apple Watch, y ▶︎.
+
 ## Demo sin servidor
 
 `npm run build:demo` arma una versión de prueba que funciona sola, sin Supabase ni cuentas: un hogar de ejemplo,
