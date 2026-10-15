@@ -45,6 +45,16 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Foco visible solo con teclado, sobrio */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid rgb(var(--primary) / 0.5);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
 /* Evita el zoom de iOS al enfocar inputs (16px mínimo) */
 input,
 select,

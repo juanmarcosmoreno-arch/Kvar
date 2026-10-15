@@ -173,6 +173,7 @@ const TABLE_KEY = {
   shopping_list_items: 'list',
   locations: 'locations',
   categories: 'categories',
+  product_aliases: 'aliases',
 } as const;
 
 function subscribeRealtime(hh: string) {
@@ -206,13 +207,13 @@ function subscribeRealtime(hh: string) {
 }
 
 function applyRemote(
-  key: 'products' | 'list' | 'locations' | 'categories',
+  key: 'products' | 'list' | 'locations' | 'categories' | 'aliases',
   event: 'INSERT' | 'UPDATE' | 'DELETE',
   row: Row,
 ) {
   const s = state.server;
   if (!s || !row?.id) return;
-  const arr = s[key] as unknown as Row[];
+  const arr = (s[key] ?? []) as unknown as Row[];
   const prev = arr.find((r) => r.id === row.id);
   let next: Row[];
   if (event === 'DELETE') {

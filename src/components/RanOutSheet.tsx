@@ -3,6 +3,7 @@ import { searchProducts } from '../domain/aliases';
 import { frequentProducts } from '../domain/status';
 import { createProduct, setStatus } from '../store/actions';
 import { useView } from '../store/store';
+import { useUI } from '../store/ui';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
@@ -12,6 +13,7 @@ import { Sheet } from './Sheet';
 export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const view = useView();
   const [q, setQ] = useState('');
+  const ui = useUI();
   if (!view) return null;
   const catName = new Map(view.categories.map((c) => [c.id, c.name]));
   const results = q.trim() ? searchProducts(q, view.products).slice(0, 12) : frequentProducts(view.products, view.outCounts, 12);
@@ -28,6 +30,9 @@ export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => v
           <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
           <input className="field pl-12" placeholder="Buscá un producto…" value={q} onChange={(e) => setQ(e.target.value)} enterKeyHint="search" />
         </label>
+        <button className="btn-ghost w-full" onClick={() => { close(); ui.openScan('out'); }}>
+          <Icon name="barcode" size={20} /> Escaneá el envase vacío
+        </button>
         {!q && results.length > 0 && <p className="text-sm text-muted">Los que más se terminan</p>}
         <div className="grid grid-cols-2 gap-2">
           {results.map((p) => (

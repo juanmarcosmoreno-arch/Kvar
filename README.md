@@ -9,7 +9,8 @@ y, más adelante, sugiere qué cocinar con lo que hay. Es una PWA para instalar 
 una mano y con el menor esfuerzo posible.
 
 - 📄 Especificación completa y fases: [`docs/SPEC.md`](docs/SPEC.md)
-- ✅ Estado: **Fase 1** (auth, hogar compartido, estados, lista automática, tiempo real, offline)
+- ✅ Estado: **Fase 1** (auth, hogar compartido, estados, lista automática, tiempo real, offline) y **Fase 2**
+  (códigos de barras con Open Food Facts, foto del producto recortada sin fondo)
 - 📱 Versión web (PWA) y app de iPhone para el App Store, con el mismo código y la misma base
 
 ---
@@ -50,9 +51,12 @@ La anon key es pública por diseño: lo que protege los datos es Row Level Secur
 `service_role` key ni claves de IA en variables `VITE_`.
 
 ### 3. Crear el esquema
-Opción A — **SQL Editor** (lo más simple): pegá el contenido de
-[`supabase/migrations/20261015000000_initial_schema.sql`](supabase/migrations/20261015000000_initial_schema.sql) y
-ejecutalo.
+Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden**, el contenido de cada archivo de
+`supabase/migrations/`:
+1. [`20261015000000_initial_schema.sql`](supabase/migrations/20261015000000_initial_schema.sql)
+2. [`20261016000000_fase2_codigos_y_fotos.sql`](supabase/migrations/20261016000000_fase2_codigos_y_fotos.sql)
+
+Cuando aparezcan migraciones nuevas (fases siguientes), se corre solo la nueva.
 
 Opción B — **Supabase CLI**:
 
@@ -63,10 +67,15 @@ npx supabase link --project-ref <tu-ref>
 npx supabase db push
 ```
 
-La migración crea todas las tablas (incluidas las de fases futuras), las políticas RLS, las funciones
+Corré **todas** las migraciones de `supabase/migrations/` en orden (con la CLI, `db push` lo hace solo).
+
+La migración inicial crea todas las tablas (incluidas las de fases futuras), las políticas RLS, las funciones
 (`create_household`, `join_household`, `set_product_status`, `purchase_list_item`, …) y agrega las tablas a la
 publicación de **Realtime**. Para verificarlo: **Database → Publications → supabase_realtime** debe listar
 `products`, `shopping_list_items`, `locations`, `categories`, `households` y `household_members`.
+
+Las fotos de productos van al bucket privado **product-images**, que crean las migraciones (Storage → Buckets). Cada
+hogar solo puede leer y escribir su carpeta.
 
 ### 4. Ingreso con código por correo
 Kvar entra con un **código de 6 dígitos** (no con link mágico: en iPhone el link abre Safari y no la app instalada).

@@ -184,32 +184,43 @@ real, PWA offline.
 - «Qué cocino» muestra un adelanto; la búsqueda muestra el ícono de escaneo deshabilitado (Fase 2).
 - El bloque «Vence pronto» aparece solo cuando hay productos con vencimiento (se cargan desde la Fase 4).
 
-### Fase 2 — Código de barras, foto del producto y voz
-- Escaneo con cámara (ZXing `@zxing/browser`, funciona en Safari iOS con `getUserMedia`).
-- Edge Function `barcode-lookup`: consulta Open Food Facts, cachea en `barcode_cache`.
-- Código desconocido → hoja mínima (nombre, categoría, lugar) una sola vez → alias `barcode` en `product_aliases`.
-- Escanear algo que ya existe → propone «¿Se terminó?» / «¿Compraste?».
-- **Foto del producto con recorte sin fondo:**
-  - Cámara con `<input type="file" accept="image/*" capture="environment">` (funciona en la PWA de iOS).
-  - En la **app de iPhone**: recorte con Vision de Apple (el mismo «levantar sujeto» de Fotos), en el dispositivo,
-    gratis y con la mejor calidad.
-  - En la **web**: recorte en el navegador con un modelo de segmentación en WebAssembly (p. ej. `@imgly/background-removal`):
-    no necesita claves, no manda la foto a terceros y funciona offline una vez descargado el modelo (se descarga la
-    primera vez que se usa, no al instalar la app).
-  - Si el dispositivo no puede (memoria o navegador viejo): Edge Function `cutout` con el proveedor configurado en
-    `IMAGE_CUTOUT_PROVIDER`.
-  - Se ajusta al contorno del sujeto, se reduce a 512 px y se guarda como PNG/WebP con transparencia en el bucket
-    privado `product-images/<household_id>/<product_id>.png` (columna `products.image_path`, ya creada). Sin conexión,
-    la foto queda en la cola y se sube al reconectar.
-  - La misma foto sirve después (Fase 3) para que la IA proponga nombre y categoría.
-- Voz: Web Speech API donde exista; si no, grabación → Edge Function `voice-parse` (transcripción + interpretación con
-  IA) → lista de acciones propuestas a confirmar. Alias `voice`.
+### Fase 2 — Código de barras y foto del producto (implementada)
+- **Escanear** (botón + → «Escanear», o el ícono en la búsqueda de Inicio): cámara con ZXing, funciona en Safari, en
+  la PWA y en la app. Si no lee, se puede escribir el número.
+  - Código conocido → muestra el producto con dos botones grandes: **Se terminó** / **Compré**.
+  - Código desconocido → se busca en **Open Food Facts** (gratis, directo desde la app, sin servidor). Se propone un
+    nombre útil («Oro» de Gallo → «Arroz Gallo Oro»), categoría y lugar. Si ya tenés un producto parecido («Arroz»),
+    «¿Es alguno de estos?» vincula el código a ese producto. Se confirma **una sola vez**.
+  - Sin conexión o si OFF no lo conoce → el usuario le pone nombre una vez.
+- **Envase vacío**: desde «¿Se terminó algo?» → «Escaneá el envase vacío» → «No hay» directo.
+- **Volví del súper**: escaneo continuo; cada código conocido pasa a «Hay» (si estaba en la lista se marca comprado).
+- **Vincular código** desde el detalle de un producto (varios códigos por producto: distintas marcas).
+- Los códigos aprendidos se guardan por hogar (`product_aliases`, `learn_alias()`), funcionan offline y le llegan
+  al otro miembro en tiempo real.
+- **Foto del producto**: «Sacale una foto» en el detalle o en el alta.
+  - App de iPhone con iOS 17+: recorte sin fondo con Vision de Apple, en el dispositivo (plugin `KvarCutout`).
+  - Web o iOS anterior: recorte cuadrado (sin quitar el fondo).
+  - Se guarda en el teléfono (se ve al instante, también offline) y se sube al bucket privado `product-images` al
+    sincronizar. Cada foto nueva tiene otro nombre de archivo; la anterior se borra.
+- La **voz** pasó a la Fase 3, junto con la IA.
 
-### Fase 3 — Ticket y fotos con IA
+### Fase 3 — Ticket, fotos con IA y voz
 - Subida de imagen a Supabase Storage (bucket privado por hogar) → registro en `imports`.
 - Edge Function `receipt-parse` / `photo-identify` con el proveedor de `AI_PROVIDER`; resultado en `imports.result`.
 - Pantalla de revisión: «Encontré 14 productos, ¿confirmás?», corregir / descartar líneas, crear «sin identificar».
 - Al confirmar: se aprenden alias `receipt` / `photo` y se marcan como comprados (eventos con `source = receipt|photo`).
+- **Lector de tickets sin IA ya implementado** (`src/domain/receipt.ts`, probado con un ticket real de Macromercado):
+  - Formato e-Ticket: `CÓDIGO DESCRIPCIÓN CANTIDAD PRECIO MONTO[IVA]`.
+  - El **código interno del súper** se aprende como alias (`macromercado 168953` → Leche): es más confiable que el texto.
+  - Packs («1LT X 4» → 8 unidades si se compraron 2), productos por peso (9,686 kg de pollo), ofertas («OF.»),
+    abreviaturas («GALL.», «S/G», «DESOD.»), bolsas descartadas.
+  - **Control de lectura**: la suma de las líneas más el redondeo tiene que dar el total; si no, se avisa que el OCR leyó
+    mal alguna línea.
+  - El emparejamiento mira las primeras palabras: «Galletitas el trigal con leche» no es Leche; «Cefa azúcar» sí es Azúcar.
+  - Flujo: foto → OCR (Vision en iPhone; Claude en la web) → este lector → solo las líneas que no se reconocen van a
+    Claude → pantalla de revisión.
+- **Voz**: «Compré leche, dos paquetes de fideos y yerba», «Se terminó el aceite», «¿Hay arroz?». Reconocimiento de voz
+  de iOS / Web Speech + alias; Claude solo si no se entendió.
 
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».

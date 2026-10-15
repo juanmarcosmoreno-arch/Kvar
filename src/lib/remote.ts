@@ -1,10 +1,11 @@
 /** Todo lo que habla con Supabase: lectura del hogar y envío de operaciones. */
 import type { Op } from '../domain/ops';
 import type { Household, Member, Snapshot } from '../domain/types';
+import { removeImage, UploadError, uploadImage } from './images';
 import { supabase } from './supabase';
 
 const PRODUCT_COLS =
-  'id,household_id,name,category_id,location_id,status,track_quantity,quantity,low_threshold,unit,is_staple,unidentified,expires_on,image_url,notes,status_changed_at,created_at,updated_at';
+  'id,household_id,name,category_id,location_id,status,track_quantity,quantity,low_threshold,unit,is_staple,unidentified,expires_on,image_url,image_path,brand,notes,status_changed_at,created_at,updated_at';
 const ITEM_COLS = 'id,household_id,product_id,name,quantity,note,reason,checked_at,checked_by,created_at';
 
 export class PermanentError extends Error {}
@@ -34,7 +35,7 @@ export async function fetchMemberships(userId: string): Promise<(Member & { hous
 export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
   const eventsSince = new Date(Date.now() - 120 * 86_400_000).toISOString();
-  const [household, members, locations, categories, products, list, outs] = await Promise.all([
+  const [household, members, locations, categories, products, list, outs, aliases] = await Promise.all([
     supabase.from('households').select('id,name,invite_code,list_on_low,created_at').eq('id', householdId).single(),
     supabase.from('household_members').select('*').eq('household_id', householdId),
     supabase.from('locations').select('id,household_id,name,icon,sort_order').eq('household_id', householdId).order('sort_order'),
@@ -52,6 +53,10 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
       .eq('to_status', 'out')
       .gt('created_at', eventsSince)
       .limit(3000),
+    supabase
+      .from('product_aliases')
+      .select('id,household_id,product_id,kind,alias,normalized,hits')
+      .eq('household_id', householdId),
   ]);
   const outCounts: Record<string, number> = {};
   for (const e of check(outs) as { product_id: string | null }[]) {
@@ -65,6 +70,7 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
     products: check(products) as Snapshot['products'],
     list: check(list) as Snapshot['list'],
     outCounts,
+    aliases: check(aliases) as Snapshot['aliases'],
   };
 }
 
@@ -117,6 +123,7 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
             unidentified: p.unidentified,
             expires_on: p.expires_on,
             image_url: p.image_url,
+            brand: p.brand ?? null,
             notes: p.notes,
             status_changed_at: p.status_changed_at,
           },
@@ -183,6 +190,31 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
     case 'update_household':
       check(await supabase.from('households').update(op.patch).eq('id', householdId));
       return;
+    case 'learn_alias': {
+      const a = op.alias;
+      check(
+        await supabase.rpc('learn_alias', {
+          p_household_id: a.household_id,
+          p_product_id: a.product_id,
+          p_kind: a.kind,
+          p_alias: a.alias,
+          p_normalized: a.normalized,
+          p_id: a.id,
+        }),
+      );
+      return;
+    }
+    case 'set_image': {
+      try {
+        if (!(await uploadImage(op.path))) return; // la foto local ya no está: nada que subir
+      } catch (e) {
+        if (e instanceof UploadError && e.status && e.status >= 400 && e.status < 500) throw new PermanentError(e.message);
+        throw e;
+      }
+      check(await supabase.from('products').update({ image_path: op.path }).eq('id', op.productId));
+      if (op.previousPath) await removeImage(op.previousPath).catch(() => {});
+      return;
+    }
   }
 }
 

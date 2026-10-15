@@ -76,6 +76,22 @@ do $$ begin
   assert (select status from public.products where name = 'Pañales') = 'low', '2 <= 3 queda poco';
 end $$;
 
+-- Fase 2: aprender un código de barras
+select 1 as x from public.learn_alias(current_setting('kvar.hh')::uuid,
+  (select id from public.products where name = 'Leche'), 'barcode', '7730123456789', '7730123456789') \gset ignored_
+select 1 as x from public.learn_alias(current_setting('kvar.hh')::uuid,
+  (select id from public.products where name = 'Leche'), 'barcode', '7730123456789', '7730123456789') \gset ignored_
+do $$ begin
+  assert (select hits from public.product_aliases where normalized = '7730123456789') = 2, 'suma usos';
+end $$;
+-- Corrección: el mismo código era del Café
+select 1 as x from public.learn_alias(current_setting('kvar.hh')::uuid,
+  (select id from public.products where name = 'Café'), 'barcode', '7730123456789', '7730123456789') \gset ignored_
+do $$ begin
+  assert (select count(*) from public.product_aliases) = 1, 'no duplica';
+  assert (select p.name from public.product_aliases a join public.products p on p.id = a.product_id) = 'Café', 'gana la corrección';
+end $$;
+
 -- Carla (otro hogar) no ve nada
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
 select 1 as x from public.create_household('Casa de Carla', 'Carla') \gset ignored_
@@ -84,6 +100,7 @@ do $$ begin
   assert (select count(*) from public.shopping_list_items) = 0, 'Carla no ve listas ajenas';
   assert (select count(*) from public.product_events) = 0, 'Carla no ve eventos ajenos';
   assert (select count(*) from public.households) = 1, 'Carla solo ve su hogar';
+  assert (select count(*) from public.product_aliases) = 0, 'Carla no ve códigos ajenos';
   assert (select count(*) from public.household_members) = 1, 'Carla solo ve sus miembros';
 end $$;
 
@@ -96,6 +113,15 @@ do $$ begin
   end;
 end $$;
 update public.products set name = 'hackeado';
+
+-- Carla no puede enseñarle códigos al hogar de Ana
+do $$ begin
+  begin
+    perform public.learn_alias(current_setting('kvar.hh')::uuid, gen_random_uuid(), 'barcode', '1', '1');
+    raise exception 'debería haber fallado';
+  exception when insufficient_privilege or foreign_key_violation then null;
+  end;
+end $$;
 
 -- Carla no puede cambiar estado de un producto ajeno vía RPC
 do $$ begin

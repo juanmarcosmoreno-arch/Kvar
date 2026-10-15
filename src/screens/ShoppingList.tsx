@@ -10,6 +10,7 @@ import { addListItem, clearChecked, purchaseItem, removeItem, unpurchaseItem } f
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { EmptyCard } from './Home';
+import { useUI } from '../store/ui';
 
 const REASON_LABEL: Record<ShoppingItem['reason'], string | null> = {
   out: 'No hay',
@@ -24,6 +25,7 @@ const REASON_LABEL: Record<ShoppingItem['reason'], string | null> = {
 export function ShoppingList() {
   const view = useView()!;
   const [text, setText] = useState('');
+  const ui = useUI();
   const byId = new Map(view.products.map((p) => [p.id, p]));
   const groups = groupListByCategory(view.list, view.products, view.categories);
   const checked = recentlyChecked(view.list, 24 * 3_600_000);
@@ -54,6 +56,11 @@ export function ShoppingList() {
       <Header title="Lista de compras" />
       <div className="space-y-6 px-5 pt-1">
         <SyncBadge />
+        {groups.length > 0 && (
+          <button className="btn-ghost w-full" onClick={() => ui.openScan('bought')}>
+            <Icon name="barcode" size={20} /> Volví del súper: escaneá lo que compraste
+          </button>
+        )}
         <form onSubmit={add} className="space-y-2">
           <div className="flex gap-2">
             <input

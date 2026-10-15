@@ -1,8 +1,11 @@
 /** Acciones de alto nivel que usan las pantallas. Todas funcionan sin conexión. */
+import { normalizeAlias, normalizeBarcode, type AliasKind } from '../domain/aliases';
 import type { Op } from '../domain/ops';
+import { openItemFor } from '../domain/shoppingList';
 import type { Category, EventSource, Location, Product, ShoppingItem, StockStatus } from '../domain/types';
 import { STATUS_LABEL } from '../domain/types';
 import { nowIso, uuid } from '../lib/id';
+import { imagePath, imageStore } from '../lib/images';
 import { dispatch, getView } from './store';
 import { toast } from './toast';
 
@@ -36,6 +39,8 @@ export interface NewProduct {
   quantity?: number | null;
   low_threshold?: number;
   unidentified?: boolean;
+  brand?: string | null;
+  image_url?: string | null;
 }
 
 export function createProduct(input: NewProduct): Product | null {
@@ -56,7 +61,8 @@ export function createProduct(input: NewProduct): Product | null {
     is_staple: input.is_staple ?? false,
     unidentified: input.unidentified ?? false,
     expires_on: null,
-    image_url: null,
+    image_url: input.image_url ?? null,
+    brand: input.brand ?? null,
     notes: null,
     status_changed_at: at,
     created_at: at,
@@ -165,4 +171,38 @@ export function moveCategory(id: string, dir: -1 | 1) {
 
 export function updateHousehold(patch: { name?: string; list_on_low?: boolean }) {
   dispatch({ kind: 'update_household', ...base(), patch });
+}
+
+/** Aprende una equivalencia (código de barras, texto de ticket…) para un producto. */
+export function learnAlias(productId: string, kind: AliasKind, text: string) {
+  const view = getView();
+  if (!view) return;
+  const normalized = kind === 'barcode' ? normalizeBarcode(text) : normalizeAlias(text);
+  dispatch({
+    kind: 'learn_alias',
+    ...base(),
+    alias: { id: uuid(), household_id: view.household.id, product_id: productId, kind, alias: text, normalized, hits: 1 },
+  });
+}
+
+export const learnBarcode = (productId: string, code: string) => learnAlias(productId, 'barcode', code);
+
+/** «Compré»: si estaba en la lista se marca comprado; si lleva conteo suma uno; si no, pasa a Hay. */
+export function markBought(product: Product, source: EventSource = 'barcode') {
+  const view = getView();
+  const item = view ? openItemFor(view.list, product.id) : undefined;
+  if (item) {
+    purchaseItem(item);
+  } else if (product.track_quantity) {
+    dispatch({ kind: 'set_status', ...base(), productId: product.id, quantity: (product.quantity ?? 0) + 1, source });
+  } else if (product.status !== 'ok') {
+    dispatch({ kind: 'set_status', ...base(), productId: product.id, status: 'ok', source });
+  }
+}
+
+/** Guarda la foto en el teléfono (se ve al instante) y la encola para subirla. */
+export async function setProductPhoto(product: Pick<Product, 'id' | 'household_id' | 'image_path'>, blob: Blob) {
+  const path = imagePath(product.household_id, product.id, blob.type);
+  await imageStore.put(path, blob);
+  dispatch({ kind: 'set_image', ...base(), productId: product.id, path, previousPath: product.image_path ?? null });
 }

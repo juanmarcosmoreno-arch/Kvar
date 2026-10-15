@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { openCount } from '../domain/shoppingList';
 import { useView } from '../store/store';
-import { UIContext, type AddDefaults } from '../store/ui';
+import { UIContext, type AddDefaults, type ScanMode } from '../store/ui';
+import { ScanSheet } from './ScanSheet';
 import { AddProductSheet } from './AddProductSheet';
 import { Icon, type IconName } from './Icon';
 import { ProductSheet } from './ProductSheet';
@@ -15,6 +16,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [addDefaults, setAddDefaults] = useState<AddDefaults | null>(null);
   const [ranOut, setRanOut] = useState(false);
   const [actions, setActions] = useState(false);
+  const [scan, setScan] = useState<{ mode: ScanMode; productId?: string } | null>(null);
 
   const ui = {
     openProduct: (id: string) => {
@@ -23,6 +25,11 @@ export function Shell({ children }: { children: ReactNode }) {
     },
     openAdd: (d: AddDefaults = {}) => setAddDefaults(d),
     openRanOut: () => setRanOut(true),
+    openScan: (mode: ScanMode, productId?: string) => {
+      setRanOut(false);
+      setProductId(null);
+      setScan({ mode, productId });
+    },
   };
 
   return (
@@ -42,18 +49,31 @@ export function Shell({ children }: { children: ReactNode }) {
             onClick={() => { setActions(false); setRanOut(true); }}
           />
           <BigAction
+            icon="barcode"
+            title="Escanear"
+            hint="Se terminó o lo compraste: elegís con un toque"
+            onClick={() => { setActions(false); ui.openScan('ask'); }}
+          />
+          <BigAction
+            icon="cart"
+            title="Volví del súper"
+            hint="Escaneá lo que compraste y pasa a «Hay»"
+            onClick={() => { setActions(false); ui.openScan('bought'); }}
+          />
+          <BigAction
             icon="plus"
             title="Agregar producto"
             hint="Solo el nombre; lo demás es opcional"
             onClick={() => { setActions(false); setAddDefaults({}); }}
           />
-          <p className="pt-1 text-center text-xs text-muted">Pronto: escanear códigos, foto del ticket y voz.</p>
+          <p className="pt-1 text-center text-xs text-muted">Pronto: foto del ticket y voz.</p>
         </div>
       </Sheet>
 
       <RanOutSheet open={ranOut} onClose={() => setRanOut(false)} />
       <AddProductSheet defaults={addDefaults} onClose={() => setAddDefaults(null)} onOpenExisting={ui.openProduct} />
       <ProductSheet productId={productId} onClose={() => setProductId(null)} />
+      <ScanSheet mode={scan?.mode ?? null} productId={scan?.productId} onClose={() => setScan(null)} />
     </UIContext.Provider>
   );
 }

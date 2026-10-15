@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { openItemFor } from '../domain/shoppingList';
 import type { Product } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
-import { addListItem, deleteProduct, setQuantity, setStatus, updateProduct } from '../store/actions';
+import { addListItem, deleteProduct, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
+import { useUI } from '../store/ui';
+import { isNative } from '../lib/platform';
+import { PhotoButton } from './PhotoButton';
+import { ProductThumb } from './ProductThumb';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { ChipPicker } from './ChipPicker';
@@ -27,7 +31,10 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
   const [name, setName] = useState(product.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => setName(product.name), [product.name]);
+  const ui = useUI();
   const inList = Boolean(openItemFor(view.list, product.id));
+  const barcodes = (view.aliases ?? []).filter((a) => a.product_id === product.id && a.kind === 'barcode');
+  const categoryName = view.categories.find((c) => c.id === product.category_id)?.name;
   const locations = [...view.locations].sort((a, b) => a.sort_order - b.sort_order);
   const categories = [...view.categories].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -39,6 +46,27 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
 
   return (
     <div className="space-y-6 pb-4">
+      <div className="flex items-center gap-4">
+        <ProductThumb product={product} categoryName={categoryName} size="lg" />
+        <div className="flex-1 space-y-2">
+          <PhotoButton
+            label={product.image_path ? 'Cambiar foto' : 'Sacale una foto'}
+            onPhoto={(blob, cutout) => {
+              void setProductPhoto(product, blob);
+              if (!cutout) {
+                toast(isNative
+                  ? 'No pude separar el producto del fondo: guardé la foto entera.'
+                  : 'Guardé la foto. El recorte sin fondo está en la app de iPhone.');
+              }
+            }}
+          />
+          <button type="button" className="btn-ghost w-full" onClick={() => { onClose(); ui.openScan('link', product.id); }}>
+            <Icon name="barcode" size={20} />
+            {barcodes.length ? `${barcodes.length === 1 ? '1 código' : `${barcodes.length} códigos`} · vincular otro` : 'Vincular código'}
+          </button>
+        </div>
+      </div>
+
       <StatusPicker value={product.status} onChange={(s) => setStatus(product, s, 'manual', false)} />
 
       {product.track_quantity && (

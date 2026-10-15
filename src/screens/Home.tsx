@@ -52,9 +52,14 @@ export function Home() {
               enterKeyHint="search"
               type="search"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted/50" title="Escanear: próximamente">
+            <button
+              type="button"
+              aria-label="Escanear un código de barras"
+              onClick={() => ui.openScan('ask')}
+              className="absolute right-1 top-1/2 flex min-h-tap min-w-tap -translate-y-1/2 items-center justify-center rounded-full text-muted"
+            >
               <Icon name="scan" size={20} />
-            </span>
+            </button>
           </label>
 
           {q.trim() ? (
