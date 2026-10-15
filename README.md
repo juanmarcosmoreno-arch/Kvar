@@ -199,11 +199,13 @@ El código está en `ios/StokaWatch/`. El *target* del reloj se crea una vez en 
    ```bash
    cd "ios/App/StokaWatch Watch App"
    rm -f ContentView.swift *App.swift
-   cp ../../StokaWatch/*.swift .
+   cp ../../StokaWatch/*.swift ../../StokaWatch/Intro/*.jpg .
    cd ~/kvar
    ```
    Si los archivos no aparecen en Xcode dentro de la carpeta del reloj: clic derecho en la carpeta →
    **Add Files to "App"…** → elegilos → target **StokaWatch Watch App**.
+   Los `stoka-intro-NN.jpg` son la bienvenida animada del reloj (si faltan, el reloj arranca igual, sin animación).
+   ¿Ya habías creado el target? Alcanza con repetir el `cp` de arriba para traer `IntroView.swift` y los cuadros.
 3. Ícono: en esa carpeta, **Assets → AppIcon**, arrastrá `ios/StokaWatch/AppIcon-1024.png`.
 4. Target **StokaWatch Watch App** → **Signing & Capabilities** → el mismo **Team**.
 5. Abrí Stoka en el iPhone (así le pasa el hogar al reloj). Después, arriba, elegí el esquema

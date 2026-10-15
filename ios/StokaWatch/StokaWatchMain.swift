@@ -4,12 +4,19 @@ import SwiftUI
 @main
 struct StokaWatchMain: App {
     @StateObject private var store = WatchStore()
+    @AppStorage("introVisto") private var introSeen = false
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(store)
-                .tint(Color(red: 0.36, green: 0.73, blue: 0.48))
+            ZStack {
+                RootView()
+                    .environmentObject(store)
+                    .tint(Color(red: 0.36, green: 0.73, blue: 0.48))
+                if !introSeen {
+                    IntroView { introSeen = true }
+                        .transition(.opacity)
+                }
+            }
         }
     }
 }
