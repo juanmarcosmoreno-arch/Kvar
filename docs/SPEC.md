@@ -264,14 +264,11 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - Todo se calcula en el teléfono a partir de `product_events` (`src/domain/stats.ts`); el historial se guarda
   para verlo sin conexión.
 
-### Productos duplicados y «Pensar recetas»
+### Productos duplicados
 - **Unir con otro producto** (ficha del producto): dos marcas que son lo mismo o un producto cargado dos veces.
   El duplicado pasa al que queda con sus códigos, historial, lista y recetas (RPC `merge_products`); queda el
   mejor estado de los dos y, si los dos se cuentan, se suman las unidades. La ficha lista los códigos de barras y
   deja quitar uno.
-- **Pensar recetas con lo que hay** («¿Qué cocino?»): vuelve a mirar el stock, propone otras recetas parecidas y
-  confirma con cuántos productos pensó. En iPhone con Apple Intelligence inventa además 3 ideas nuevas en el
-  teléfono (plugin KvarVoice, `recipeIdeas`), que se pueden guardar como receta de la casa.
 
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».

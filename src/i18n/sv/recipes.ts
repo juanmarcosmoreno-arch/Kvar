@@ -7,14 +7,6 @@ export const recipes: Messages['recipes'] = {
   listSep: ', ',
 
   cook: {
-    think: 'Hitta recept med det som finns',
-    thinkAgain: 'Tänk igen',
-    thinking: 'Tänker med det som finns…',
-    thought: (n) => `Klart: jag utgick från ${isOne(n) ? 'den enda produkten' : `de ${n} produkterna`} som finns.`,
-    autoUpdate: 'Förslagen uppdateras av sig själva varje gång det som finns ändras.',
-    ideasTitle: 'Nya idéer med det som finns',
-    ideasHint: 'Apple Intelligence hittade på dem i din iPhone. Om du gillar en, spara den som husets recept.',
-    ideasError: 'Apple Intelligence kunde inte komma på idéer just nu. Här är de från receptsamlingen.',
     title: 'Vad ska jag laga?',
     addRecipe: 'Lägg till ett recept',
     eating: 'Vi är',

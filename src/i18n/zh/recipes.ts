@@ -6,14 +6,6 @@ export const recipes: Messages['recipes'] = {
   listSep: '、',
 
   cook: {
-    think: '用现有的东西想菜谱',
-    thinkAgain: '再想一次',
-    thinking: '正在根据现有的东西想…',
-    thought: (n) => `完成：已根据现有的 ${n} 样商品来想。`,
-    autoUpdate: '现有的东西一有变化，建议就会自动更新。',
-    ideasTitle: '用现有的东西做的新点子',
-    ideasHint: '由你 iPhone 上的 Apple Intelligence 想出来的。喜欢的话，可以存为家常菜谱。',
-    ideasError: 'Apple Intelligence 暂时想不出点子。先给你看菜谱库里的。',
     title: '今天做什么？',
     addRecipe: '添加菜谱',
     eating: '用餐',

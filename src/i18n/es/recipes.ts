@@ -6,14 +6,6 @@ export const recipes = {
   listSep: ', ',
 
   cook: {
-    think: 'Pensar recetas con lo que hay',
-    thinkAgain: 'Pensar de nuevo',
-    thinking: 'Pensando con lo que hay…',
-    thought: (n: number) => `Listo: pensé con los ${n} productos que hay.`,
-    autoUpdate: 'Las sugerencias se actualizan solas cada vez que cambia lo que hay.',
-    ideasTitle: 'Ideas nuevas con lo que hay',
-    ideasHint: 'Las inventó Apple Intelligence en tu iPhone. Si te gusta una, guardala como receta de la casa.',
-    ideasError: 'Apple Intelligence no pudo pensar ideas ahora. Te muestro las del recetario.',
     title: '¿Qué cocino?',
     addRecipe: 'Cargar una receta',
     eating: 'Comemos',

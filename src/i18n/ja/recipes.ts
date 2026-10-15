@@ -6,14 +6,6 @@ export const recipes: Messages['recipes'] = {
   listSep: '、',
 
   cook: {
-    think: '今あるものでレシピを考える',
-    thinkAgain: 'もう一度考える',
-    thinking: '今あるもので考えています…',
-    thought: (n) => `完了：今ある${n}個の商品で考えました。`,
-    autoUpdate: '在庫が変わるたびに、おすすめは自動で更新されます。',
-    ideasTitle: '今あるもので新しいアイデア',
-    ideasHint: 'iPhone の Apple Intelligence が考えました。気に入ったら、わが家のレシピとして保存しましょう。',
-    ideasError: 'Apple Intelligence が今はアイデアを考えられませんでした。レシピ集から表示します。',
     title: '何を作る？',
     addRecipe: 'レシピを追加',
     eating: '人数',

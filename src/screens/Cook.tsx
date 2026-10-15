@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { RecipeEditor } from '../components/RecipeEditor';
@@ -6,12 +6,10 @@ import { RecipeSheet } from '../components/RecipeSheet';
 import { peopleLabel, Stepper } from '../components/Stepper';
 import { recipeCatalog } from '../domain/recipeCatalog';
 import {
-  assessRecipe, capitalize, isHouseRecipe, minutesLabel, QUICK_MINUTES, suggestRecipes, type CookFilters, type Suggestion,
+  capitalize, minutesLabel, QUICK_MINUTES, suggestRecipes, type CookFilters, type Suggestion,
 } from '../domain/recipes';
 import type { MealType, Recipe, RecipeConstraint } from '../domain/types';
 import { compareText, m } from '../i18n';
-import { recipeIdeas } from '../lib/recipeAI';
-import { voiceAvailability } from '../lib/voice';
 import { addMissingToList } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -37,37 +35,6 @@ export function Cook() {
   const [open, setOpen] = useState<Recipe | null>(null);
   const [editing, setEditing] = useState<{ base: Recipe | null } | null>(null);
   const [showMore, setShowMore] = useState(false);
-  // «Pensar recetas con lo que hay»: vuelve a mirar el stock, propone otras parecidas y, con Apple Intelligence, inventa ideas nuevas
-  const [variety, setVariety] = useState(0);
-  const [thinking, setThinking] = useState(false);
-  const [thought, setThought] = useState(false);
-  const [ideas, setIdeas] = useState<Recipe[]>([]);
-  const [aiReady, setAiReady] = useState(false);
-  useEffect(() => {
-    void voiceAvailability().then((a) => setAiReady(a.ai === 'available'));
-  }, []);
-  const inStock = view.products.filter((p) => p.status !== 'out').length;
-
-  const think = async () => {
-    setThinking(true);
-    setThought(false);
-    const started = Date.now();
-    let next: Recipe[] = [];
-    if (aiReady) {
-      try {
-        next = await recipeIdeas({ products: view.products, servings, avoid: [...ideas, ...own].map((r) => r.title) });
-      } catch (e) {
-        console.warn('Ideas de Apple Intelligence', e);
-        toast(t.ideasError);
-      }
-    }
-    // Un momento visible aunque sea instantáneo: que se note que pensó
-    await new Promise((r) => setTimeout(r, Math.max(0, 700 - (Date.now() - started))));
-    setIdeas(next);
-    setVariety((v) => v + 1);
-    setThinking(false);
-    setThought(true);
-  };
 
   const own = view.recipes ?? [];
   const filters: CookFilters = {
@@ -76,9 +43,9 @@ export function Cook() {
     constraints: active.filter(isConstraint),
   };
   const groups = useMemo(
-    () => suggestRecipes([...own, ...recipeCatalog()], view.products, { servings, filters, feedback: view.feedback, variety }),
+    () => suggestRecipes([...own, ...recipeCatalog()], view.products, { servings, filters, feedback: view.feedback }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [own, view.products, view.feedback, servings, active, variety],
+    [own, view.products, view.feedback, servings, active],
   );
   const total = groups.expiring.length + groups.ready.length + groups.oneMissing.length;
 
@@ -127,27 +94,6 @@ export function Cook() {
             );
           })}
         </div>
-
-        <div className="space-y-2">
-          <button className="btn-primary w-full" onClick={() => void think()} disabled={thinking} aria-busy={thinking}>
-            <Icon name={thinking ? 'sync' : 'pot'} size={20} className={thinking ? 'animate-spin' : ''} />
-            {thinking ? t.thinking : thought ? t.thinkAgain : t.think}
-          </button>
-          <p className="text-center text-sm text-muted" aria-live="polite">
-            {thought && !thinking ? t.thought(inStock) : t.autoUpdate}
-          </p>
-        </div>
-
-        {ideas.length > 0 && (
-          <section className="space-y-2">
-            <h2 className="section-title flex items-center gap-2">
-              <Icon name="star" size={15} />
-              {t.ideasTitle}
-            </h2>
-            <p className="text-sm text-muted">{t.ideasHint}</p>
-            <Cards items={ideas.map((r) => assessRecipe(r, view.products, servings))} onOpen={setOpen} />
-          </section>
-        )}
 
         <Group
           title={t.expiring}
@@ -283,7 +229,7 @@ function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void
   const uses = s.lines
     .filter((l) => l.product && l.availability !== 'missing')
     .map((l) => l.product!.name);
-  const meta = [minutesLabel(recipe.total_minutes), isHouseRecipe(recipe) ? m.recipes.fromHome : null].filter(Boolean);
+  const meta = [minutesLabel(recipe.total_minutes), recipe.source !== 'catalog' ? m.recipes.fromHome : null].filter(Boolean);
   const add = (e: React.MouseEvent) => {
     e.stopPropagation();
     const n = addMissingToList(s);
