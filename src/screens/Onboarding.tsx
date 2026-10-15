@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { createHousehold, joinHousehold } from '../lib/remote';
+import { markNewHousehold } from '../store/actions';
 import { pendingInvite } from '../lib/auth';
 import { AuthLayout } from './Login';
+import { m } from '../i18n';
 
 /** Primera vez: crear un hogar o unirse a uno con un código. */
 export function Onboarding({ onReady }: { onReady: (householdId: string) => void }) {
   const [mode, setMode] = useState<'choose' | 'create' | 'join'>(pendingInvite.get() ? 'join' : 'choose');
   const [name, setName] = useState('');
-  const [home, setHome] = useState('Casa');
+  const [home, setHome] = useState(() => m.settings.onboarding.defaultHome);
   const [code, setCode] = useState(pendingInvite.get() ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,50 +22,51 @@ export function Onboarding({ onReady }: { onReady: (householdId: string) => void
       pendingInvite.clear();
       onReady(hh.id);
     } catch (e) {
-      setError(/inv[aá]lido/i.test(String(e)) ? 'Ese código no existe. Revisalo o pedí uno nuevo.' : 'No se pudo completar. ¿Tenés conexión?');
+      setError(/inv[aá]lido/i.test(String(e)) ? m.settings.onboarding.errors.badCode : m.settings.onboarding.errors.failed);
     } finally {
       setBusy(false);
     }
   };
 
+  const t = m.settings.onboarding;
   const nameField = (
-    <input className="field" placeholder="Tu nombre (ej: Juan)" value={name} onChange={(e) => setName(e.target.value)} autoComplete="given-name" />
+    <input className="field" placeholder={t.yourName} value={name} onChange={(e) => setName(e.target.value)} autoComplete="given-name" />
   );
 
   return (
     <AuthLayout>
       {mode === 'choose' && (
         <div className="space-y-3">
-          <h1 className="text-2xl font-semibold">¡Bienvenido a Stoka!</h1>
-          <p className="text-muted">Tu hogar siempre provisto. Empezá creando tu hogar o sumate al de alguien.</p>
-          <button className="btn-primary w-full" onClick={() => setMode('create')}>Crear mi hogar</button>
-          <button className="btn-ghost w-full" onClick={() => setMode('join')}>Tengo un código</button>
+          <h1 className="text-2xl font-semibold">{t.welcome}</h1>
+          <p className="text-muted">{t.intro}</p>
+          <button className="btn-primary w-full" onClick={() => setMode('create')}>{t.createMine}</button>
+          <button className="btn-ghost w-full" onClick={() => setMode('join')}>{t.haveCode}</button>
         </div>
       )}
       {mode === 'create' && (
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void run(() => createHousehold(home.trim() || 'Casa', name.trim() || null)); }}>
-          <h1 className="text-2xl font-semibold">Tu hogar</h1>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void run(async () => { const hh = await createHousehold(home.trim() || t.defaultHome, name.trim() || null); markNewHousehold(hh.id); return hh; }); }}>
+          <h1 className="text-2xl font-semibold">{t.createTitle}</h1>
           {nameField}
-          <input className="field" placeholder="Nombre del hogar" value={home} onChange={(e) => setHome(e.target.value)} />
-          <p className="text-sm text-muted">Te dejo armados los lugares (Heladera, Freezer, Alacena, Baño, Limpieza) y las categorías. Los podés cambiar después.</p>
-          <button className="btn-primary w-full" disabled={busy}>{busy ? 'Creando…' : 'Crear hogar'}</button>
-          <button type="button" className="btn w-full text-muted" onClick={() => setMode('choose')}>Volver</button>
+          <input className="field" placeholder={t.homeName} value={home} onChange={(e) => setHome(e.target.value)} />
+          <p className="text-sm text-muted">{t.seedsHint}</p>
+          <button className="btn-primary w-full" disabled={busy}>{busy ? t.creating : t.create}</button>
+          <button type="button" className="btn w-full text-muted" onClick={() => setMode('choose')}>{m.common.back}</button>
         </form>
       )}
       {mode === 'join' && (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void run(() => joinHousehold(code, name.trim() || null)); }}>
-          <h1 className="text-2xl font-semibold">Sumate a un hogar</h1>
+          <h1 className="text-2xl font-semibold">{t.joinTitle}</h1>
           {nameField}
           <input
             className="field text-center font-mono text-xl uppercase tracking-[0.3em]"
-            placeholder="CÓDIGO"
+            placeholder={t.codePlaceholder}
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
             maxLength={8}
             autoCapitalize="characters"
           />
-          <button className="btn-primary w-full" disabled={busy || code.length < 6}>{busy ? 'Uniéndote…' : 'Unirme'}</button>
-          <button type="button" className="btn w-full text-muted" onClick={() => { pendingInvite.clear(); setMode('choose'); }}>Volver</button>
+          <button className="btn-primary w-full" disabled={busy || code.length < 6}>{busy ? t.joining : t.join}</button>
+          <button type="button" className="btn w-full text-muted" onClick={() => { pendingInvite.clear(); setMode('choose'); }}>{m.common.back}</button>
         </form>
       )}
       {error && <p className="mt-4 rounded-2xl bg-out/10 p-3 text-sm text-out">{error}</p>}

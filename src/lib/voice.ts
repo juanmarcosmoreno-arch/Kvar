@@ -4,13 +4,15 @@
  */
 import { registerPlugin, type PluginListenerHandle } from '@capacitor/core';
 import { kindFromModel, parseVoice, type VoiceAction } from '../domain/voice';
+import { locale, m } from '../i18n';
 import { isNative } from './platform';
 
 export type AIStatus = 'available' | 'notEnabled' | 'notEligible' | 'notReady' | 'unsupported';
 
 interface KvarVoicePlugin {
   availability(): Promise<{ speech: boolean; appleIntelligence: AIStatus }>;
-  start(): Promise<void>;
+  /** locale: idioma del dictado (p. ej. «en-US»); el plugin puede ignorarlo y usar español */
+  start(options?: { locale: string }): Promise<void>;
   stop(): Promise<{ text: string }>;
   interpret(options: { text: string }): Promise<{ actions: { kind: string; product: string; quantity: number }[] }>;
   addListener(event: 'partial', cb: (data: { text: string; final: boolean }) => void): Promise<PluginListenerHandle>;
@@ -32,7 +34,7 @@ export async function voiceAvailability(): Promise<{ speech: boolean; ai: AIStat
 
 export async function startDictation(onPartial: (text: string) => void): Promise<() => Promise<string>> {
   const handle = await KvarVoice.addListener('partial', (d) => onPartial(d.text));
-  await KvarVoice.start();
+  await KvarVoice.start({ locale });
   return async () => {
     const { text } = await KvarVoice.stop();
     await handle.remove();
@@ -56,10 +58,7 @@ export async function interpret(text: string, ai: AIStatus): Promise<{ actions: 
   return { actions: parseVoice(text), by: 'rules' };
 }
 
-export const AI_HINT: Record<AIStatus, string | null> = {
-  available: null,
-  notEnabled: 'Activá Apple Intelligence en Ajustes → Apple Intelligence y Siri para que entienda mejor.',
-  notEligible: 'Este iPhone no tiene Apple Intelligence: entiendo frases simples.',
-  notReady: 'Apple Intelligence se está descargando: mientras tanto entiendo frases simples.',
-  unsupported: null,
-};
+/** Aviso según el estado de Apple Intelligence (null si no hay nada que decir). */
+export function aiHint(status: AIStatus): string | null {
+  return status === 'notEnabled' || status === 'notEligible' || status === 'notReady' ? m.capture.voice.aiHints[status] : null;
+}

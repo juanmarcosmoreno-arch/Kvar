@@ -10,11 +10,12 @@ import type {
   Category, EventSource, ListReason, Location, Product, Recipe, RecipeFeedback, ShoppingItem, StockStatus,
 } from '../domain/types';
 import { missingForList, type Suggestion } from '../domain/recipes';
-import { STATUS_LABEL } from '../domain/types';
 import { nowIso, uuid } from '../lib/id';
 import { imagePath, imageStore } from '../lib/images';
+import { localizedSeeds } from '../domain/seeds';
 import { dispatch, getView } from './store';
 import { toast } from './toast';
+import { m } from '../i18n';
 
 const base = () => ({ id: uuid(), at: nowIso() });
 
@@ -24,9 +25,9 @@ export function setStatus(product: Product, status: StockStatus, source: EventSo
   dispatch({ kind: 'set_status', ...base(), productId: product.id, status, source });
   if (undoable) {
     const msg =
-      status === 'out' ? `${product.name}: No hay. Lo agregué a la lista.` : `${product.name}: ${STATUS_LABEL[status]}`;
+      status === 'out' ? m.store.toasts.statusOut(product.name, m.common.status.out) : m.store.toasts.status(product.name, m.common.status[status]);
     toast(msg, {
-      label: 'Deshacer',
+      label: m.common.undo,
       run: () => dispatch({ kind: 'set_status', ...base(), productId: product.id, status: prev, source }),
     });
   }
@@ -85,7 +86,7 @@ export function updateProduct(productId: string, patch: Partial<Product>) {
 
 export function deleteProduct(product: Product) {
   dispatch({ kind: 'delete_product', ...base(), productId: product.id });
-  toast(`Borré ${product.name}.`);
+  toast(m.store.toasts.deleted(product.name));
 }
 
 export function addListItem(input: {
@@ -323,18 +324,18 @@ export function addMissingToList(s: Suggestion): number {
   const view = getView();
   if (!view) return 0;
   let added = 0;
-  for (const m of missingForList(s)) {
-    if (m.productId) {
-      const open = openItemFor(view.list, m.productId);
+  for (const x of missingForList(s)) {
+    if (x.productId) {
+      const open = openItemFor(view.list, x.productId);
       if (open) {
-        if (m.quantity && (open.quantity ?? 0) < m.quantity) setItemQuantity(open, m.quantity);
+        if (x.quantity && (open.quantity ?? 0) < x.quantity) setItemQuantity(open, x.quantity);
         continue;
       }
-      addListItem({ productId: m.productId, quantity: m.quantity, note: m.note, reason: 'recipe' });
+      addListItem({ productId: x.productId, quantity: x.quantity, note: x.note, reason: 'recipe' });
     } else {
-      const already = view.list.some((i) => !i.checked_at && !i.product_id && normalizeAlias(i.name ?? '') === normalizeAlias(m.name));
+      const already = view.list.some((i) => !i.checked_at && !i.product_id && normalizeAlias(i.name ?? '') === normalizeAlias(x.name));
       if (already) continue;
-      addListItem({ name: m.name, quantity: m.quantity, note: m.note, reason: 'recipe' });
+      addListItem({ name: x.name, quantity: x.quantity, note: x.note, reason: 'recipe' });
     }
     added++;
   }
@@ -361,7 +362,7 @@ export function recipeFeedback(recipe: Recipe, action: RecipeFeedback['action'])
 /** «No me tienta»: no se propone por unas semanas (y se aprende el tipo de plato). */
 export function dismissRecipe(recipe: Recipe) {
   recipeFeedback(recipe, 'dismissed');
-  toast(`Listo, no te propongo ${recipe.title} por un tiempo.`);
+  toast(m.store.toasts.recipeDismissed(recipe.title));
 }
 
 /**
@@ -387,5 +388,33 @@ export function saveRecipe(recipe: Recipe) {
 
 export function deleteRecipe(recipe: Recipe) {
   dispatch({ kind: 'delete_recipe', ...base(), recipeId: recipe.id });
-  toast(`Borré ${recipe.title}.`);
+  toast(m.store.toasts.deleted(recipe.title));
+}
+
+// -----------------------------------------------------------------------------
+// Hogar nuevo en otro idioma
+// -----------------------------------------------------------------------------
+const NEW_HOUSEHOLD_KEY = 'stoka:hogar-nuevo';
+
+/** Al crear un hogar: la base crea lugares y categorías en español; se traducen al abrirlo por primera vez. */
+export function markNewHousehold(householdId: string) {
+  try {
+    localStorage.setItem(NEW_HOUSEHOLD_KEY, householdId);
+  } catch {
+    /* sin almacenamiento: quedan en español, se pueden renombrar a mano */
+  }
+}
+
+export function localizeNewHousehold() {
+  const view = getView();
+  if (!view) return;
+  try {
+    if (localStorage.getItem(NEW_HOUSEHOLD_KEY) !== view.household.id) return;
+    localStorage.removeItem(NEW_HOUSEHOLD_KEY);
+  } catch {
+    return;
+  }
+  const { categories, locations } = localizedSeeds(view.categories, view.locations);
+  for (const category of categories) dispatch({ kind: 'upsert_category', ...base(), category });
+  for (const location of locations) dispatch({ kind: 'upsert_location', ...base(), location });
 }

@@ -7,21 +7,10 @@ import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
-
-const TITLE: Record<QuantityMode, string> = {
-  add: '¿Cuántos sumás?',
-  remove: '¿Cuántos usaste?',
-  set: '¿Cuántos hay?',
-  bought: '¿Cuántos compraste?',
-  list: '¿Cuántos comprar?',
-};
+import { m } from '../i18n';
 
 /** Modos que se pueden alternar desde el selector cuando se abre tocando el número. */
-const STOCK_MODES: { id: QuantityMode; label: string }[] = [
-  { id: 'add', label: 'Sumar' },
-  { id: 'remove', label: 'Restar' },
-  { id: 'set', label: 'Contar' },
-];
+const STOCK_MODES = ['add', 'remove', 'set'] as const;
 
 /**
  * Elegir una cantidad con el menor esfuerzo: tocar un número rápido ya confirma;
@@ -55,46 +44,46 @@ export function QuantitySheet({
     const boughtItem = mode === 'bought' ? item : undefined;
     applyQuantity(product, mode, value, mode === 'bought' ? 'shopping' : 'manual');
     const undo = {
-      label: 'Deshacer',
+      label: m.common.undo,
       run: () =>
         boughtItem
           ? unpurchaseItem({ ...boughtItem, quantity: value, checked_at: new Date().toISOString() })
           : setQuantity(product, prevQuantity),
     };
-    if (mode === 'list') toast(`${product.name}: comprar ${value}.`);
-    else if (tracks) toast(`${product.name}: quedan ${formatQuantity(nextQuantity(product.quantity, mode, value), product.unit)}.`, undo);
-    else toast(`${product.name}: Hay.`);
+    if (mode === 'list') toast(m.stock.quantity.toastBuy(product.name, value));
+    else if (tracks) toast(m.stock.quantity.toastLeft(product.name, formatQuantity(nextQuantity(product.quantity, mode, value), product.unit)), undo);
+    else toast(m.stock.quantity.toastOk(product.name));
     onClose();
   };
 
   const showModes = target && ['add', 'remove', 'set'].includes(target.mode);
 
   return (
-    <Sheet open={Boolean(target)} onClose={onClose} title={TITLE[mode]}>
+    <Sheet open={Boolean(target)} onClose={onClose} title={m.stock.quantity.titles[mode]}>
       <div className="space-y-5 pb-4">
         <p className="text-muted">
           {product.name}
           {tracks && mode !== 'list' && (
             <>
-              {' · '}hay {formatQuantity(product.quantity, product.unit)}
+              {' · '}{m.stock.quantity.has(formatQuantity(product.quantity, product.unit))}
             </>
           )}
         </p>
 
         {showModes && (
           <div className="grid grid-cols-3 gap-1 rounded-xl border border-line p-1" role="tablist">
-            {STOCK_MODES.map((m) => (
+            {STOCK_MODES.map((id) => (
               <button
-                key={m.id}
+                key={id}
                 role="tab"
-                aria-selected={mode === m.id}
-                className={`min-h-[40px] rounded-lg text-sm ${mode === m.id ? 'bg-primary text-on-primary' : 'text-muted'}`}
+                aria-selected={mode === id}
+                className={`min-h-[40px] rounded-lg text-sm ${mode === id ? 'bg-primary text-on-primary' : 'text-muted'}`}
                 onClick={() => {
-                  setMode(m.id);
-                  setAmount(initialAmount(m.id, product.quantity, null));
+                  setMode(id);
+                  setAmount(initialAmount(id, product.quantity, null));
                 }}
               >
-                {m.label}
+                {m.stock.quantity.modes[id]}
               </button>
             ))}
           </div>
@@ -107,7 +96,7 @@ export function QuantitySheet({
                 key={n}
                 className="min-h-[52px] rounded-xl border border-line bg-surface text-lg font-medium tabular-nums active:scale-95"
                 onClick={() => confirm(n)}
-                aria-label={`${TITLE[mode]} ${n}`}
+                aria-label={`${m.stock.quantity.titles[mode]} ${n}`}
               >
                 {mode === 'remove' ? `−${n}` : n}
               </button>
@@ -116,18 +105,18 @@ export function QuantitySheet({
         )}
 
         <div className="card flex items-center justify-between p-2">
-          <button className="btn-ghost min-w-[56px]" aria-label="Uno menos" onClick={() => setAmount((a) => clampAmount(a - 1, mode))}>
+          <button className="btn-ghost min-w-[56px]" aria-label={m.stock.quantity.oneLess} onClick={() => setAmount((a) => clampAmount(a - 1, mode))}>
             <Icon name="minus" />
           </button>
           <input
             className="w-24 bg-transparent text-center text-4xl font-semibold tabular-nums outline-none"
             inputMode="numeric"
-            aria-label="Cantidad"
+            aria-label={m.stock.quantity.amount}
             value={amount}
             onChange={(e) => setAmount(Math.min(999, Number(e.target.value.replace(/\D/g, '')) || 0))}
             onBlur={() => setAmount((a) => clampAmount(a, mode))}
           />
-          <button className="btn-ghost min-w-[56px]" aria-label="Uno más" onClick={() => setAmount((a) => clampAmount(a + 1, mode))}>
+          <button className="btn-ghost min-w-[56px]" aria-label={m.stock.quantity.oneMore} onClick={() => setAmount((a) => clampAmount(a + 1, mode))}>
             <Icon name="plus" />
           </button>
         </div>
@@ -139,7 +128,7 @@ export function QuantitySheet({
         )}
 
         <button className="btn-primary w-full" onClick={() => confirm(amount)}>
-          Listo
+          {m.common.done}
         </button>
       </div>
     </Sheet>

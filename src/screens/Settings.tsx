@@ -13,6 +13,7 @@ import { isDemo } from '../lib/demo';
 import { deleteMyAccount, regenerateInviteCode } from '../lib/remote';
 import { supabase } from '../lib/supabase';
 import { getTheme, setTheme, type Theme } from '../lib/theme';
+import { LANGUAGES, m, savedChoice, setLanguage, type LangChoice } from '../i18n';
 import {
   deleteCategory, deleteLocation, moveCategory, saveCategory, saveLocation, updateHousehold,
 } from '../store/actions';
@@ -31,19 +32,19 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
 
   const share = async () => {
     if (isDemo) {
-      toast(`En la app real esto comparte el link de invitación. Código: ${view.household.invite_code}`);
+      toast(m.settings.settings.toasts.demoShare(view.household.invite_code));
       return;
     }
-    const text = `Sumate a «${view.household.name}» en Stoka: ${link}  (código ${view.household.invite_code})`;
+    const text = m.settings.settings.inviteText(view.household.name, link, view.household.invite_code);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Stoka', text, url: link });
+        await navigator.share({ title: m.common.appName, text, url: link });
       } catch {
         /* cancelado */
       }
     } else {
       await navigator.clipboard?.writeText(text);
-      toast('Copié el link de invitación.');
+      toast(m.settings.settings.toasts.linkCopied);
     }
   };
 
@@ -51,9 +52,9 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
     try {
       await regenerateInviteCode(view.household.id);
       await sync();
-      toast('Código nuevo listo. El anterior ya no sirve.');
+      toast(m.settings.settings.toasts.newCodeReady);
     } catch {
-      toast('Necesitás conexión para cambiar el código.');
+      toast(m.settings.settings.toasts.newCodeOffline);
     }
   };
 
@@ -80,16 +81,19 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
       await supabase.auth.signOut({ scope: 'local' });
     } catch {
       setDeleting('confirm');
-      toast('No se pudo borrar la cuenta. ¿Tenés conexión?');
+      toast(m.settings.settings.toasts.deleteFailed);
     }
   };
+
+  const t = m.settings.settings;
+  const [langChoice] = useState<LangChoice>(savedChoice);
 
   return (
     <>
       <Header
-        title="Ajustes"
+        title={t.title}
         left={
-          <button className="-ml-3 flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label="Volver" onClick={() => navigate(-1)}>
+          <button className="-ml-3 flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.back} onClick={() => navigate(-1)}>
             <Icon name="back" />
           </button>
         }
@@ -97,87 +101,87 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
       <div className="space-y-8 px-5 pb-6">
         {!isNative && !isStandalone() && (
           <div className="card space-y-1 border border-lime/50 p-4">
-            <p className="font-semibold">Instalá Stoka en tu iPhone</p>
+            <p className="font-semibold">{t.install.title}</p>
             <p className="text-sm text-muted">
-              En Safari tocá <strong>Compartir</strong> <Icon name="share" size={14} className="inline" /> y después{' '}
-              <strong>Agregar a inicio</strong>. Así abre como app y funciona sin conexión.
+              {t.install.before}<strong>{t.install.share}</strong> <Icon name="share" size={14} className="inline" />{t.install.middle}
+              <strong>{t.install.addToHome}</strong>{t.install.after}
             </p>
           </div>
         )}
 
-        <Section title="Hogar">
+        <Section title={t.household.title}>
           <div className="card space-y-4 p-4">
             <input
               className="field"
               value={hhName}
               onChange={(e) => setHhName(e.target.value)}
               onBlur={() => hhName.trim() && hhName.trim() !== view.household.name && updateHousehold({ name: hhName.trim() })}
-              aria-label="Nombre del hogar"
+              aria-label={t.household.nameLabel}
             />
             <div className="rounded-2xl bg-sunken p-4 text-center">
-              <p className="text-sm text-muted">Código de invitación</p>
+              <p className="text-sm text-muted">{t.household.inviteCode}</p>
               <p className="font-mono text-3xl font-semibold tracking-[0.25em]">{view.household.invite_code}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button className="btn-primary" onClick={share}>
-                <Icon name="share" size={20} /> Invitar
+                <Icon name="share" size={20} /> {t.household.invite}
               </button>
               <button className="btn-ghost" onClick={regenerate} disabled={!online}>
-                <Icon name="sync" size={20} /> Nuevo código
+                <Icon name="sync" size={20} /> {t.household.newCode}
               </button>
             </div>
             <ul className="divide-y divide-line">
-              {view.members.map((m) => (
-                <li key={m.user_id} className="flex min-h-[48px] items-center gap-3">
+              {view.members.map((mem) => (
+                <li key={mem.user_id} className="flex min-h-[48px] items-center gap-3">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 font-semibold text-primary">
-                    {(m.display_name ?? '?').slice(0, 1).toUpperCase()}
+                    {(mem.display_name ?? '?').slice(0, 1).toUpperCase()}
                   </span>
                   <span className="flex-1">
-                    {m.display_name ?? 'Sin nombre'}
-                    {m.user_id === userId && <span className="text-muted"> (vos)</span>}
+                    {mem.display_name ?? t.household.noName}
+                    {mem.user_id === userId && <span className="text-muted">{t.household.you}</span>}
                   </span>
-                  {m.role === 'owner' && <span className="text-xs text-muted">Creó el hogar</span>}
+                  {mem.role === 'owner' && <span className="text-xs text-muted">{t.household.owner}</span>}
                 </li>
               ))}
             </ul>
           </div>
         </Section>
 
-        <Section title="Lista de compras">
+        <Section title={t.shopping.title}>
           <div className="card px-4">
             <Toggle
               checked={view.household.list_on_low}
               onChange={(v) => updateHousehold({ list_on_low: v })}
-              label="Agregar también lo que queda poco"
-              hint="Si está apagado, solo van a la lista los básicos que quedan poco y lo que no hay."
+              label={t.shopping.addLow}
+              hint={t.shopping.addLowHint}
             />
           </div>
         </Section>
 
-        <Section title="Cocina" hint="Con cuántos se come normalmente: las recetas ajustan las cantidades.">
+        <Section title={t.kitchen.title} hint={t.kitchen.hint}>
           <div className="card flex min-h-[64px] items-center justify-between gap-3 px-4">
-            <span>Personas a comer</span>
+            <span>{t.kitchen.servings}</span>
             <Stepper
               value={view.household.default_servings ?? 2}
               onChange={(n) => updateHousehold({ default_servings: n })}
-              label="Personas a comer"
+              label={t.kitchen.servings}
               unit={peopleLabel}
             />
           </div>
         </Section>
 
-        <Section title="Lugares">
+        <Section title={t.locations.title}>
           <EditableList<Location>
             items={[...view.locations].sort((a, b) => a.sort_order - b.sort_order)}
             icon={(l) => locationIcon(l.icon, l.name)}
             onRename={(l, name) => saveLocation({ ...l, name })}
             onDelete={(l) => deleteLocation(l.id)}
             onAdd={(name) => saveLocation({ name })}
-            placeholder="Nuevo lugar (ej: Despensa)"
+            placeholder={t.locations.placeholder}
           />
         </Section>
 
-        <Section title="Categorías" hint="El orden es el del recorrido del súper: así se ordena la lista.">
+        <Section title={t.categories.title} hint={t.categories.hint}>
           <EditableList<Category>
             items={[...view.categories].sort((a, b) => a.sort_order - b.sort_order)}
             icon={(c) => categoryIcon(c.name)}
@@ -185,74 +189,89 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             onDelete={(c) => deleteCategory(c.id)}
             onAdd={(name) => saveCategory({ name })}
             onMove={(c, dir) => moveCategory(c.id, dir)}
-            placeholder="Nueva categoría"
+            placeholder={t.categories.placeholder}
           />
         </Section>
 
-        <Section title="Apariencia">
-          <div className="card grid grid-cols-3 gap-1 p-1">
-            {(['system', 'light', 'dark'] as Theme[]).map((t) => (
+        <Section title={m.common.language.title} hint={m.common.language.hint}>
+          <div className="card divide-y divide-line" role="radiogroup" aria-label={m.common.language.title}>
+            {([{ code: 'auto', name: m.common.language.auto }, ...LANGUAGES] as { code: LangChoice; name: string }[]).map((l) => (
               <button
-                key={t}
-                onClick={() => { setTheme(t); setThemeState(t); }}
-                className={`min-h-tap rounded-2xl text-sm font-medium ${theme === t ? 'bg-primary text-on-primary' : 'text-muted'}`}
+                key={l.code}
+                role="radio"
+                aria-checked={langChoice === l.code}
+                onClick={() => langChoice !== l.code && setLanguage(l.code)}
+                className="flex min-h-[52px] w-full items-center justify-between gap-3 px-4 text-left"
               >
-                {t === 'system' ? 'Automático' : t === 'light' ? 'Claro' : 'Oscuro'}
+                <span className={langChoice === l.code ? 'font-medium' : ''}>{l.name}</span>
+                {langChoice === l.code && <Icon name="check" size={20} className="text-primary" />}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section title={t.appearance.title}>
+          <div className="card grid grid-cols-3 gap-1 p-1">
+            {(['system', 'light', 'dark'] as Theme[]).map((th) => (
+              <button
+                key={th}
+                onClick={() => { setTheme(th); setThemeState(th); }}
+                className={`min-h-tap rounded-2xl text-sm font-medium ${theme === th ? 'bg-primary text-on-primary' : 'text-muted'}`}
+              >
+                {t.appearance[th]}
               </button>
             ))}
           </div>
           <button className="btn-ghost mt-2 w-full" onClick={replayIntro}>
-            Ver la bienvenida de nuevo
+            {t.appearance.replayIntro}
           </button>
         </Section>
 
-        <Section title="Cuenta">
+        <Section title={t.account.title}>
           <div className="grid gap-2">
-            <button className="btn-ghost w-full" onClick={onSwitchHousehold}>Crear otro hogar o sumarme a uno</button>
+            <button className="btn-ghost w-full" onClick={onSwitchHousehold}>{t.account.switchHousehold}</button>
             {!isDemo && !confirmSignOut && (
               <button className="btn w-full text-out" onClick={() => (anonymous ? setConfirmSignOut(true) : void signOut())}>
-                Cerrar sesión
+                {t.account.signOut}
               </button>
             )}
             {confirmSignOut && (
               <div className="card space-y-3 p-4">
-                <p className="font-medium">Para volver vas a necesitar el código del hogar</p>
+                <p className="font-medium">{t.account.anonTitle}</p>
                 <p className="text-sm text-muted">
-                  Entraste sin correo. Si cerrás sesión, para volver tocás «Empezar» y te sumás con el código{' '}
-                  <strong className="font-mono text-ink">{view.household.invite_code}</strong>.
-                  {alone && ' Sos la única persona en este hogar: anotá el código antes de salir.'}
+                  {t.account.anonBefore}
+                  <strong className="font-mono text-ink">{view.household.invite_code}</strong>{t.account.anonAfter}
+                  {alone && t.account.anonAlone}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="btn-ghost" onClick={() => setConfirmSignOut(false)}>Cancelar</button>
-                  <button className="btn bg-out text-white" onClick={() => void signOut()}>Cerrar sesión</button>
+                  <button className="btn-ghost" onClick={() => setConfirmSignOut(false)}>{m.common.cancel}</button>
+                  <button className="btn bg-out text-white" onClick={() => void signOut()}>{t.account.signOut}</button>
                 </div>
               </div>
             )}
           </div>
           {deleting === 'idle' ? (
             <button className="btn w-full text-sm text-muted" onClick={() => setDeleting('confirm')}>
-              Borrar mi cuenta
+              {t.account.deleteAccount}
             </button>
           ) : (
             <div className="card space-y-3 border-out/40 p-4">
-              <p className="font-medium">¿Borrar tu cuenta para siempre?</p>
+              <p className="font-medium">{t.account.deleteTitle}</p>
               <p className="text-sm text-muted">
-                {alone
-                  ? `Sos la única persona en «${view.household.name}», así que también se borran el hogar, sus productos y su lista.`
-                  : `Salís de «${view.household.name}». El hogar y sus datos quedan para los demás miembros.`}{' '}
-                No se puede deshacer.
+                {alone ? t.account.deleteAlone(view.household.name) : t.account.deleteLeave(view.household.name)}{' '}
+                {t.account.cannotUndo}
               </p>
               <div className="grid grid-cols-2 gap-2">
-                <button className="btn-ghost" onClick={() => setDeleting('idle')} disabled={deleting === 'busy'}>Cancelar</button>
+                <button className="btn-ghost" onClick={() => setDeleting('idle')} disabled={deleting === 'busy'}>{m.common.cancel}</button>
                 <button className="btn bg-out text-white" onClick={deleteAccount} disabled={deleting === 'busy' || !online}>
-                  {deleting === 'busy' ? 'Borrando…' : 'Sí, borrar'}
+                  {deleting === 'busy' ? t.account.deleting : t.account.confirmDelete}
                 </button>
               </div>
-              {!online && <p className="text-xs text-muted">Necesitás conexión para borrar la cuenta.</p>}
+              {!online && <p className="text-xs text-muted">{t.account.deleteOffline}</p>}
             </div>
           )}
         </Section>
-        <p className="text-center text-xs text-muted">Stoka {APP_VERSION} · Tu hogar siempre provisto</p>
+        <p className="text-center text-xs text-muted">{m.common.appName} {APP_VERSION} · {m.settings.tagline}</p>
       </div>
     </>
   );
@@ -292,24 +311,24 @@ function EditableList<T extends { id: string; name: string }>({
             className="min-h-tap min-w-0 flex-1 bg-transparent px-2 outline-none"
             onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== it.name && onRename(it, e.target.value.trim())}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-            aria-label={`Nombre de ${it.name}`}
+            aria-label={m.settings.settings.list.nameOf(it.name)}
           />
           {onMove && (
             <>
-              <button className="flex min-h-tap min-w-[36px] items-center justify-center text-muted disabled:opacity-30" disabled={i === 0} onClick={() => onMove(it, -1)} aria-label="Subir">
+              <button className="flex min-h-tap min-w-[36px] items-center justify-center text-muted disabled:opacity-30" disabled={i === 0} onClick={() => onMove(it, -1)} aria-label={m.settings.settings.list.moveUp}>
                 <Icon name="up" size={18} />
               </button>
-              <button className="flex min-h-tap min-w-[36px] items-center justify-center text-muted disabled:opacity-30" disabled={i === items.length - 1} onClick={() => onMove(it, 1)} aria-label="Bajar">
+              <button className="flex min-h-tap min-w-[36px] items-center justify-center text-muted disabled:opacity-30" disabled={i === items.length - 1} onClick={() => onMove(it, 1)} aria-label={m.settings.settings.list.moveDown}>
                 <Icon name="down" size={18} />
               </button>
             </>
           )}
           {confirm === it.id ? (
             <button className="min-h-tap px-3 text-sm font-semibold text-out" onClick={() => { onDelete(it); setConfirm(null); }}>
-              ¿Borrar?
+              {m.common.confirmDelete}
             </button>
           ) : (
-            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" onClick={() => setConfirm(it.id)} aria-label={`Borrar ${it.name}`}>
+            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" onClick={() => setConfirm(it.id)} aria-label={m.settings.settings.list.deleteItem(it.name)}>
               <Icon name="trash" size={18} />
             </button>
           )}
@@ -325,7 +344,7 @@ function EditableList<T extends { id: string; name: string }>({
       >
         <Icon name="plus" size={20} className="text-muted" />
         <input className="min-h-tap flex-1 bg-transparent px-2 outline-none placeholder:text-muted" placeholder={placeholder} value={draft} onChange={(e) => setDraft(e.target.value)} />
-        {draft.trim() && <button className="min-h-tap px-3 font-semibold text-primary">Agregar</button>}
+        {draft.trim() && <button className="min-h-tap px-3 font-semibold text-primary">{m.common.add}</button>}
       </form>
     </div>
   );

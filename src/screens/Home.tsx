@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { searchProducts } from '../domain/aliases';
 import { openCount } from '../domain/shoppingList';
-import { daysUntil, expiringSoon, expiryLabel, frequentProducts, needsAttention } from '../domain/status';
+import { daysUntil, expiringSoon, frequentProducts, needsAttention } from '../domain/status';
+import { m } from '../i18n';
 import { Header } from '../components/Shell';
 import { Icon, type IconName } from '../components/Icon';
 import { ProductRow } from '../components/ProductRow';
@@ -32,7 +33,7 @@ export function Home() {
         right={
           <>
             <SyncBadge />
-            <Link to="/ajustes" aria-label="Ajustes" className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
+            <Link to="/ajustes" aria-label={m.stock.home.settings} className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
               <Icon name="gear" />
             </Link>
           </>
@@ -46,7 +47,7 @@ export function Home() {
             <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
             <input
               className="field rounded-full pl-12 pr-[5.5rem]"
-              placeholder="Buscar un producto…"
+              placeholder={m.stock.home.searchPlaceholder}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               enterKeyHint="search"
@@ -55,7 +56,7 @@ export function Home() {
             <span className="absolute right-1 top-1/2 flex -translate-y-1/2">
               <button
                 type="button"
-                aria-label="Decíselo por voz"
+                aria-label={m.stock.home.voice}
                 onClick={ui.openVoice}
                 className="flex min-h-tap min-w-[40px] items-center justify-center rounded-full text-muted"
               >
@@ -63,7 +64,7 @@ export function Home() {
               </button>
               <button
                 type="button"
-                aria-label="Escanear un código de barras"
+                aria-label={m.stock.home.scan}
                 onClick={() => ui.openScan('ask')}
                 className="flex min-h-tap min-w-[40px] items-center justify-center rounded-full text-muted"
               >
@@ -78,7 +79,7 @@ export function Home() {
                 <ProductRow key={p.id} product={p} categoryName={cat.get(p.category_id ?? '')} onOpen={() => ui.openProduct(p.id)} />
               ))}
               <button className="btn-ghost w-full" onClick={() => { ui.openAdd({ name: q }); setQ(''); }}>
-                <Icon name="plus" size={20} /> Agregar «{q.trim()}»
+                <Icon name="plus" size={20} /> {m.stock.home.addNamed(q.trim())}
               </button>
             </div>
           ) : (
@@ -88,8 +89,8 @@ export function Home() {
                 className="flex min-h-[68px] w-full items-center gap-4 bg-primary px-5 text-left text-on-primary active:opacity-90"
               >
                 <span className="flex-1">
-                  <span className="block text-lg font-medium">¿Se terminó algo?</span>
-                  <span className="block text-sm opacity-75">Tocalo y va directo a la lista</span>
+                  <span className="block text-lg font-medium">{m.stock.home.ranOutTitle}</span>
+                  <span className="block text-sm opacity-75">{m.stock.home.ranOutHint}</span>
                 </span>
                 <Icon name="chevron" />
               </button>
@@ -115,10 +116,10 @@ export function Home() {
         {!q.trim() && (
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="section-title">Para reponer</h2>
+              <h2 className="section-title">{m.stock.home.restock}</h2>
               {listCount > 0 && (
                 <Link to="/lista" className="text-sm text-primary">
-                  Ver lista ({listCount})
+                  {m.stock.home.viewList(listCount)}
                 </Link>
               )}
             </div>
@@ -131,9 +132,9 @@ export function Home() {
             ) : (
               <EmptyCard
                 icon="leaf"
-                title={view.products.length ? 'Está todo en orden' : 'Empezá agregando lo que hay'}
-                hint={view.products.length ? 'Cuando algo quede poco o se termine, aparece acá.' : 'Con el botón + cargás tus productos de a uno, solo con el nombre.'}
-                action={!view.products.length ? { label: 'Agregar producto', run: () => ui.openAdd() } : undefined}
+                title={view.products.length ? m.stock.home.allGoodTitle : m.stock.home.emptyTitle}
+                hint={view.products.length ? m.stock.home.allGoodHint : m.stock.home.emptyHint}
+                action={!view.products.length ? { label: m.stock.home.addProduct, run: () => ui.openAdd() } : undefined}
               />
             )}
           </section>
@@ -142,14 +143,14 @@ export function Home() {
         {/* Bloque 3: vence pronto (los vencimientos se cargan desde la Fase 4) */}
         {!q.trim() && expiring.length > 0 && (
           <section className="space-y-3">
-            <h2 className="section-title">Vence pronto</h2>
+            <h2 className="section-title">{m.stock.home.expiringSoon}</h2>
             <div className="space-y-2">
               {expiring.map((p) => (
                 <ProductRow
                   key={p.id}
                   product={p}
                   categoryName={cat.get(p.category_id ?? '')}
-                  subtitle={expiryLabel(daysUntil(p.expires_on!))}
+                  subtitle={m.stock.expiry(daysUntil(p.expires_on!))}
                   onOpen={() => ui.openProduct(p.id)}
                 />
               ))}

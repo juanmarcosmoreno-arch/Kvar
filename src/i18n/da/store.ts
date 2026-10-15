@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}: ${out}. Jeg har sat det på listen.`,
+    status: (product, status) => `${product}: ${status}`,
+    deleted: (name) => `Slettede ${name}.`,
+    recipeDismissed: (title) => `Okay, jeg foreslår ikke ${title} i et stykke tid.`,
+    syncRejected: 'En ændring kunne ikke gemmes. Opdateret med husstandens seneste.',
+  },
+  demo: {
+    household: 'Hjemme',
+    me: 'Dig',
+    partner: 'Sofie',
+    products: {
+      milk: 'Mælk',
+      yerba: 'Yerba mate',
+      tomato: 'Tomater',
+      pasta: 'Pasta',
+      sunflowerOil: 'Solsikkeolie',
+      diapers: 'Bleer',
+      bread: 'Brød',
+      detergent: 'Opvaskemiddel',
+      eggs: 'Æg',
+      rice: 'Ris',
+      gratedCheese: 'Revet ost',
+      coffee: 'Kaffe',
+      toiletPaper: 'Toiletpapir',
+      milanesas: 'Paneret schnitzel',
+      apples: 'Æbler',
+      dogFood: 'Hundemad',
+      onion: 'Løg',
+      potatoes: 'Kartofler',
+      crushedTomatoes: 'Hakkede tomater',
+      butter: 'Smør',
+      groundBeef: 'Hakket oksekød',
+      ham: 'Skinke',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Fødselsdagslys',
+    recipe: {
+      title: 'Mormors kødsovs',
+      steps: 'Brun kødet med løget.\nTilsæt tomaterne og et laurbærblad.\nLad det simre ved laveste varme i halvanden time.',
+      ingredients: {
+        groundBeef: 'hakket oksekød',
+        crushedTomatoes: 'hakkede tomater',
+        onion: 'løg',
+        pasta: 'pasta',
+        salt: 'salt',
+      },
+    },
+    codes: {
+      milk: 'Mælk (kendt)',
+      pasta: 'Pasta (kendt)',
+      newRice: 'Ris Gallo Oro (ny)',
+    },
+  },
+};

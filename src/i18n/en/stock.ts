@@ -1,0 +1,161 @@
+import { isOne } from '..';
+import type { Messages } from '../es';
+
+export const stock: Messages['stock'] = {
+  home: {
+    settings: 'Settings',
+    searchPlaceholder: 'Search for a product…',
+    voice: 'Tell it by voice',
+    scan: 'Scan a barcode',
+    addNamed: (name) => `Add “${name}”`,
+    ranOutTitle: 'Ran out of something?',
+    ranOutHint: 'Tap it and it goes straight to the list',
+    restock: 'To restock',
+    viewList: (n) => `View list (${n})`,
+    allGoodTitle: 'All good',
+    allGoodHint: 'When something runs low or runs out, it shows up here.',
+    emptyTitle: 'Start by adding what you have',
+    emptyHint: 'Use the + button to add your products one at a time, just by name.',
+    addProduct: 'Add product',
+    expiringSoon: 'Expiring soon',
+  },
+
+  expiry: (days) => {
+    if (days < 0) return days === -1 ? 'Expired yesterday' : `Expired ${-days} ${isOne(-days) ? 'day' : 'days'} ago`;
+    if (days === 0) return 'Expires today';
+    if (days === 1) return 'Expires tomorrow';
+    return `Expires in ${days} ${isOne(days) ? 'day' : 'days'}`;
+  },
+
+  inventory: {
+    title: 'Products',
+    addProduct: 'Add product',
+    searchPlaceholder: 'Search…',
+    filterAll: 'All',
+    filterStaple: 'Staples',
+    noMatchTitle: 'Nothing matches these filters',
+    noMatchHint: 'Try removing a filter.',
+    emptyTitle: 'No products yet',
+    emptyHint: 'Add what you have at home; all you need is the name.',
+    swipeHint: 'Swipe left for “running low”, right for “In stock”.',
+  },
+
+  list: {
+    title: 'Shopping list',
+    reasons: {
+      recipe: 'For a recipe',
+      plan: 'Weekly plan',
+      predicted: 'Probably running out',
+    },
+    boughtNowOk: (name) => `${name}: bought, now in stock.`,
+    bought: (name) => `${name}: bought.`,
+    backFromStore: 'Back from the store',
+    receipt: 'Receipt',
+    addPlaceholder: 'Add to the list…',
+    emptyTitle: 'Nothing missing',
+    emptyHint: 'When you mark something as out, it shows up here on its own.',
+    markBought: (name) => `Mark ${name} as bought`,
+    howMany: (name) => `How many ${name} to buy`,
+    remove: (name) => `Remove ${name} from the list`,
+    checkedTitle: 'Bought',
+    clear: 'Clear',
+    uncheck: (name) => `Uncheck ${name}`,
+  },
+
+  row: {
+    staple: 'Staple',
+    unidentified: 'Unidentified',
+    minusOne: (name) => `Remove one ${name} (press and hold to choose how many)`,
+    plusOne: (name) => `Add one ${name} (press and hold to choose how many)`,
+    chooseAmount: (unitPlural, name) => `Choose how many ${unitPlural} of ${name}`,
+    changeStatus: (name) => `Change status of ${name}`,
+  },
+
+  product: {
+    changePhoto: 'Change photo',
+    noCutoutNative: 'Couldn’t separate the product from the background, so I saved the whole photo.',
+    noCutoutWeb: 'Photo saved. Background removal is available in the iPhone app.',
+    anotherBarcode: 'Another barcode',
+    linkBarcode: 'Link barcode',
+    minusOne: 'Remove one',
+    plusOne: 'Add one',
+    tapForMany: 'tap to add or remove several',
+    addedToList: (name) => `Added ${name} to the list.`,
+    addToList: 'Add to list',
+    inList: 'It’s on the shopping list',
+    buyN: (n) => `Buy ${n}`,
+    howManyToBuy: 'How many to buy',
+    name: 'Name',
+    location: 'Place',
+    category: 'Category',
+    staple: 'It’s a staple',
+    stapleHint: 'I’ll let you know before it runs out: at “Running low” it already goes on the list.',
+    countUnits: 'Count units',
+    countUnitsHint: 'For diapers, cans or things in the freezer.',
+    unit: 'Unit',
+    lowAt: '“Running low” at',
+    confirmDelete: 'Yes, delete',
+    deleteProduct: 'Delete product',
+  },
+
+  add: {
+    titleNew: 'New product',
+    title: 'Add product',
+    linked: (name) => `Done: next time you scan it, it’ll be ${name}.`,
+    addedToList: (name) => `Added ${name}; it’s going on the list.`,
+    added: (name) => `Added ${name}.`,
+    foundOff: 'Found it on Open Food Facts. ',
+    unknownCode: 'I don’t know this barcode. ',
+    confirmOnce: 'Confirm it just once: next time you scan it, I’ll recognize it.',
+    namePlaceholder: 'E.g. Coffee, Milk, Diapers…',
+    isOneOfThese: 'Is it one of these?',
+    alreadyHave: 'Already have it?',
+    anotherPhoto: 'Another photo',
+    photo: 'Photo',
+    isExisting: (name) => `It’s ${name}`,
+    viewExisting: (name) => `View ${name}`,
+  },
+
+  quantity: {
+    titles: {
+      add: 'How many to add?',
+      remove: 'How many did you use?',
+      set: 'How many are there?',
+      bought: 'How many did you buy?',
+      list: 'How many to buy?',
+    },
+    modes: { add: 'Add', remove: 'Remove', set: 'Count' },
+    toastBuy: (name, n) => `${name}: buy ${n}.`,
+    toastLeft: (name, quantity) => `${name}: ${quantity} left.`,
+    toastOk: (name) => `${name}: in stock.`,
+    has: (quantity) => `${quantity} on hand`,
+    oneLess: 'One less',
+    oneMore: 'One more',
+    amount: 'Quantity',
+  },
+
+  ranOut: {
+    title: 'Ran out of something?',
+    searchPlaceholder: 'Search for a product…',
+    scanEmpty: 'Scan the empty package',
+    frequent: 'The ones that run out most',
+    alreadyInList: 'Already on the list',
+    addedOut: (name) => `${name}: out. Added it to the list.`,
+    addToList: (name) => `Add “${name}” to the list`,
+    empty: 'No products yet. Search for one to add it.',
+  },
+
+  unitPicker: {
+    other: 'Other',
+    placeholder: 'Plural, e.g. diapers, jars',
+    use: 'Use',
+  },
+
+  status: { label: 'Status' },
+
+  photo: {
+    take: 'Take a photo',
+    failed: 'Couldn’t process the photo. Try another one.',
+    cropping: 'Cropping…',
+  },
+};

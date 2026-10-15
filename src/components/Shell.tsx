@@ -16,6 +16,7 @@ import { ProductSheet } from './ProductSheet';
 import { RanOutSheet } from './RanOutSheet';
 import { Sheet } from './Sheet';
 import { ToastView } from './Toast';
+import { m } from '../i18n';
 
 export function Shell({ children }: { children: ReactNode }) {
   const [productId, setProductId] = useState<string | null>(null);
@@ -56,42 +57,42 @@ export function Shell({ children }: { children: ReactNode }) {
       <TabBar onFab={() => setActions(true)} />
       <ToastView />
 
-      <Sheet open={actions} onClose={() => setActions(false)} title="¿Qué hacemos?">
+      <Sheet open={actions} onClose={() => setActions(false)} title={m.shell.actions.title}>
         <div className="grid gap-3 pb-4">
           <BigAction
             icon="minus"
-            title="Se terminó algo"
-            hint="Un toque y va a la lista"
+            title={m.shell.actions.ranOut.title}
+            hint={m.shell.actions.ranOut.hint}
             onClick={() => { setActions(false); setRanOut(true); }}
           />
           <BigAction
             icon="mic"
-            title="Decíselo"
-            hint="«Compré leche», «Se terminó el aceite», «¿Hay arroz?»"
+            title={m.shell.actions.voice.title}
+            hint={m.shell.actions.voice.hint}
             onClick={() => { setActions(false); setVoice(true); }}
           />
           <BigAction
             icon="barcode"
-            title="Escanear"
-            hint="Se terminó o lo compraste: elegís con un toque"
+            title={m.shell.actions.scan.title}
+            hint={m.shell.actions.scan.hint}
             onClick={() => { setActions(false); ui.openScan('ask'); }}
           />
           <BigAction
             icon="cart"
-            title="Volví del súper"
-            hint="Escaneá lo que compraste y pasa a «Hay»"
+            title={m.shell.actions.bought.title}
+            hint={m.shell.actions.bought.hint(m.common.status.ok)}
             onClick={() => { setActions(false); ui.openScan('bought'); }}
           />
           <BigAction
             icon="receipt"
-            title="Foto del ticket"
-            hint="Cargo toda la compra de una vez"
+            title={m.shell.actions.receipt.title}
+            hint={m.shell.actions.receipt.hint}
             onClick={() => { setActions(false); setReceipt(true); }}
           />
           <BigAction
             icon="plus"
-            title="Agregar producto"
-            hint="Solo el nombre; lo demás es opcional"
+            title={m.shell.actions.add.title}
+            hint={m.shell.actions.add.hint}
             onClick={() => { setActions(false); setAddDefaults({}); }}
           />
         </div>
@@ -128,22 +129,22 @@ function TabBar({ onFab }: { onFab: () => void }) {
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur"
-      aria-label="Principal"
+      aria-label={m.shell.nav.label}
     >
       <div className="mx-auto grid max-w-lg grid-cols-5 items-end px-2">
-        <Tab to="/" icon="home" label="Inicio" />
-        <Tab to="/inventario" icon="box" label="Productos" />
+        <Tab to="/" icon="home" label={m.shell.nav.home} />
+        <Tab to="/inventario" icon="box" label={m.shell.nav.products} />
         <div className="flex justify-center">
           <button
             onClick={onFab}
-            aria-label="Acciones rápidas"
+            aria-label={m.shell.nav.quickActions}
             className="-mt-5 mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-fab active:scale-95"
           >
             <Icon name="plus" size={26} strokeWidth={2} />
           </button>
         </div>
-        <Tab to="/lista" icon="cart" label="Lista" badge={count} />
-        <Tab to="/cocino" icon="pot" label="Cocino" />
+        <Tab to="/lista" icon="cart" label={m.shell.nav.list} badge={count} />
+        <Tab to="/cocino" icon="pot" label={m.shell.nav.cook} />
       </div>
     </nav>
   );

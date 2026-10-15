@@ -1,25 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { resolveVoice, voiceProductName, type ResolvedVoiceAction, type VoiceKind } from '../domain/voice';
-import { STATUS_LABEL } from '../domain/types';
 import { formatQuantity } from '../domain/units';
-import { AI_HINT, canDictate, interpret, startDictation, voiceAvailability, type AIStatus } from '../lib/voice';
+import { aiHint, canDictate, interpret, startDictation, voiceAvailability, type AIStatus } from '../lib/voice';
 import { applyVoice } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { Icon, type IconName } from './Icon';
 import { Sheet } from './Sheet';
+import { m } from '../i18n';
 
 type Phase = 'idle' | 'listening' | 'thinking' | 'review';
 
-const KIND: Record<VoiceKind, { label: string; icon: IconName }> = {
-  bought: { label: 'Compraste', icon: 'cart' },
-  out: { label: 'Se terminó', icon: 'minus' },
-  low: { label: 'Queda poco', icon: 'down' },
-  list: { label: 'A la lista', icon: 'plus' },
-  ask: { label: '¿Hay?', icon: 'search' },
+const KIND_ICON: Record<VoiceKind, IconName> = {
+  bought: 'cart',
+  out: 'minus',
+  low: 'down',
+  list: 'plus',
+  ask: 'search',
 };
-
-const EXAMPLES = ['Compré leche y dos paquetes de fideos', 'Se terminó el aceite', '¿Hay arroz?'];
 
 /** «Decíselo»: hablás, Stoka entiende (Apple Intelligence) y confirmás con un toque. */
 export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -77,7 +75,17 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
       stopRef.current = await startDictation((t) => setSaid(t));
       setPhase('listening');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pude usar el micrófono.');
+      // Los errores de permiso del plugin vienen con código; el texto se muestra en el idioma de la app
+      const code = (e as { code?: string }).code;
+      setError(
+        code === 'SPEECH_DENIED'
+          ? m.capture.voice.speechDenied
+          : code === 'MIC_DENIED'
+            ? m.capture.voice.micDenied
+            : e instanceof Error && e.message
+              ? e.message
+              : m.capture.voice.micError,
+      );
     }
   };
 
@@ -92,22 +100,23 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
   const confirm = () => {
     const n = applyVoice(actions);
-    toast(n ? `Listo: ${n} ${n === 1 ? 'cambio' : 'cambios'}.` : 'No había nada para cambiar.');
+    toast(n ? m.capture.voice.applied(n) : m.capture.voice.nothingToChange);
     close();
   };
 
   const byId = new Map((view?.products ?? []).map((p) => [p.id, p]));
   const toApply = actions.filter((a) => a.include && a.kind !== 'ask').length;
+  const hint = aiHint(ai);
 
   return (
-    <Sheet open={open} onClose={close} title="Decíselo">
+    <Sheet open={open} onClose={close} title={m.capture.voice.title}>
       <div className="space-y-4 pb-4">
         {(phase === 'idle' || phase === 'listening') && (
           <>
             {canDictate && speech ? (
               <div className="flex flex-col items-center gap-3 py-2">
                 <button
-                  aria-label={phase === 'listening' ? 'Terminé de hablar' : 'Empezar a hablar'}
+                  aria-label={phase === 'listening' ? m.capture.voice.stopTalking : m.capture.voice.startTalking}
                   onClick={() => void (phase === 'listening' ? done() : listen())}
                   className={`flex h-24 w-24 items-center justify-center rounded-full text-on-primary shadow-fab transition ${
                     phase === 'listening' ? 'animate-pulse bg-out' : 'bg-primary'
@@ -116,17 +125,17 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
                   <Icon name={phase === 'listening' ? 'check' : 'mic'} size={40} />
                 </button>
                 <p className="min-h-[3rem] text-center text-muted">
-                  {phase === 'listening' ? said || 'Te escucho…' : 'Tocá y decí, por ejemplo: «Compré leche y dos paquetes de fideos».'}
+                  {phase === 'listening' ? said || m.capture.voice.listening : m.capture.voice.tapHint}
                 </p>
               </div>
             ) : (
               <p className="text-muted">
                 {canDictate
-                  ? 'El reconocimiento de voz no está disponible en este iPhone. Podés escribirlo.'
-                  : 'La voz está en la app de iPhone. Acá podés escribir la frase y la entiendo igual.'}
+                  ? m.capture.voice.noSpeech
+                  : m.capture.voice.appOnly}
               </p>
             )}
-            {AI_HINT[ai] && <p className="text-xs text-muted">{AI_HINT[ai]}</p>}
+            {hint && <p className="text-xs text-muted">{hint}</p>}
             {phase === 'idle' && (
               <form
                 className="flex gap-2"
@@ -135,15 +144,15 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
                   void understand(typed);
                 }}
               >
-                <input className="field" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="o escribilo acá" aria-label="Frase" />
-                <button className="btn-ghost shrink-0 px-4" disabled={!typed.trim()}>Listo</button>
+                <input className="field" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={m.capture.voice.typePlaceholder} aria-label={m.capture.voice.phraseLabel} />
+                <button className="btn-ghost shrink-0 px-4" disabled={!typed.trim()}>{m.common.done}</button>
               </form>
             )}
             {phase === 'idle' && !canDictate && (
               <div className="flex flex-wrap gap-2">
-                {EXAMPLES.map((ex) => (
+                {m.capture.voice.examples.map((ex) => (
                   <button key={ex} className="chip min-h-[36px] bg-surface text-muted" onClick={() => void understand(ex)}>
-                    «{ex}»
+                    {m.capture.quote(ex)}
                   </button>
                 ))}
               </div>
@@ -155,17 +164,17 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
         {phase === 'thinking' && (
           <div className="flex flex-col items-center gap-3 py-10 text-muted">
             <Icon name="sync" className="animate-spin" />
-            {ai === 'available' ? 'Entendiendo con Apple Intelligence…' : 'Entendiendo…'}
+            {ai === 'available' ? m.capture.voice.thinkingAI : m.capture.voice.thinking}
           </div>
         )}
 
         {phase === 'review' && (
           <>
             <p className="text-sm text-muted">
-              «{said}»{by === 'ai' ? ' · entendido con Apple Intelligence' : ''}
+              {m.capture.quote(said)}{by === 'ai' ? ` · ${m.capture.voice.byAI}` : ''}
             </p>
             {actions.length === 0 ? (
-              <p className="py-4 text-center text-muted">No entendí qué productos. Probá de nuevo, por ejemplo: «Se terminó la leche».</p>
+              <p className="py-4 text-center text-muted">{m.capture.voice.notUnderstood}</p>
             ) : (
               <ul className="card divide-y divide-line">
                 {actions.map((a) => {
@@ -174,27 +183,27 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
                   return (
                     <li key={a.key} className={`flex items-center gap-3 px-3 ${a.include ? '' : 'opacity-50'}`}>
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sunken text-muted">
-                        <Icon name={KIND[a.kind].icon} size={18} />
+                        <Icon name={KIND_ICON[a.kind]} size={18} />
                       </span>
                       <span className="min-h-[56px] min-w-0 flex-1 py-2">
-                        <span className="block text-xs text-muted">{KIND[a.kind].label}</span>
+                        <span className="block text-xs text-muted">{m.capture.voice.kinds[a.kind]}</span>
                         <span className="block truncate font-medium">
                           {name}
                           {a.quantity > 1 && a.kind !== 'ask' ? ` × ${a.quantity}` : ''}
-                          {!p && a.kind !== 'ask' && <span className="ml-2 rounded-full border border-line px-2 text-[11px] font-normal text-muted">nuevo</span>}
+                          {!p && a.kind !== 'ask' && <span className="ml-2 rounded-full border border-line px-2 text-[11px] font-normal text-muted">{m.capture.newBadge}</span>}
                         </span>
                         {a.kind === 'ask' && (
                           <span className="block text-sm text-muted">
                             {p
-                              ? `${STATUS_LABEL[p.status]}${p.track_quantity ? ` · ${formatQuantity(p.quantity, p.unit)}` : ''}`
-                              : 'No lo tenés cargado'}
+                              ? `${m.common.status[p.status]}${p.track_quantity ? ` · ${formatQuantity(p.quantity, p.unit)}` : ''}`
+                              : m.capture.voice.notLoaded}
                           </span>
                         )}
                       </span>
                       {a.kind !== 'ask' && (
                         <button
                           className="flex min-h-tap min-w-tap items-center justify-center"
-                          aria-label={a.include ? 'No aplicar' : 'Aplicar'}
+                          aria-label={a.include ? m.capture.voice.skip : m.capture.voice.apply}
                           onClick={() => setActions(actions.map((x) => (x.key === a.key ? { ...x, include: !x.include } : x)))}
                         >
                           <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${a.include ? 'border-primary bg-primary text-on-primary' : 'border-line'}`}>
@@ -208,9 +217,9 @@ export function VoiceSheet({ open, onClose }: { open: boolean; onClose: () => vo
               </ul>
             )}
             <div className="grid grid-cols-2 gap-2">
-              <button className="btn-ghost" onClick={reset}>Otra vez</button>
+              <button className="btn-ghost" onClick={reset}>{m.capture.voice.again}</button>
               <button className="btn-primary" disabled={!toApply} onClick={confirm}>
-                {toApply ? 'Confirmar' : 'Listo'}
+                {toApply ? m.capture.voice.confirm : m.common.done}
               </button>
             </div>
           </>

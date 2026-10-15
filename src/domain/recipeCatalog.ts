@@ -3,6 +3,7 @@
  * funcionan sin conexión y las recetas propias del hogar tienen prioridad sobre ellas.
  * Los ingredientes se escriben como los escribiría cualquiera y se interpretan con parseIngredientLine.
  */
+import { lang, m } from '../i18n';
 import { parseIngredientLine } from './recipes';
 import type { MealType, Recipe, RecipeConstraint } from './types';
 
@@ -211,10 +212,11 @@ const EPOCH = '2026-01-01T00:00:00.000Z';
 
 function toRecipe(d: Def): Recipe {
   const id = `catalog:${d.key}`;
+  const t = m.catalog; // null en español (el original)
   return {
     id,
     household_id: '',
-    title: d.title,
+    title: t?.titles[d.key] ?? d.title,
     source: 'catalog',
     source_url: null,
     servings: d.servings,
@@ -222,16 +224,23 @@ function toRecipe(d: Def): Recipe {
     meal_types: d.meals,
     constraints: d.constraints ?? [],
     tags: d.tags,
-    steps: d.steps.join('\n'),
+    steps: (t?.steps[d.key] ?? d.steps).join('\n'),
     image_url: null,
     created_at: EPOCH,
     updated_at: EPOCH,
     ingredients: d.ingredients.map((line, i) => {
       const p = parseIngredientLine(line);
       if (!p) throw new Error(`Ingrediente inválido en ${d.key}: ${line}`);
-      return { id: `${id}:${i}`, recipe_id: id, household_id: '', product_id: null, sort_order: i, ...p };
+      // Se interpreta el original en español y se traduce solo el nombre (las cantidades no cambian)
+      return { id: `${id}:${i}`, recipe_id: id, household_id: '', product_id: null, sort_order: i, ...p, name: t?.ingredients[p.name] ?? p.name };
     }),
   };
 }
 
-export const RECIPE_CATALOG: Recipe[] = DEFS.map(toRecipe);
+let built: { lang: string; list: Recipe[] } | null = null;
+
+/** El recetario en el idioma de la app (se arma la primera vez que se usa). */
+export function recipeCatalog(): Recipe[] {
+  if (built?.lang !== lang) built = { lang, list: DEFS.map(toRecipe) };
+  return built.list;
+}

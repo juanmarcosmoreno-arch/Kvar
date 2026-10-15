@@ -19,7 +19,7 @@ struct WatchConfig: Codable, Equatable {
         supabaseKey = key
         inviteCode = code
         householdId = hh
-        householdName = dict["householdName"] as? String ?? "Casa"
+        householdName = dict["householdName"] as? String ?? L10n.home
         memberName = dict["memberName"] as? String ?? ""
     }
 

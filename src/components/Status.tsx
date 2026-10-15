@@ -1,5 +1,5 @@
 import type { StockStatus } from '../domain/types';
-import { STATUS_LABEL } from '../domain/types';
+import { m } from '../i18n';
 
 export const STATUS_BG: Record<StockStatus, string> = { ok: 'bg-ok', low: 'bg-low', out: 'bg-out' };
 export const STATUS_SOFT: Record<StockStatus, string> = {
@@ -18,7 +18,7 @@ export function StatusPill({ status, className = '' }: { status: StockStatus; cl
   return (
     <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-line/80 px-2.5 py-1 text-[13px] ${STATUS_TEXT[status]} ${className}`}>
       <StatusDot status={status} size={7} />
-      {STATUS_LABEL[status]}
+      {m.common.status[status]}
     </span>
   );
 }
@@ -31,7 +31,7 @@ export function StatusDot({ status, size = 12 }: { status: StockStatus; size?: n
 export function StatusPicker({ value, onChange }: { value: StockStatus; onChange: (s: StockStatus) => void }) {
   const opts: StockStatus[] = ['ok', 'low', 'out'];
   return (
-    <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Estado">
+    <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={m.stock.status.label}>
       {opts.map((s) => {
         const active = s === value;
         return (
@@ -46,7 +46,7 @@ export function StatusPicker({ value, onChange }: { value: StockStatus; onChange
             }`}
           >
             <StatusDot status={s} size={8} />
-            {STATUS_LABEL[s]}
+            {m.common.status[s]}
           </button>
         );
       })}

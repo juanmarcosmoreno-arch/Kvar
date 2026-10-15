@@ -1,0 +1,106 @@
+import { isOne } from '..';
+import type { Messages } from '../es';
+
+export const capture: Messages['capture'] = {
+  quote: (s) => `“${s}”`,
+  newBadge: 'new',
+
+  scan: {
+    titles: {
+      ask: 'Scan a product',
+      out: 'Scan the empty package',
+      bought: 'Scan what you bought',
+      link: 'Scan its barcode',
+    },
+    hints: {
+      ask: "I'll show you the product and you choose whether it ran out or you bought it.",
+      out: 'I’ll mark it as “Out” and add it to the list.',
+      bought: 'Every product you scan is marked “In stock”. The camera stays open.',
+      link: 'Next time you scan it, I’ll recognize it.',
+    },
+    linked: (name) => `Done: this barcode is now ${name ?? 'the product'}.`,
+    boughtToast: (name) => `${name}: in stock.`,
+    ranOut: 'Ran out',
+    bought: 'Bought it',
+    otherCode: 'Another barcode',
+    viewProduct: 'View product',
+    demoHint: 'There’s no camera in this demo. Tap a sample barcode or type one below, as if you had scanned it.',
+    looking: 'Looking up the product…',
+    manualPlaceholder: 'Won’t scan? Type the number',
+    searchCode: 'Look up barcode',
+  },
+
+  scanner: {
+    deniedApp: 'Stoka doesn’t have permission to use the camera. Turn it on in Settings → Stoka → Camera.',
+    deniedWeb: 'The browser doesn’t have permission to use the camera. Check the site’s permissions.',
+    cantOpen: 'Couldn’t open the camera.',
+  },
+
+  receipt: {
+    title: 'Receipt photo',
+    found: (n) => `Found ${n} ${isOne(n) ? 'product' : 'products'}`,
+    noLines: 'I couldn’t find any product lines. Try a straighter photo with good light, or paste the text.',
+    cantRead: 'I couldn’t read the photo. Try again with the receipt flat and good light.',
+    applied: (updated, created) =>
+      `Done: ${updated} updated${created ? ` and ${created} new` : ''}. Next time I’ll recognize them.`,
+    intro:
+      'I read the receipt, suggest which product each line matches, and you confirm everything at once. I’ll remember what you confirm for next time.',
+    takePhoto: 'Take a photo of the receipt',
+    photoTip: 'Lay it flat on a table, in good light and fully in the frame.',
+    paste: 'Paste the receipt text',
+    photosInApp:
+      'Reading receipt photos is available in the iPhone app. Here you can paste the text, for example from an emailed e-receipt.',
+    tryDemo: 'Try a sample receipt (Macromercado)',
+    textLabel: 'Receipt text',
+    read: 'Read',
+    reading: 'Reading the receipt…',
+    ticket: 'Receipt',
+    known: (n) => `${n} known`,
+    fresh: (n) => `${n} new`,
+    sumMatches: (total) => `The lines add up to $${total}, matching the total.`,
+    sumMismatch: (diff) =>
+      `The lines don’t add up to the total (off by $${diff}). Some lines may have been misread: check them.`,
+    onlyKnown: 'Known only',
+    all: 'All',
+    skipLine: 'Don’t add this line',
+    includeLine: 'Add this line',
+    confirm: (n) => `Confirm ${n} ${isOne(n) ? 'product' : 'products'}`,
+    searchPlaceholder: 'Search your products',
+    searchLabel: 'Search product',
+    newNameLabel: 'New product name',
+    newButton: 'New',
+  },
+
+  voice: {
+    title: 'Say it',
+    kinds: { bought: 'You bought', out: 'Ran out', low: 'Running low', list: 'To the list', ask: 'Do we have it?' },
+    examples: ['I bought milk and two packs of pasta', 'We ran out of oil', 'Do we have rice?'],
+    micError: 'Couldn’t use the microphone.',
+    speechDenied: 'Stoka doesn’t have permission to recognize speech. Turn it on in Settings → Stoka.',
+    micDenied: 'Stoka doesn’t have permission to use the microphone. Turn it on in Settings → Stoka.',
+    applied: (n) => `Done: ${n} ${isOne(n) ? 'change' : 'changes'}.`,
+    nothingToChange: 'There was nothing to change.',
+    stopTalking: 'Done talking',
+    startTalking: 'Start talking',
+    listening: 'Listening…',
+    tapHint: 'Tap and say, for example: “I bought milk and two packs of pasta.”',
+    noSpeech: 'Speech recognition isn’t available on this iPhone. You can type it instead.',
+    appOnly: 'Voice is available in the iPhone app. Here you can type the phrase and I’ll understand it just the same.',
+    typePlaceholder: 'or type it here',
+    phraseLabel: 'Phrase',
+    thinkingAI: 'Understanding with Apple Intelligence…',
+    thinking: 'Understanding…',
+    byAI: 'understood with Apple Intelligence',
+    notUnderstood: 'I didn’t catch which products. Try again, for example: “We ran out of milk.”',
+    notLoaded: 'Not in your products',
+    skip: 'Don’t apply',
+    apply: 'Apply',
+    again: 'Try again',
+    confirm: 'Confirm',
+    aiHints: {
+      notEnabled: 'Turn on Apple Intelligence in Settings → Apple Intelligence & Siri so I understand better.',
+      notEligible: 'This iPhone doesn’t have Apple Intelligence: I understand simple phrases.',
+      notReady: 'Apple Intelligence is downloading: until then I understand simple phrases.',
+    },
+  },
+};

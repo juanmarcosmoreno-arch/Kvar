@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}：${out}。已加入清单。`,
+    status: (product, status) => `${product}：${status}`,
+    deleted: (name) => `已删除${name}。`,
+    recipeDismissed: (title) => `好的，近期不再推荐${title}。`,
+    syncRejected: '有一项更改未能保存。已更新为家庭的最新数据。',
+  },
+  demo: {
+    household: '我家',
+    me: '你',
+    partner: '索菲亚',
+    products: {
+      milk: '牛奶',
+      yerba: '马黛茶',
+      tomato: '西红柿',
+      pasta: '意大利面',
+      sunflowerOil: '葵花籽油',
+      diapers: '纸尿裤',
+      bread: '面包',
+      detergent: '洗洁精',
+      eggs: '鸡蛋',
+      rice: '大米',
+      gratedCheese: '奶酪碎',
+      coffee: '咖啡',
+      toiletPaper: '卫生纸',
+      milanesas: '炸肉排',
+      apples: '苹果',
+      dogFood: '狗粮',
+      onion: '洋葱',
+      potatoes: '土豆',
+      crushedTomatoes: '番茄碎罐头',
+      butter: '黄油',
+      groundBeef: '牛肉末',
+      ham: '火腿',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: '生日蜡烛',
+    recipe: {
+      title: '奶奶的肉酱',
+      steps: '将肉末和洋葱一起炒至上色。\n加入番茄和一片月桂叶。\n用最小火慢炖一个半小时。',
+      ingredients: {
+        groundBeef: '牛肉末',
+        crushedTomatoes: '番茄碎罐头',
+        onion: '洋葱',
+        pasta: '意大利面',
+        salt: '盐',
+      },
+    },
+    codes: {
+      milk: '牛奶（已知）',
+      pasta: '意大利面（已知）',
+      newRice: 'Gallo Oro 大米（新）',
+    },
+  },
+};

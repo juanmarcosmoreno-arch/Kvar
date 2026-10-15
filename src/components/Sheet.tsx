@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import { dismissToast } from '../store/toast';
+import { m } from '../i18n';
 
 /** Hoja inferior (bottom sheet): se usa con una mano y se cierra tocando afuera. */
 export function Sheet({
@@ -22,12 +23,12 @@ export function Sheet({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" role="dialog" aria-modal="true">
-      <button aria-label="Cerrar" className="animate-fade absolute inset-0 bg-black/30" onClick={onClose} />
+      <button aria-label={m.common.close} className="animate-fade absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="animate-sheet relative mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-[1.75rem] bg-bg pb-[calc(env(safe-area-inset-bottom)+12px)] shadow-2xl">
         <div className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-line" />
         <div className="flex items-center justify-between px-5 pt-2">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <button onClick={onClose} className="-mr-2 flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted" aria-label="Cerrar">
+          <button onClick={onClose} className="-mr-2 flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted" aria-label={m.common.close}>
             <Icon name="x" />
           </button>
         </div>

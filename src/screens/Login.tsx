@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import logo from '../assets/brand/stoka-logo.webp';
 import { supabase } from '../lib/supabase';
+import { m } from '../i18n';
 
 /**
  * Ingreso sin correo: «Empezar» crea un usuario propio del teléfono (anonymous sign-in de
@@ -22,7 +23,7 @@ export function Login() {
     if (error) {
       setError(
         /anonymous/i.test(error.message)
-          ? 'Falta activar «Allow anonymous sign-ins» en Supabase (Authentication → Sign In / Providers).'
+          ? m.settings.login.errors.anonymousDisabled
           : traducir(error.message),
       );
     }
@@ -44,50 +45,51 @@ export function Login() {
     setError(null);
     const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
     setBusy(false);
-    if (error) setError('El código no es correcto o ya venció. Pedí uno nuevo.');
+    if (error) setError(m.settings.login.errors.badCode);
   };
 
+  const t = m.settings.login;
   return (
     <AuthLayout>
       {step === 'start' ? (
         <div className="space-y-4">
-          <h1 className="text-2xl font-semibold">Bienvenido</h1>
+          <h1 className="text-2xl font-semibold">{t.welcome}</h1>
           <p className="text-muted">
-            Sin correos ni contraseñas. Empezá y creá tu hogar, o sumate al de alguien con su código.
+            {t.intro}
           </p>
           <button className="btn-primary w-full" onClick={() => void start()} disabled={busy}>
-            {busy ? 'Un segundo…' : 'Empezar'}
+            {busy ? t.wait : t.start}
           </button>
           <button type="button" className="btn w-full text-sm text-muted" onClick={() => setStep('email')}>
-            Entrar con mi correo
+            {t.withEmail}
           </button>
         </div>
       ) : step === 'email' ? (
         <form onSubmit={sendCode} className="space-y-4">
-          <h1 className="text-2xl font-semibold">Entrá a tu hogar</h1>
-          <p className="text-muted">Te mandamos un código por correo. Sin contraseñas.</p>
+          <h1 className="text-2xl font-semibold">{t.emailTitle}</h1>
+          <p className="text-muted">{t.emailIntro}</p>
           <input
             className="field"
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="tu@correo.com"
+            placeholder={t.emailPlaceholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <button className="btn-primary w-full" disabled={busy || !email.includes('@')}>
-            {busy ? 'Enviando…' : 'Mandame el código'}
+            {busy ? t.sending : t.sendCode}
           </button>
           <button type="button" className="btn w-full text-muted" onClick={() => { setStep('start'); setError(null); }}>
-            Volver
+            {m.common.back}
           </button>
         </form>
       ) : (
         <form onSubmit={verify} className="space-y-4">
-          <h1 className="text-2xl font-semibold">Revisá tu correo</h1>
+          <h1 className="text-2xl font-semibold">{t.codeTitle}</h1>
           <p className="text-muted">
-            Escribí el código que te mandamos a <strong className="text-ink">{email}</strong>.
+            {t.codeBefore}<strong className="text-ink">{email}</strong>{t.codeAfter}
           </p>
           <input
             className="field text-center text-2xl tracking-[0.4em]"
@@ -101,10 +103,10 @@ export function Login() {
             autoFocus
           />
           <button className="btn-primary w-full" disabled={busy || code.length < 6}>
-            {busy ? 'Verificando…' : 'Confirmá'}
+            {busy ? t.verifying : t.confirm}
           </button>
           <button type="button" className="btn w-full text-muted" onClick={() => { setStep('email'); setCode(''); }}>
-            Usar otro correo
+            {t.otherEmail}
           </button>
         </form>
       )}
@@ -114,8 +116,8 @@ export function Login() {
 }
 
 function traducir(msg: string): string {
-  if (/rate limit|seconds/i.test(msg)) return 'Pediste muchos códigos seguidos. Esperá un minuto y probá de nuevo.';
-  if (/fetch|network/i.test(msg)) return 'No hay conexión. Para entrar la primera vez necesitás internet.';
+  if (/rate limit|seconds/i.test(msg)) return m.settings.login.errors.rateLimit;
+  if (/fetch|network/i.test(msg)) return m.settings.login.errors.offline;
   return msg;
 }
 
@@ -125,9 +127,9 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       <div className="mb-8 flex flex-col items-center text-center">
         {/* Logo: la casa con la despensa y «Stoka» */}
         <div className="dark:overflow-hidden dark:rounded-[2rem] dark:bg-white">
-          <img src={logo} alt="Stoka" className="h-48 w-auto mix-blend-multiply dark:mix-blend-normal" />
+          <img src={logo} alt={m.common.appName} className="h-48 w-auto mix-blend-multiply dark:mix-blend-normal" />
         </div>
-        <span className="mt-2 text-[11px] uppercase tracking-[0.32em] text-muted">Tu hogar siempre provisto</span>
+        <span className="mt-2 text-[11px] uppercase tracking-[0.32em] text-muted">{m.settings.tagline}</span>
       </div>
       {children}
     </div>

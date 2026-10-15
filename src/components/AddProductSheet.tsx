@@ -11,6 +11,7 @@ import { Icon } from './Icon';
 import { PhotoButton } from './PhotoButton';
 import { Sheet } from './Sheet';
 import { StatusPicker } from './Status';
+import { m } from '../i18n';
 
 /**
  * Alta rápida: solo el nombre es obligatorio.
@@ -54,7 +55,7 @@ export function AddProductSheet({
       learnBarcode(p.id, barcode);
       if (defaults?.then === 'out') setStatus(p, 'out', 'barcode');
       else if (defaults?.then === 'bought') markBought(p);
-      else toast(`Listo: la próxima vez que lo escanees, es ${p.name}.`);
+      else toast(m.stock.add.linked(p.name));
       onClose();
       return;
     }
@@ -76,7 +77,7 @@ export function AddProductSheet({
     if (p) {
       if (barcode) learnBarcode(p.id, barcode);
       if (photo) void setProductPhoto(p, photo.blob);
-      toast(status === 'out' ? `Agregué ${p.name} y va a la lista.` : `Agregué ${p.name}.`);
+      toast(status === 'out' ? m.stock.add.addedToList(p.name) : m.stock.add.added(p.name));
     }
     onClose();
   };
@@ -84,12 +85,12 @@ export function AddProductSheet({
   const preview = photo?.url ?? defaults?.image_url ?? null;
 
   return (
-    <Sheet open={Boolean(defaults)} onClose={onClose} title={barcode ? 'Producto nuevo' : 'Agregar producto'}>
+    <Sheet open={Boolean(defaults)} onClose={onClose} title={barcode ? m.stock.add.titleNew : m.stock.add.title}>
       <form onSubmit={submit} className="space-y-5 pb-4">
         {barcode && (
           <p className="text-sm text-muted">
-            {defaults?.name ? 'Lo encontré en Open Food Facts. ' : 'No conozco este código. '}
-            Confirmalo una sola vez: la próxima vez que lo escanees, lo reconozco.
+            {defaults?.name ? m.stock.add.foundOff : m.stock.add.unknownCode}
+            {m.stock.add.confirmOnce}
           </p>
         )}
 
@@ -102,7 +103,7 @@ export function AddProductSheet({
           <input
             autoFocus={!barcode}
             className="field text-lg"
-            placeholder="Ej: Yerba, Leche, Pañales…"
+            placeholder={m.stock.add.namePlaceholder}
             value={name}
             onChange={(e) => setName(e.target.value)}
             enterKeyHint="done"
@@ -112,7 +113,7 @@ export function AddProductSheet({
 
         {similar.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm text-muted">{barcode ? '¿Es alguno de estos?' : '¿Ya lo tenés?'}</p>
+            <p className="text-sm text-muted">{barcode ? m.stock.add.isOneOfThese : m.stock.add.alreadyHave}</p>
             <div className="flex flex-wrap gap-2">
               {similar.map((p) => (
                 <button key={p.id} type="button" className="chip min-h-tap bg-surface" onClick={() => useExisting(p)}>
@@ -126,12 +127,12 @@ export function AddProductSheet({
 
         <StatusPicker value={status} onChange={setStatusValue} />
         <section className="space-y-2">
-          <h3 className="text-sm text-muted">Lugar</h3>
+          <h3 className="text-sm text-muted">{m.stock.product.location}</h3>
           <ChipPicker items={[...view.locations].sort((a, b) => a.sort_order - b.sort_order)} value={locationId}
             onChange={setLocationId} icon={(l) => locationIcon(l.icon, l.name)} />
         </section>
         <section className="space-y-2">
-          <h3 className="text-sm text-muted">Categoría</h3>
+          <h3 className="text-sm text-muted">{m.stock.product.category}</h3>
           <ChipPicker items={[...view.categories].sort((a, b) => a.sort_order - b.sort_order)} value={categoryId}
             onChange={setCategoryId} icon={(c) => categoryIcon(c.name)} />
         </section>
@@ -139,16 +140,16 @@ export function AddProductSheet({
           <button type="button" onClick={() => setStaple(!staple)} aria-pressed={staple}
             className={`chip min-h-tap ${staple ? 'border-low/60 bg-low/15 text-ink' : 'bg-surface text-muted'}`}>
             <Icon name="star" size={16} fill={staple ? 'currentColor' : 'none'} className={staple ? 'text-low' : ''} />
-            Es un básico
+            {m.stock.product.staple}
           </button>
           <PhotoButton
             className="chip min-h-tap bg-surface text-muted"
-            label={photo ? 'Otra foto' : 'Foto'}
+            label={photo ? m.stock.add.anotherPhoto : m.stock.add.photo}
             onPhoto={(blob) => setPhoto({ blob, url: URL.createObjectURL(blob) })}
           />
         </div>
         <button type="submit" className="btn-primary w-full text-lg" disabled={!name.trim()}>
-          {exact ? (barcode ? `Es ${exact.name}` : `Ver ${exact.name}`) : 'Agregar'}
+          {exact ? (barcode ? m.stock.add.isExisting(exact.name) : m.stock.add.viewExisting(exact.name)) : m.common.add}
         </button>
       </form>
     </Sheet>

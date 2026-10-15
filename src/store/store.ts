@@ -18,6 +18,7 @@ import { fetchSnapshot, PermanentError, sendOp } from '../lib/remote';
 import { isDemo } from '../lib/demo';
 import { supabase } from '../lib/supabase';
 import { toast } from './toast';
+import { m } from '../i18n';
 
 export interface State {
   householdId: string | null;
@@ -146,7 +147,7 @@ async function runSync() {
       } catch (e) {
         if (e instanceof PermanentError) {
           console.warn('Operación descartada', op, e);
-          toast('No se pudo guardar un cambio. Se actualizó con lo último del hogar.');
+          toast(m.store.toasts.syncRejected);
           done.add(op.id);
         } else {
           throw e; // sin red: se reintenta después

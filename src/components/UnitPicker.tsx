@@ -5,6 +5,7 @@ import { findUnit, householdUnits, UNIT_CATALOG } from '../domain/units';
 /** Las más usadas en una casa; el resto del catálogo queda detrás de «Más». */
 const COMMON = new Set(['unidades', 'paquetes', 'latas', 'botellas', 'cajas', 'rollos']);
 import { useView } from '../store/store';
+import { m } from '../i18n';
 import { Icon } from './Icon';
 
 /** Elegir la unidad del catálogo (o una propia, que queda disponible para otros productos). */
@@ -13,24 +14,24 @@ export function UnitPicker({ value, onChange }: { value: string | null; onChange
   const [custom, setCustom] = useState<string | null>(null);
   const [all, setAll] = useState(false);
   const units = useMemo(() => householdUnits((view?.products ?? []).map((p) => p.unit)), [view?.products]);
-  const current = normalizeAlias(findUnit(value).plural);
-  const catalog = new Set(UNIT_CATALOG.map((u) => u.plural));
+  const current = normalizeAlias(findUnit(value).key);
+  const catalog = new Set(UNIT_CATALOG.map((u) => u.key));
   const visible = all
     ? units
-    : units.filter((u) => COMMON.has(u.plural) || !catalog.has(u.plural) || normalizeAlias(u.plural) === current);
+    : units.filter((u) => COMMON.has(u.key) || !catalog.has(u.key) || normalizeAlias(u.key) === current);
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
         {visible.map((u) => {
-          const active = normalizeAlias(u.plural) === current;
+          const active = normalizeAlias(u.key) === current;
           return (
             <button
-              key={u.plural}
+              key={u.key}
               type="button"
               aria-pressed={active}
               className={`chip min-h-[40px] ${active ? 'border-primary bg-primary text-on-primary' : 'bg-surface text-ink'}`}
-              onClick={() => onChange(u.plural)}
+              onClick={() => onChange(u.key)}
             >
               {u.plural}
             </button>
@@ -38,12 +39,12 @@ export function UnitPicker({ value, onChange }: { value: string | null; onChange
         })}
         {!all && visible.length < units.length && (
           <button type="button" className="chip min-h-[40px] bg-surface text-muted" onClick={() => setAll(true)}>
-            Más
+            {m.common.more}
           </button>
         )}
         {custom === null && (
           <button type="button" className="chip min-h-[40px] bg-surface text-muted" onClick={() => setCustom('')}>
-            <Icon name="plus" size={14} /> Otra
+            <Icon name="plus" size={14} /> {m.stock.unitPicker.other}
           </button>
         )}
       </div>
@@ -60,12 +61,12 @@ export function UnitPicker({ value, onChange }: { value: string | null; onChange
           <input
             autoFocus
             className="field"
-            placeholder="En plural, ej: pañales, tarros"
+            placeholder={m.stock.unitPicker.placeholder}
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
             maxLength={24}
           />
-          <button className="btn-primary px-4" disabled={!custom.trim()}>Usar</button>
+          <button className="btn-primary px-4" disabled={!custom.trim()}>{m.stock.unitPicker.use}</button>
         </form>
       )}
     </div>

@@ -16,6 +16,7 @@ import { Icon } from './Icon';
 import { Sheet } from './Sheet';
 import { StatusPicker } from './Status';
 import { Toggle } from './Toggle';
+import { m } from '../i18n';
 
 /** Detalle del producto. Cada cambio se guarda al instante: no hay botón "Guardar". */
 export function ProductSheet({ productId, onClose }: { productId: string | null; onClose: () => void }) {
@@ -53,19 +54,19 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
         <ProductThumb product={product} categoryName={categoryName} size="lg" />
         <div className="flex-1 space-y-2">
           <PhotoButton
-            label={product.image_path ? 'Cambiar foto' : 'Sacale una foto'}
+            label={product.image_path ? m.stock.product.changePhoto : m.stock.photo.take}
             onPhoto={(blob, cutout) => {
               void setProductPhoto(product, blob);
               if (!cutout) {
                 toast(isNative
-                  ? 'No pude separar el producto del fondo: guardé la foto entera.'
-                  : 'Guardé la foto. El recorte sin fondo está en la app de iPhone.');
+                  ? m.stock.product.noCutoutNative
+                  : m.stock.product.noCutoutWeb);
               }
             }}
           />
           <button type="button" className="btn-ghost w-full" onClick={() => { onClose(); ui.openScan('link', product.id); }}>
             <Icon name="barcode" size={20} />
-            {barcodes.length ? 'Otro código' : 'Vincular código'}
+            {barcodes.length ? m.stock.product.anotherBarcode : m.stock.product.linkBarcode}
           </button>
         </div>
       </div>
@@ -74,35 +75,35 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
 
       {product.track_quantity && (
         <div className="card flex items-center justify-between p-2">
-          <button className="btn-ghost min-w-[56px]" aria-label="Restar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) - 1)}>
+          <button className="btn-ghost min-w-[56px]" aria-label={m.stock.product.minusOne} onClick={() => setQuantity(product, (product.quantity ?? 0) - 1)}>
             <Icon name="minus" />
           </button>
           <button className="min-h-[56px] flex-1 text-center" onClick={() => ui.openQuantity(product.id, 'add')}>
             <div className="text-3xl font-semibold tabular-nums">{product.quantity ?? 0}</div>
-            <div className="text-xs text-muted">{unitLabel(product.quantity, product.unit)} · tocá para sumar o restar varios</div>
+            <div className="text-xs text-muted">{unitLabel(product.quantity, product.unit)} · {m.stock.product.tapForMany}</div>
           </button>
-          <button className="btn-ghost min-w-[56px]" aria-label="Sumar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}>
+          <button className="btn-ghost min-w-[56px]" aria-label={m.stock.product.plusOne} onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}>
             <Icon name="plus" />
           </button>
         </div>
       )}
 
       {!inList ? (
-        <button className="btn-ghost w-full" onClick={() => { addListItem({ productId: product.id }); toast(`Agregué ${product.name} a la lista.`); }}>
-          <Icon name="cart" size={20} /> Agregar a la lista
+        <button className="btn-ghost w-full" onClick={() => { addListItem({ productId: product.id }); toast(m.stock.product.addedToList(product.name)); }}>
+          <Icon name="cart" size={20} /> {m.stock.product.addToList}
         </button>
       ) : (
         <div className="flex items-center gap-2 text-sm text-muted">
           <Icon name="check" size={18} className="text-ok" />
-          <span className="flex-1">Está en la lista de compras</span>
+          <span className="flex-1">{m.stock.product.inList}</span>
           <button className="chip min-h-[36px] bg-surface text-ink" onClick={() => ui.openQuantity(product.id, 'list')}>
-            {listItem?.quantity ? `Comprar ${listItem.quantity}` : 'Cuántos comprar'}
+            {listItem?.quantity ? m.stock.product.buyN(listItem.quantity) : m.stock.product.howManyToBuy}
           </button>
         </div>
       )}
 
       <section className="space-y-2">
-        <label className="text-sm font-medium text-muted" htmlFor="pname">Nombre</label>
+        <label className="text-sm font-medium text-muted" htmlFor="pname">{m.stock.product.name}</label>
         <input
           id="pname"
           className="field"
@@ -114,13 +115,13 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
       </section>
 
       <section className="space-y-2">
-        <h3 className="text-sm font-medium text-muted">Lugar</h3>
+        <h3 className="text-sm font-medium text-muted">{m.stock.product.location}</h3>
         <ChipPicker items={locations} value={product.location_id} icon={(l) => locationIcon(l.icon, l.name)}
           onChange={(id) => updateProduct(product.id, { location_id: id })} />
       </section>
 
       <section className="space-y-2">
-        <h3 className="text-sm font-medium text-muted">Categoría</h3>
+        <h3 className="text-sm font-medium text-muted">{m.stock.product.category}</h3>
         <ChipPicker items={categories} value={product.category_id} icon={(c) => categoryIcon(c.name)}
           onChange={(id) => updateProduct(product.id, { category_id: id })} />
       </section>
@@ -129,8 +130,8 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
         <Toggle
           checked={product.is_staple}
           onChange={(v) => updateProduct(product.id, { is_staple: v })}
-          label="Es un básico"
-          hint="Te aviso antes de que se termine: con «Queda poco» ya va a la lista."
+          label={m.stock.product.staple}
+          hint={m.stock.product.stapleHint}
         />
         <Toggle
           checked={product.track_quantity}
@@ -141,24 +142,24 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
               quantity: v ? (product.status === 'out' ? 0 : product.status === 'low' ? product.low_threshold || 1 : product.low_threshold + 2) : null,
             })
           }
-          label="Contar unidades"
-          hint="Para pañales, latas o lo del freezer."
+          label={m.stock.product.countUnits}
+          hint={m.stock.product.countUnitsHint}
         />
         {product.track_quantity && (
           <div className="space-y-2 py-3">
-            <span className="block font-medium">Unidad</span>
+            <span className="block font-medium">{m.stock.product.unit}</span>
             <UnitPicker value={product.unit} onChange={(unit) => updateProduct(product.id, { unit })} />
           </div>
         )}
         {product.track_quantity && (
           <div className="flex min-h-[56px] items-center gap-3">
-            <span className="min-w-0 flex-1 whitespace-nowrap font-medium">«Queda poco» con</span>
-            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label="Menos"
+            <span className="min-w-0 flex-1 whitespace-nowrap font-medium">{m.stock.product.lowAt}</span>
+            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.less}
               onClick={() => updateProduct(product.id, { low_threshold: Math.max(0, product.low_threshold - 1) })}>
               <Icon name="minus" size={20} />
             </button>
             <span className="w-6 text-center font-semibold tabular-nums">{product.low_threshold}</span>
-            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label="Más"
+            <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.more}
               onClick={() => updateProduct(product.id, { low_threshold: product.low_threshold + 1 })}>
               <Icon name="plus" size={20} />
             </button>
@@ -169,14 +170,14 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
 
       {confirmDelete ? (
         <div className="flex gap-2">
-          <button className="btn-ghost flex-1" onClick={() => setConfirmDelete(false)}>Cancelar</button>
+          <button className="btn-ghost flex-1" onClick={() => setConfirmDelete(false)}>{m.common.cancel}</button>
           <button className="btn flex-1 bg-out text-white" onClick={() => { deleteProduct(product); onClose(); }}>
-            Sí, borrar
+            {m.stock.product.confirmDelete}
           </button>
         </div>
       ) : (
         <button className="btn w-full text-out" onClick={() => setConfirmDelete(true)}>
-          <Icon name="trash" size={20} /> Borrar producto
+          <Icon name="trash" size={20} /> {m.stock.product.deleteProduct}
         </button>
       )}
     </div>

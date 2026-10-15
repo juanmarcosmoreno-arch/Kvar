@@ -1,3 +1,5 @@
+import { m } from '../i18n';
+
 // Tipos del dominio. Reflejan las tablas de supabase/migrations.
 
 export type StockStatus = 'ok' | 'low' | 'out';
@@ -117,10 +119,11 @@ export interface ProductAlias {
   hits: number;
 }
 
-export const STATUS_LABEL: Record<StockStatus, string> = {
-  ok: 'Hay',
-  low: 'Queda poco',
-  out: 'No hay',
+/** «Hay», «Queda poco», «No hay» en el idioma de la app (se lee al usarlo). */
+export const STATUS_LABEL: Readonly<Record<StockStatus, string>> = {
+  get ok() { return m.common.status.ok; },
+  get low() { return m.common.status.low; },
+  get out() { return m.common.status.out; },
 };
 
 // -----------------------------------------------------------------------------

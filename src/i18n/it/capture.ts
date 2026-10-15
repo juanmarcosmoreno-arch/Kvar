@@ -1,0 +1,106 @@
+import { isOne } from '..';
+import type { Messages } from '../es';
+
+export const capture: Messages['capture'] = {
+  quote: (s) => `«${s}»`,
+  newBadge: 'nuovo',
+
+  scan: {
+    titles: {
+      ask: 'Scansiona un prodotto',
+      out: 'Scansiona la confezione vuota',
+      bought: 'Scansiona quello che hai comprato',
+      link: 'Scansiona il codice',
+    },
+    hints: {
+      ask: 'Ti mostro il prodotto e scegli se è finito o se l’hai comprato.',
+      out: 'Lo segno come «Finito» e va nella lista.',
+      bought: 'Ogni prodotto che scansioni passa a «C’è». La fotocamera resta aperta.',
+      link: 'La prossima volta che lo scansioni, lo riconosco.',
+    },
+    linked: (name) => `Fatto: ora questo codice è ${name ?? 'il prodotto'}.`,
+    boughtToast: (name) => `${name}: c’è.`,
+    ranOut: 'È finito',
+    bought: 'Comprato',
+    otherCode: 'Altro codice',
+    viewProduct: 'Vedi prodotto',
+    demoHint: 'In questa demo non c’è la fotocamera. Tocca un codice di esempio o scrivine uno qui sotto, come se l’avessi scansionato.',
+    looking: 'Cerco il prodotto…',
+    manualPlaceholder: 'Non lo legge? Scrivi il numero',
+    searchCode: 'Cerca codice',
+  },
+
+  scanner: {
+    deniedApp: 'Stoka non ha il permesso di usare la fotocamera. Attivalo in Impostazioni → Stoka → Fotocamera.',
+    deniedWeb: 'Il browser non ha il permesso di usare la fotocamera. Controlla i permessi del sito.',
+    cantOpen: 'Impossibile aprire la fotocamera.',
+  },
+
+  receipt: {
+    title: 'Foto dello scontrino',
+    found: (n) => `Ho trovato ${n} ${isOne(n) ? 'prodotto' : 'prodotti'}`,
+    noLines: 'Non ho trovato righe di prodotti. Prova con una foto più dritta e con buona luce, oppure incolla il testo.',
+    cantRead: 'Non sono riuscito a leggere la foto. Riprova con lo scontrino ben disteso e buona luce.',
+    applied: (updated, created) =>
+      `Fatto: ${updated} ${isOne(updated) ? 'aggiornato' : 'aggiornati'}${created ? ` e ${created} ${isOne(created) ? 'nuovo' : 'nuovi'}` : ''}. La prossima volta li riconosco.`,
+    intro:
+      'Leggo lo scontrino, ti propongo a quale prodotto corrisponde ogni riga e confermi tutto insieme. Quello che confermi lo imparo per la prossima volta.',
+    takePhoto: 'Fai una foto allo scontrino',
+    photoTip: 'Stendilo sul tavolo, con buona luce e intero nella foto.',
+    paste: 'Incolla il testo dello scontrino',
+    photosInApp:
+      'La lettura delle foto degli scontrini è nell’app per iPhone. Qui puoi incollare il testo, ad esempio dello scontrino elettronico ricevuto per email.',
+    tryDemo: 'Prova con uno scontrino di esempio (Macromercado)',
+    textLabel: 'Testo dello scontrino',
+    read: 'Leggi',
+    reading: 'Leggo lo scontrino…',
+    ticket: 'Scontrino',
+    known: (n) => `${n} ${isOne(n) ? 'conosciuto' : 'conosciuti'}`,
+    fresh: (n) => `${n} ${isOne(n) ? 'nuovo' : 'nuovi'}`,
+    sumMatches: (total) => `La somma è $${total}, uguale al totale.`,
+    sumMismatch: (diff) =>
+      `La somma non corrisponde al totale (differenza $${diff}). Forse qualche riga è stata letta male: controllale.`,
+    onlyKnown: 'Solo i conosciuti',
+    all: 'Tutti',
+    skipLine: 'Non caricare questa riga',
+    includeLine: 'Carica questa riga',
+    confirm: (n) => `Conferma ${n} ${isOne(n) ? 'prodotto' : 'prodotti'}`,
+    searchPlaceholder: 'Cerca tra i tuoi prodotti',
+    searchLabel: 'Cerca prodotto',
+    newNameLabel: 'Nome del nuovo prodotto',
+    newButton: 'Nuovo',
+  },
+
+  voice: {
+    title: 'Dimmelo',
+    kinds: { bought: 'Hai comprato', out: 'È finito', low: 'Sta finendo', list: 'In lista', ask: 'C’è?' },
+    examples: ['Ho comprato il latte e due pacchi di pasta', 'È finito l’olio', 'C’è il riso?'],
+    micError: 'Non riesco a usare il microfono.',
+    speechDenied: 'Stoka non ha il permesso di riconoscere la voce. Attivalo in Impostazioni → Stoka.',
+    micDenied: 'Stoka non ha il permesso di usare il microfono. Attivalo in Impostazioni → Stoka.',
+    applied: (n) => `Fatto: ${n} ${isOne(n) ? 'modifica' : 'modifiche'}.`,
+    nothingToChange: 'Non c’era niente da cambiare.',
+    stopTalking: 'Ho finito di parlare',
+    startTalking: 'Inizia a parlare',
+    listening: 'Ti ascolto…',
+    tapHint: 'Tocca e di’, ad esempio: «Ho comprato il latte e due pacchi di pasta».',
+    noSpeech: 'Il riconoscimento vocale non è disponibile su questo iPhone. Puoi scriverlo.',
+    appOnly: 'La voce è nell’app per iPhone. Qui puoi scrivere la frase e la capisco lo stesso.',
+    typePlaceholder: 'oppure scrivilo qui',
+    phraseLabel: 'Frase',
+    thinkingAI: 'Sto capendo con Apple Intelligence…',
+    thinking: 'Sto capendo…',
+    byAI: 'capito con Apple Intelligence',
+    notUnderstood: 'Non ho capito quali prodotti. Riprova, ad esempio: «È finito il latte».',
+    notLoaded: 'Non è tra i tuoi prodotti',
+    skip: 'Non applicare',
+    apply: 'Applica',
+    again: 'Di nuovo',
+    confirm: 'Conferma',
+    aiHints: {
+      notEnabled: 'Attiva Apple Intelligence in Impostazioni → Apple Intelligence e Siri per farmi capire meglio.',
+      notEligible: 'Questo iPhone non ha Apple Intelligence: capisco frasi semplici.',
+      notReady: 'Apple Intelligence si sta scaricando: nel frattempo capisco frasi semplici.',
+    },
+  },
+};

@@ -3,7 +3,7 @@ import {
   amountLabel, assessRecipe, findProduct, formatAmount, ingredientLine, isBasic, kitchenRound, learnPreferences,
   missingForList, nameScore, parseIngredientLine, suggestRecipes, usedProducts,
 } from '../recipes';
-import { RECIPE_CATALOG } from '../recipeCatalog';
+import { recipeCatalog } from '../recipeCatalog';
 import type { Recipe, RecipeFeedback } from '../types';
 import { HH, NOW, product } from './fixtures';
 
@@ -170,8 +170,8 @@ describe('sugerencias', () => {
 
 describe('catálogo', () => {
   it('todas las recetas se interpretan bien', () => {
-    expect(RECIPE_CATALOG.length).toBeGreaterThanOrEqual(25);
-    for (const r of RECIPE_CATALOG) {
+    expect(recipeCatalog().length).toBeGreaterThanOrEqual(25);
+    for (const r of recipeCatalog()) {
       expect(r.ingredients.length).toBeGreaterThan(0);
       for (const i of r.ingredients) {
         expect(i.name, `${r.title}: ${i.name}`).not.toMatch(/^\d|^de /);
@@ -183,7 +183,7 @@ describe('catálogo', () => {
 
 describe('editar recetas como texto', () => {
   it('cada ingrediente del catálogo vuelve a leerse igual', () => {
-    for (const r of RECIPE_CATALOG) {
+    for (const r of recipeCatalog()) {
       for (const i of r.ingredients) {
         const back = parseIngredientLine(ingredientLine(i));
         expect(back, ingredientLine(i)).toMatchObject({

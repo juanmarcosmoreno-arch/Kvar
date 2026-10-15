@@ -20,8 +20,10 @@ import { Settings } from './screens/Settings';
 import { SetupMissing } from './screens/SetupMissing';
 import { UpdateRequired } from './screens/UpdateRequired';
 import { ShoppingList } from './screens/ShoppingList';
+import { localizeNewHousehold } from './store/actions';
 import { closeHousehold, openHousehold, useStore, useView } from './store/store';
 import { toast } from './store/toast';
+import { m } from './i18n';
 
 export default function App() {
   useEffect(() => applyTheme(), []);
@@ -78,7 +80,7 @@ function JoinLink({ signedIn }: { signedIn: boolean }) {
       .then(async (hh) => {
         pendingInvite.clear();
         await persist.saveHousehold(hh.id);
-        toast(`Te uniste a ${hh.name}.`);
+        toast(m.shell.app.joined(hh.name));
         window.location.replace('/');
       })
       .catch(() => navigate('/', { replace: true }));
@@ -94,7 +96,7 @@ function HouseholdGate({ userId }: { userId: string }) {
     const cached = await persist.loadHousehold();
     try {
       const memberships = await fetchMemberships(userId);
-      const ids = memberships.map((m) => m.household_id);
+      const ids = memberships.map((x) => x.household_id);
       if (pendingInvite.get()) return setHhId(null); // completar la invitación
       setHhId(cached && ids.includes(cached) ? cached : ids[ids.length - 1] ?? null);
     } catch {
@@ -132,10 +134,14 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
   useEffect(() => {
     if (view) void syncWatch(view, userId);
   }, [view?.household.id, view?.household.invite_code, view?.members, userId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Hogar recién creado con la app en otro idioma: lugares y categorías en ese idioma
+  useEffect(() => {
+    if (view) localizeNewHousehold();
+  }, [view?.household.id, view?.categories.length]); // eslint-disable-line react-hooks/exhaustive-deps
   const loaded = useStore((s) => s.loaded);
   const online = useStore((s) => s.online);
   if (!view) {
-    return loaded || online ? <Splash /> : <Splash message="Sin conexión. Abrí Stoka con internet la primera vez." />;
+    return loaded || online ? <Splash /> : <Splash message={m.shell.app.offlineFirstRun} />;
   }
   return (
     <Shell>

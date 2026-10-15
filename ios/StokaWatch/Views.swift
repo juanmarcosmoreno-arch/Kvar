@@ -6,13 +6,13 @@ struct RootView: View {
     var body: some View {
         switch store.phase {
         case .needsPhone:
-            Message(icon: "iphone", text: "Abrí Stoka en el iPhone para conectar el reloj.")
+            Message(icon: "iphone", text: L10n.openPhone)
         case .connecting:
-            ProgressView("Conectando…")
+            ProgressView(L10n.connecting)
         case .failed(let message):
             VStack(spacing: 8) {
                 Message(icon: "exclamationmark.triangle", text: message)
-                Button("Reintentar") { Task { await store.connect() } }
+                Button(L10n.retry) { Task { await store.connect() } }
             }
         case .ready:
             TabView {
@@ -46,7 +46,7 @@ struct ShoppingListView: View {
         NavigationStack {
             List {
                 if store.items.isEmpty {
-                    Text("No falta nada").foregroundStyle(.secondary)
+                    Text(L10n.nothingMissing).foregroundStyle(.secondary)
                 }
                 ForEach(store.items) { item in
                     Button {
@@ -57,9 +57,9 @@ struct ShoppingListView: View {
                             VStack(alignment: .leading) {
                                 Text(item.title).lineLimit(2)
                                 if item.reason == "out" {
-                                    Text("No hay").font(.caption2).foregroundStyle(.red)
+                                    Text(L10n.out).font(.caption2).foregroundStyle(.red)
                                 } else if item.reason == "low" {
-                                    Text("Queda poco").font(.caption2).foregroundStyle(.orange)
+                                    Text(L10n.low).font(.caption2).foregroundStyle(.orange)
                                 }
                             }
                             Spacer()
@@ -67,14 +67,14 @@ struct ShoppingListView: View {
                         }
                     }
                 }
-                TextField("Agregar…", text: $newItem)
+                TextField(L10n.addPlaceholder, text: $newItem)
                     .onSubmit {
                         let text = newItem
                         newItem = ""
                         Task { await store.add(text) }
                     }
             }
-            .navigationTitle("Lista")
+            .navigationTitle(L10n.list)
             .refreshable { await store.reload() }
         }
         .task { await store.reload() }
@@ -106,7 +106,7 @@ struct RanOutView: View {
                     }
                 }
             }
-            .navigationTitle("¿Se terminó?")
+            .navigationTitle(L10n.ranOut)
             .refreshable { await store.reload() }
         }
     }

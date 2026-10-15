@@ -9,10 +9,9 @@ import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
+import { formatDecimal, formatMoney, m } from '../i18n';
 
 type Phase = 'start' | 'paste' | 'reading' | 'review';
-
-const money = (n: number) => n.toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /**
  * Foto del ticket → «Encontré 57 productos, ¿confirmás?».
@@ -42,7 +41,7 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
     if (!view) return;
     const p = parseReceiptText(raw);
     if (!p.lines.length) {
-      setError('No encontré líneas de productos. Probá con una foto más derecha y con buena luz, o pegá el texto.');
+      setError(m.capture.receipt.noLines);
       setPhase('start');
       return;
     }
@@ -60,47 +59,44 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
     try {
       analyze(await readReceiptPhoto(file));
     } catch {
-      setError('No pude leer la foto. Probá de nuevo, con el ticket estirado y buena luz.');
+      setError(m.capture.receipt.cantRead);
       setPhase('start');
     }
   };
 
   const confirm = () => {
     const { updated, created } = applyReceipt(review, parsed?.store ?? null);
-    toast(`Listo: ${updated} actualizados${created ? ` y ${created} nuevos` : ''}. La próxima vez los reconozco.`);
+    toast(m.capture.receipt.applied(updated, created));
     close();
   };
 
-  const title = phase === 'review' ? `Encontré ${review.length} productos` : 'Foto del ticket';
+  const title = phase === 'review' ? m.capture.receipt.found(review.length) : m.capture.receipt.title;
 
   return (
     <Sheet open={open} onClose={close} title={title}>
       {phase === 'start' && (
         <div className="space-y-3 pb-4">
-          <p className="text-muted">
-            Leo el ticket, te propongo a qué producto corresponde cada línea y confirmás todo junto. Lo que confirmes lo
-            aprendo para la próxima.
-          </p>
+          <p className="text-muted">{m.capture.receipt.intro}</p>
           {canReadPhotos && (
             <>
               <input ref={input} type="file" accept="image/*" className="hidden" onChange={onPhoto} />
               <button className="btn-primary w-full" onClick={() => input.current?.click()}>
-                <Icon name="camera" size={20} /> Sacale una foto al ticket
+                <Icon name="camera" size={20} /> {m.capture.receipt.takePhoto}
               </button>
-              <p className="text-xs text-muted">Estiralo sobre la mesa, con buena luz y entero en la foto.</p>
+              <p className="text-xs text-muted">{m.capture.receipt.photoTip}</p>
             </>
           )}
           <button className={canReadPhotos ? 'btn-ghost w-full' : 'btn-primary w-full'} onClick={() => setPhase('paste')}>
-            Pegar el texto del ticket
+            {m.capture.receipt.paste}
           </button>
           {!canReadPhotos && (
             <p className="text-xs text-muted">
-              Leer fotos de tickets está en la app de iPhone. Acá podés pegar el texto, por ejemplo del e-Ticket que llega por correo.
+              {m.capture.receipt.photosInApp}
             </p>
           )}
           {isDemo && (
             <button className="btn-ghost w-full" onClick={() => analyze(sampleTicket)}>
-              Probar con un ticket de ejemplo (Macromercado)
+              {m.capture.receipt.tryDemo}
             </button>
           )}
           {error && <p className="rounded-xl bg-out/10 p-3 text-sm text-out">{error}</p>}
@@ -114,11 +110,11 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
             placeholder={'168953 LECHE CLADY ULTRA ENTERA 1LT X 4 2,000 185,07 370,14\n…'}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            aria-label="Texto del ticket"
+            aria-label={m.capture.receipt.textLabel}
           />
           <div className="grid grid-cols-2 gap-2">
-            <button className="btn-ghost" onClick={() => setPhase('start')}>Volver</button>
-            <button className="btn-primary" disabled={!text.trim()} onClick={() => analyze(text)}>Leer</button>
+            <button className="btn-ghost" onClick={() => setPhase('start')}>{m.common.back}</button>
+            <button className="btn-primary" disabled={!text.trim()} onClick={() => analyze(text)}>{m.capture.receipt.read}</button>
           </div>
         </div>
       )}
@@ -126,7 +122,7 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
       {phase === 'reading' && (
         <div className="flex flex-col items-center gap-3 py-12 text-muted">
           <Icon name="sync" className="animate-spin" />
-          Leyendo el ticket…
+          {m.capture.receipt.reading}
         </div>
       )}
 
@@ -165,19 +161,18 @@ function ReviewList({
     <div className="space-y-4 pb-24">
       <div className="space-y-1 text-sm">
         <p className="text-muted">
-          {parsed.store === 'macromercado' ? 'Macromercado' : parsed.store ?? 'Ticket'}
-          {parsed.date ? ` · ${parsed.date.split('-').reverse().join('/')}` : ''} · {known} conocidos ·{' '}
-          {included.length - known} nuevos
+          {parsed.store === 'macromercado' ? 'Macromercado' : parsed.store ?? m.capture.receipt.ticket}
+          {parsed.date ? ` · ${parsed.date.split('-').reverse().join('/')}` : ''} · {m.capture.receipt.known(known)} ·{' '}
+          {m.capture.receipt.fresh(included.length - known)}
         </p>
         {parsed.difference === 0 && parsed.total != null && (
           <p className="flex items-center gap-1.5 text-[#2E7A4A] dark:text-ok">
-            <Icon name="check" size={16} /> La suma da ${money(parsed.total)}, igual que el total.
+            <Icon name="check" size={16} /> {m.capture.receipt.sumMatches(formatMoney(parsed.total))}
           </p>
         )}
         {parsed.difference != null && parsed.difference !== 0 && (
           <p className="text-[#9A6300] dark:text-low">
-            La suma no coincide con el total (diferencia ${money(Math.abs(parsed.difference))}). Puede que alguna línea se
-            haya leído mal: revisalas.
+            {m.capture.receipt.sumMismatch(formatMoney(Math.abs(parsed.difference)))}
           </p>
         )}
       </div>
@@ -188,10 +183,10 @@ function ReviewList({
             className="chip min-h-[36px] bg-surface"
             onClick={() => setReview(review.map((r) => ({ ...r, include: Boolean(r.productId) })))}
           >
-            Solo los conocidos
+            {m.capture.receipt.onlyKnown}
           </button>
           <button className="chip min-h-[36px] bg-surface" onClick={() => setReview(review.map((r) => ({ ...r, include: true })))}>
-            Todos
+            {m.capture.receipt.all}
           </button>
         </div>
       ) : null}
@@ -205,7 +200,7 @@ function ReviewList({
               <div className="flex items-center gap-2 pl-2 pr-3">
                 <button
                   className="flex min-h-tap min-w-tap items-center justify-center"
-                  aria-label={r.include ? 'No cargar esta línea' : 'Cargar esta línea'}
+                  aria-label={r.include ? m.capture.receipt.skipLine : m.capture.receipt.includeLine}
                   onClick={() => update(r.key, { include: !r.include })}
                 >
                   <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${r.include ? 'border-primary bg-primary text-on-primary' : 'border-line'}`}>
@@ -215,11 +210,11 @@ function ReviewList({
                 <button className="min-h-[56px] min-w-0 flex-1 py-2 text-left" onClick={() => setEditing(open ? null : r.key)}>
                   <span className="flex items-center gap-2">
                     <span className="truncate font-medium">{p ? p.name : r.newName}</span>
-                    {!p && <span className="shrink-0 rounded-full border border-line px-2 text-[11px] text-muted">nuevo</span>}
+                    {!p && <span className="shrink-0 rounded-full border border-line px-2 text-[11px] text-muted">{m.capture.newBadge}</span>}
                   </span>
                   <span className="block truncate text-xs text-muted">
                     {r.line.clean}
-                    {r.line.weighed ? ` · ${r.line.quantity.toLocaleString('es-UY')} kg` : r.line.units > 1 ? ` · × ${r.line.units}` : ''}
+                    {r.line.weighed ? ` · ${formatDecimal(r.line.quantity, 3)} kg` : r.line.units > 1 ? ` · × ${r.line.units}` : ''}
                   </span>
                 </button>
                 <Icon name={open ? 'up' : 'down'} size={18} className="shrink-0 text-muted" />
@@ -244,7 +239,7 @@ function ReviewList({
 
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg bg-bg/95 px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
         <button className="btn-primary w-full" disabled={!included.length} onClick={onConfirm}>
-          Confirmar {included.length} {included.length === 1 ? 'producto' : 'productos'}
+          {m.capture.receipt.confirm(included.length)}
         </button>
       </div>
     </div>
@@ -261,10 +256,10 @@ function LineEditor({
   const results = searchProducts(q, view.products).slice(0, 5);
   return (
     <div className="space-y-3 border-t border-line bg-sunken/40 px-4 py-3">
-      <p className="text-xs text-muted">«{line.line.description}»</p>
+      <p className="text-xs text-muted">{m.capture.quote(line.line.description)}</p>
       <label className="relative block">
         <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-        <input className="field pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar en tus productos" aria-label="Buscar producto" />
+        <input className="field pl-10" value={q} onChange={(e) => setQ(e.target.value)} placeholder={m.capture.receipt.searchPlaceholder} aria-label={m.capture.receipt.searchLabel} />
       </label>
       {results.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -276,9 +271,9 @@ function LineEditor({
         </div>
       )}
       <div className="flex gap-2">
-        <input className="field" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nombre del producto nuevo" />
+        <input className="field" value={name} onChange={(e) => setName(e.target.value)} aria-label={m.capture.receipt.newNameLabel} />
         <button className="btn-ghost shrink-0 px-3" disabled={!name.trim()} onClick={() => onNew(name.trim())}>
-          Nuevo
+          {m.capture.receipt.newButton}
         </button>
       </div>
     </div>

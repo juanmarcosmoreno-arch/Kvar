@@ -5,6 +5,7 @@ import { setQuantity, setStatus } from '../store/actions';
 import { useUI } from '../store/ui';
 import { findUnit, formatQuantity } from '../domain/units';
 import { useLongPress } from '../lib/useLongPress';
+import { m } from '../i18n';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
 import { STATUS_BG, STATUS_TEXT, StatusPill } from './Status';
@@ -61,7 +62,7 @@ export function ProductRow({
             dx < 0 ? 'justify-end' : 'justify-start'
           } ${hintActive ? 'opacity-100' : 'opacity-60'}`}
         >
-          {hint === 'ok' ? 'Hay' : hint === 'low' ? 'Queda poco' : 'No hay'}
+          {m.common.status[hint]}
         </div>
       )}
       <div
@@ -77,26 +78,26 @@ export function ProductRow({
           <span className="min-w-0 flex-1">
             <span className="flex items-center gap-1.5">
               <span className="truncate font-medium">{product.name}</span>
-              {product.is_staple && <Icon name="star" size={14} className="shrink-0 text-low" fill="currentColor" aria-label="Básico" />}
+              {product.is_staple && <Icon name="star" size={14} className="shrink-0 text-low" fill="currentColor" aria-label={m.stock.row.staple} />}
             </span>
             <span className="block truncate text-sm text-muted">
               {subtitle ??
                 (product.track_quantity ? formatQuantity(product.quantity, product.unit) : categoryName ?? '')}
-              {product.unidentified && ' · Sin identificar'}
+              {product.unidentified && ` · ${m.stock.row.unidentified}`}
             </span>
           </span>
         </button>
         {product.track_quantity ? (
           <div className="flex items-center">
             <button
-              aria-label={`Restar uno de ${product.name} (mantené apretado para elegir cuántos)`}
+              aria-label={m.stock.row.minusOne(product.name)}
               className="flex min-h-tap min-w-tap select-none items-center justify-center rounded-full text-muted active:bg-sunken"
               {...minus}
             >
               <Icon name="minus" size={20} />
             </button>
             <button
-              aria-label={`Elegir cuántos ${findUnit(product.unit).plural} de ${product.name}`}
+              aria-label={m.stock.row.chooseAmount(findUnit(product.unit).plural, product.name)}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => ui.openQuantity(product.id, 'add')}
               className={`inline-flex min-h-[32px] min-w-[2.5rem] items-center justify-center rounded-full border border-current px-2 text-sm tabular-nums ${STATUS_TEXT[product.status]}`}
@@ -104,7 +105,7 @@ export function ProductRow({
               {product.quantity ?? 0}
             </button>
             <button
-              aria-label={`Sumar uno de ${product.name} (mantené apretado para elegir cuántos)`}
+              aria-label={m.stock.row.plusOne(product.name)}
               className="flex min-h-tap min-w-tap select-none items-center justify-center rounded-full text-muted active:bg-sunken"
               {...plus}
             >
@@ -113,7 +114,7 @@ export function ProductRow({
           </div>
         ) : (
           <button
-            aria-label={`Cambiar estado de ${product.name}`}
+            aria-label={m.stock.row.changeStatus(product.name)}
             className="flex min-h-tap items-center px-1"
             onClick={() => setStatus(product, cycleStatus(product.status), 'manual', false)}
           >

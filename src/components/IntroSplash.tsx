@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import introMp4 from '../assets/brand/stoka-intro.mp4';
 import introWebm from '../assets/brand/stoka-intro.webm';
 import finalFrame from '../assets/brand/stoka-intro-final.webp';
+import { m } from '../i18n';
 
 // Clave por versión de la bienvenida: si cambia el video, cada dispositivo lo ve una vez más
 const SEEN_KEY = 'stoka:intro-v2';
@@ -68,7 +69,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
       {/* El fundido va en la capa animada: si va en la imagen, la animación lo aísla y se ve el blanco */}
       <div className="animate-intro mix-blend-multiply dark:overflow-hidden dark:rounded-[2.5rem] dark:bg-white dark:p-4 dark:mix-blend-normal">
         {reduced ? (
-          <img src={finalFrame} alt="Stoka" className="h-72 w-72" />
+          <img src={finalFrame} alt={m.common.appName} className="h-72 w-72" />
         ) : (
           <video
             poster={finalFrame}
@@ -78,7 +79,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
             playsInline
             preload="auto"
             onEnded={() => setTimeout(finish, 450)}
-            aria-label="Stoka: la casa se llena de productos"
+            aria-label={m.shell.intro.videoLabel}
           >
             <source src={introMp4} type="video/mp4" />
             <source src={introWebm} type="video/webm" onError={finish} />

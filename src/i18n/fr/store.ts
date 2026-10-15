@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product} : ${out}. Ajouté à la liste.`,
+    status: (product, status) => `${product} : ${status}`,
+    deleted: (name) => `J’ai supprimé ${name}.`,
+    recipeDismissed: (title) => `D’accord, je ne vous proposerai plus ${title} pendant un moment.`,
+    syncRejected: 'Une modification n’a pas pu être enregistrée. Mis à jour avec les dernières données du foyer.',
+  },
+  demo: {
+    household: 'Maison',
+    me: 'Vous',
+    partner: 'Sophie',
+    products: {
+      milk: 'Lait',
+      yerba: 'Maté',
+      tomato: 'Tomates',
+      pasta: 'Pâtes',
+      sunflowerOil: 'Huile de tournesol',
+      diapers: 'Couches',
+      bread: 'Pain',
+      detergent: 'Liquide vaisselle',
+      eggs: 'Œufs',
+      rice: 'Riz',
+      gratedCheese: 'Fromage râpé',
+      coffee: 'Café',
+      toiletPaper: 'Papier toilette',
+      milanesas: 'Escalopes panées',
+      apples: 'Pommes',
+      dogFood: 'Croquettes pour chien',
+      onion: 'Oignons',
+      potatoes: 'Pommes de terre',
+      crushedTomatoes: 'Tomates concassées',
+      butter: 'Beurre',
+      groundBeef: 'Bœuf haché',
+      ham: 'Jambon',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Bougies d’anniversaire',
+    recipe: {
+      title: 'Sauce tomate à la viande de mamie',
+      steps: 'Faites dorer la viande avec l’oignon.\nAjoutez les tomates et une feuille de laurier.\nLaissez mijoter à feu très doux pendant une heure et demie.',
+      ingredients: {
+        groundBeef: 'bœuf haché',
+        crushedTomatoes: 'tomates concassées',
+        onion: 'oignon',
+        pasta: 'pâtes',
+        salt: 'sel',
+      },
+    },
+    codes: {
+      milk: 'Lait (connu)',
+      pasta: 'Pâtes (connu)',
+      newRice: 'Riz Gallo Oro (nouveau)',
+    },
+  },
+};

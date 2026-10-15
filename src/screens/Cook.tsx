@@ -4,27 +4,32 @@ import { Icon } from '../components/Icon';
 import { RecipeEditor } from '../components/RecipeEditor';
 import { RecipeSheet } from '../components/RecipeSheet';
 import { peopleLabel, Stepper } from '../components/Stepper';
-import { RECIPE_CATALOG } from '../domain/recipeCatalog';
+import { recipeCatalog } from '../domain/recipeCatalog';
 import {
-  capitalize, CONSTRAINT_LABEL, MEAL_LABEL, minutesLabel, QUICK_MINUTES, suggestRecipes, type CookFilters, type Suggestion,
+  capitalize, minutesLabel, QUICK_MINUTES, suggestRecipes, type CookFilters, type Suggestion,
 } from '../domain/recipes';
 import type { MealType, Recipe, RecipeConstraint } from '../domain/types';
+import { compareText, m } from '../i18n';
 import { addMissingToList } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 
 type FilterKey = 'quick' | MealType | RecipeConstraint;
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: 'quick', label: `Rápido (≤ ${QUICK_MINUTES} min)` },
-  ...(Object.keys(MEAL_LABEL) as MealType[]).map((m) => ({ key: m, label: MEAL_LABEL[m] })),
-  ...(Object.keys(CONSTRAINT_LABEL) as RecipeConstraint[]).map((c) => ({ key: c, label: CONSTRAINT_LABEL[c] })),
-];
-const isMeal = (k: FilterKey): k is MealType => k in MEAL_LABEL;
-const isConstraint = (k: FilterKey): k is RecipeConstraint => k in CONSTRAINT_LABEL;
+function filterOptions(): { key: FilterKey; label: string }[] {
+  const { meals, constraints } = m.common;
+  return [
+    { key: 'quick', label: m.recipes.cook.quick(QUICK_MINUTES) },
+    ...(Object.keys(meals) as MealType[]).map((k) => ({ key: k, label: meals[k] })),
+    ...(Object.keys(constraints) as RecipeConstraint[]).map((c) => ({ key: c, label: constraints[c] })),
+  ];
+}
+const isMeal = (k: FilterKey): k is MealType => k in m.common.meals;
+const isConstraint = (k: FilterKey): k is RecipeConstraint => k in m.common.constraints;
 
 /** ¿Qué cocino? — recetas con lo que hay: «Tenés todo», «Te falta 1 cosa», «Para aprovechar lo que vence». */
 export function Cook() {
   const view = useView()!;
+  const t = m.recipes.cook;
   const [servings, setServings] = useState(view.household.default_servings ?? 2);
   const [active, setActive] = useState<FilterKey[]>([]);
   const [open, setOpen] = useState<Recipe | null>(null);
@@ -38,7 +43,7 @@ export function Cook() {
     constraints: active.filter(isConstraint),
   };
   const groups = useMemo(
-    () => suggestRecipes([...own, ...RECIPE_CATALOG], view.products, { servings, filters, feedback: view.feedback }),
+    () => suggestRecipes([...own, ...recipeCatalog()], view.products, { servings, filters, feedback: view.feedback }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [own, view.products, view.feedback, servings, active],
   );
@@ -57,12 +62,12 @@ export function Cook() {
   return (
     <>
       <Header
-        title="¿Qué cocino?"
+        title={t.title}
         right={
           <button
             className="-mr-2 flex min-h-tap min-w-tap items-center justify-center rounded-full text-primary"
             onClick={() => setEditing({ base: null })}
-            aria-label="Cargar una receta"
+            aria-label={t.addRecipe}
           >
             <Icon name="plus" />
           </button>
@@ -70,12 +75,12 @@ export function Cook() {
       />
       <div className="space-y-6 px-5 pb-6">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-muted">Comemos</span>
-          <Stepper value={servings} onChange={setServings} label="Personas a comer" unit={peopleLabel} />
+          <span className="text-muted">{t.eating}</span>
+          <Stepper value={servings} onChange={setServings} label={m.recipes.servingsLabel} unit={peopleLabel} />
         </div>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label="Filtros">
-          {FILTERS.map((f) => {
+        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label={t.filters}>
+          {filterOptions().map((f) => {
             const on = active.includes(f.key);
             return (
               <button
@@ -91,22 +96,22 @@ export function Cook() {
         </div>
 
         <Group
-          title="Para aprovechar lo que vence"
+          title={t.expiring}
           icon="leaf"
           items={groups.expiring}
           onOpen={setOpen}
         />
-        <Group title="Tenés todo" icon="check" items={groups.ready} onOpen={setOpen} />
-        <Group title="Te falta 1 cosa" icon="cart" items={groups.oneMissing} onOpen={setOpen} quickAdd />
+        <Group title={t.ready} icon="check" items={groups.ready} onOpen={setOpen} />
+        <Group title={t.oneMissing} icon="cart" items={groups.oneMissing} onOpen={setOpen} quickAdd />
 
         {total === 0 && (
           <div className="card space-y-2 p-6 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-sunken text-muted">
               <Icon name="pot" size={24} />
             </div>
-            <p className="font-semibold">Con lo que hay no me sale nada redondo</p>
+            <p className="font-semibold">{t.emptyTitle}</p>
             <p className="text-sm text-muted">
-              {active.length ? 'Probá sacando algún filtro, o mirá' : 'Mirá'} lo que se puede hacer con un par de compras.
+              {active.length ? t.emptyHintFiltered : t.emptyHint}
             </p>
           </div>
         )}
@@ -118,7 +123,7 @@ export function Cook() {
               onClick={() => setShowMore((v) => !v)}
               aria-expanded={showMore || total === 0}
             >
-              <span>Con un par de compras ({groups.more.length})</span>
+              <span>{t.more(groups.more.length)}</span>
               <Icon name={showMore || total === 0 ? 'up' : 'down'} size={16} />
             </button>
             {(showMore || total === 0) && <Cards items={groups.more} onOpen={setOpen} />}
@@ -126,10 +131,10 @@ export function Cook() {
         )}
 
         <section className="space-y-2">
-          <h2 className="section-title">Recetas de la casa</h2>
+          <h2 className="section-title">{t.own}</h2>
           {own.length ? (
             <ul className="card divide-y divide-line">
-              {[...own].sort((a, b) => a.title.localeCompare(b.title, 'es')).map((r) => (
+              {[...own].sort((a, b) => compareText(a.title, b.title)).map((r) => (
                 <li key={r.id}>
                   <button className="flex min-h-[56px] w-full items-center gap-3 px-4 text-left" onClick={() => setOpen(r)}>
                     <span className="min-w-0 flex-1">
@@ -149,8 +154,8 @@ export function Cook() {
                 <Icon name="plus" size={22} />
               </span>
               <span>
-                <span className="block font-medium">Cargá las recetas de tu casa</span>
-                <span className="text-sm text-muted">Las de siempre. Aparecen primero cuando hay lo que llevan.</span>
+                <span className="block font-medium">{t.ownEmptyTitle}</span>
+                <span className="text-sm text-muted">{t.ownEmptyHint}</span>
               </span>
             </button>
           )}
@@ -212,21 +217,23 @@ function Cards({ items, onOpen, quickAdd }: { items: Suggestion[]; onOpen: (r: R
 const DAY = 86_400_000;
 function expiresLabel(iso: string): string {
   const days = Math.round((Date.parse(iso) - Date.now()) / DAY);
-  if (days <= 0) return 'vence hoy';
-  if (days === 1) return 'vence mañana';
-  return `vence en ${days} días`;
+  if (days <= 0) return m.recipes.cook.expiresToday;
+  if (days === 1) return m.recipes.cook.expiresTomorrow;
+  return m.recipes.cook.expiresIn(days);
 }
 
 function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void; quickAdd?: boolean }) {
   const { recipe } = s;
+  const t = m.recipes.cook;
+  const sep = m.recipes.listSep;
   const uses = s.lines
     .filter((l) => l.product && l.availability !== 'missing')
     .map((l) => l.product!.name);
-  const meta = [minutesLabel(recipe.total_minutes), recipe.source !== 'catalog' ? 'De la casa' : null].filter(Boolean);
+  const meta = [minutesLabel(recipe.total_minutes), recipe.source !== 'catalog' ? m.recipes.fromHome : null].filter(Boolean);
   const add = (e: React.MouseEvent) => {
     e.stopPropagation();
     const n = addMissingToList(s);
-    toast(n ? `${capitalize(s.missing[0].product?.name ?? s.missing[0].ingredient.name)} va a la lista.` : 'Ya estaba en la lista.');
+    toast(n ? t.addedToList(capitalize(s.missing[0].product?.name ?? s.missing[0].ingredient.name)) : t.alreadyInList);
   };
   return (
     <div className="card flex items-stretch">
@@ -240,10 +247,10 @@ function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void
             {s.expiring.map((p) => `${p.name} ${expiresLabel(p.expires_on!)}`).join(' · ')}
           </span>
         )}
-        {uses.length > 0 && <span className="block truncate text-sm text-muted">Usa {[...new Set(uses)].join(', ').toLowerCase()}</span>}
+        {uses.length > 0 && <span className="block truncate text-sm text-muted">{t.uses([...new Set(uses)].join(sep).toLowerCase())}</span>}
         {s.missing.length > 0 && (
           <span className="block text-sm text-[#B53A2A] dark:text-out">
-            Falta {s.missing.map((m) => (m.product?.name ?? m.ingredient.name).toLowerCase()).join(', ')}
+            {t.missing(s.missing.map((x) => (x.product?.name ?? x.ingredient.name).toLowerCase()).join(sep))}
           </span>
         )}
       </button>
@@ -251,10 +258,10 @@ function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void
         <button
           className="flex min-w-[64px] flex-col items-center justify-center gap-0.5 border-l border-line px-2 text-xs text-primary"
           onClick={add}
-          aria-label={`Agregar ${s.missing[0].ingredient.name} a la lista`}
+          aria-label={t.addToListAria(s.missing[0].ingredient.name)}
         >
           <Icon name="cart" size={20} />
-          A la lista
+          {t.toList}
         </button>
       )}
     </div>

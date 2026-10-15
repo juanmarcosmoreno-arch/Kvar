@@ -1,35 +1,47 @@
 /**
  * Catálogo de unidades para productos con conteo.
- * Se guarda en products.unit el plural («latas»); para mostrar se usa singular o plural según la cantidad.
+ * En la base se guarda siempre la clave en español y en plural («latas»), así el hogar se entiende aunque cada
+ * miembro use otro idioma; para mostrar se usa el idioma de la app, en singular o plural según la cantidad.
  * El hogar puede usar unidades propias («pañales»): quedan disponibles para los demás productos.
  */
+import { compareText, isOne, m } from '../i18n';
 import { normalizeAlias } from './aliases';
 
 export interface Unit {
+  /** Lo que se guarda en products.unit */
+  key: string;
+  /** Para mostrar, en el idioma de la app */
   singular: string;
   plural: string;
 }
 
-export const UNIT_CATALOG: Unit[] = [
-  { singular: 'unidad', plural: 'unidades' },
-  { singular: 'paquete', plural: 'paquetes' },
-  { singular: 'lata', plural: 'latas' },
-  { singular: 'botella', plural: 'botellas' },
-  { singular: 'caja', plural: 'cajas' },
-  { singular: 'frasco', plural: 'frascos' },
-  { singular: 'sachet', plural: 'sachets' },
-  { singular: 'bolsa', plural: 'bolsas' },
-  { singular: 'sobre', plural: 'sobres' },
-  { singular: 'rollo', plural: 'rollos' },
-  { singular: 'pack', plural: 'packs' },
-  { singular: 'docena', plural: 'docenas' },
-  { singular: 'tableta', plural: 'tabletas' },
-  { singular: 'cápsula', plural: 'cápsulas' },
-  { singular: 'pote', plural: 'potes' },
-  { singular: 'bandeja', plural: 'bandejas' },
-];
+const CATALOG_KEYS = [
+  'unidades', 'paquetes', 'latas', 'botellas', 'cajas', 'frascos', 'sachets', 'bolsas', 'sobres', 'rollos', 'packs',
+  'docenas', 'tabletas', 'cápsulas', 'potes', 'bandejas',
+] as const;
 
-export const DEFAULT_UNIT = UNIT_CATALOG[0];
+/** Singular en español de cada clave (para reconocer «lata» o «Lata» escrito a mano) */
+const ES_SINGULAR: Record<string, string> = {
+  unidades: 'unidad', paquetes: 'paquete', latas: 'lata', botellas: 'botella', cajas: 'caja', frascos: 'frasco',
+  sachets: 'sachet', bolsas: 'bolsa', sobres: 'sobre', rollos: 'rollo', packs: 'pack', docenas: 'docena',
+  tabletas: 'tableta', 'cápsulas': 'cápsula', potes: 'pote', bandejas: 'bandeja',
+};
+
+function catalogUnit(key: string): Unit {
+  const [singular, plural] = m.common.units[key] ?? [ES_SINGULAR[key] ?? key, key];
+  return { key, singular, plural };
+}
+
+/** Se arma al usarlo (el idioma se elige al arrancar) */
+export const UNIT_CATALOG: readonly Unit[] = new Proxy([] as Unit[], {
+  get(_t, prop) {
+    const list = CATALOG_KEYS.map(catalogUnit);
+    const v = Reflect.get(list, prop);
+    return typeof v === 'function' ? v.bind(list) : v;
+  },
+});
+
+export const defaultUnit = (): Unit => catalogUnit('unidades');
 
 /** «pañales» → «pañal», «velas» → «vela» (para unidades que no están en el catálogo). */
 export function singularize(word: string): string {
@@ -39,27 +51,29 @@ export function singularize(word: string): string {
   return w;
 }
 
-/** Busca la unidad (por singular o plural, sin importar tildes ni mayúsculas). */
+/** Busca la unidad (clave, singular o plural, en español o en el idioma de la app; sin tildes ni mayúsculas). */
 export function findUnit(text: string | null | undefined): Unit {
-  if (!text?.trim()) return DEFAULT_UNIT;
+  if (!text?.trim()) return defaultUnit();
   const n = normalizeAlias(text);
-  const hit = UNIT_CATALOG.find((u) => normalizeAlias(u.plural) === n || normalizeAlias(u.singular) === n);
-  if (hit) return hit;
+  for (const key of CATALOG_KEYS) {
+    const u = catalogUnit(key);
+    if ([key, ES_SINGULAR[key], u.singular, u.plural].some((x) => x && normalizeAlias(x) === n)) return u;
+  }
   const plural = text.trim().toLowerCase();
-  return { singular: singularize(plural), plural };
+  return { key: plural, singular: singularize(plural), plural };
 }
 
 /** «1 lata», «3 latas», «0 latas». */
 export function formatQuantity(n: number | null | undefined, unit: string | null | undefined): string {
   const qty = n ?? 0;
   const u = findUnit(unit);
-  return `${qty} ${qty === 1 ? u.singular : u.plural}`;
+  return `${qty} ${isOne(qty) ? u.singular : u.plural}`;
 }
 
 /** Solo la palabra, concordando con la cantidad. */
 export function unitLabel(n: number | null | undefined, unit: string | null | undefined): string {
   const u = findUnit(unit);
-  return (n ?? 0) === 1 ? u.singular : u.plural;
+  return isOne(n ?? 0) ? u.singular : u.plural;
 }
 
 const SUGGESTIONS: [RegExp, string][] = [
@@ -89,19 +103,21 @@ export function suggestUnit(productName: string, categoryName?: string | null): 
   const byName = SUGGESTIONS.find(([re]) => re.test(p));
   if (byName) return byName[1];
   const c = normalizeAlias(categoryName ?? '');
-  return BY_CATEGORY.find(([re]) => re.test(c))?.[1] ?? DEFAULT_UNIT.plural;
+  return BY_CATEGORY.find(([re]) => re.test(c))?.[1] ?? 'unidades';
 }
 
 /** Catálogo + unidades propias que ya usa el hogar (sin repetir). */
 export function householdUnits(usedUnits: (string | null | undefined)[]): Unit[] {
-  const known = new Set(UNIT_CATALOG.map((u) => normalizeAlias(u.plural)));
+  const catalog = CATALOG_KEYS.map(catalogUnit);
+  const known = new Set(catalog.map((u) => normalizeAlias(u.key)));
   const own: Unit[] = [];
   for (const raw of usedUnits) {
     if (!raw?.trim()) continue;
-    const n = normalizeAlias(raw);
-    if (known.has(n) || UNIT_CATALOG.some((u) => normalizeAlias(u.singular) === n)) continue;
+    const u = findUnit(raw);
+    const n = normalizeAlias(u.key);
+    if (known.has(n)) continue;
     known.add(n);
-    own.push(findUnit(raw));
+    own.push(u);
   }
-  return [...UNIT_CATALOG, ...own.sort((a, b) => a.plural.localeCompare(b.plural, 'es'))];
+  return [...catalog, ...own.sort((a, b) => compareText(a.plural, b.plural))];
 }

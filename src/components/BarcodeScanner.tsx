@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { IScannerControls } from '@zxing/browser';
 import { isNative } from '../lib/platform';
+import { m } from '../i18n';
 
 /**
  * Cámara + lector de códigos (ZXing). Funciona en Safari, en la PWA instalada y en la app.
@@ -48,9 +49,9 @@ export function BarcodeScanner({ onDetect, paused }: { onDetect: (code: string) 
         setError(
           name === 'NotAllowedError'
             ? isNative
-              ? 'Stoka no tiene permiso para usar la cámara. Activalo en Ajustes → Stoka → Cámara.'
-              : 'El navegador no tiene permiso para usar la cámara. Revisá los permisos del sitio.'
-            : 'No se pudo abrir la cámara.',
+              ? m.capture.scanner.deniedApp
+              : m.capture.scanner.deniedWeb
+            : m.capture.scanner.cantOpen,
         );
       }
     })();

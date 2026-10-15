@@ -11,15 +11,19 @@ import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { EmptyCard } from './Home';
 import { useUI } from '../store/ui';
+import { m } from '../i18n';
 
-const REASON_LABEL: Record<ShoppingItem['reason'], string | null> = {
-  out: 'No hay',
-  low: 'Queda poco',
-  manual: null,
-  recipe: 'Para una receta',
-  plan: 'Plan semanal',
-  predicted: 'Se estaría terminando',
-};
+function reasonLabel(reason: ShoppingItem['reason']): string | null {
+  switch (reason) {
+    case 'out':
+    case 'low':
+      return m.common.status[reason];
+    case 'manual':
+      return null;
+    default:
+      return m.stock.list.reasons[reason];
+  }
+}
 
 /** Lista de compras agrupada por categoría. Tocar = comprado → el producto pasa a "Hay". */
 export function ShoppingList() {
@@ -51,24 +55,24 @@ export function ShoppingList() {
     }
     purchaseItem(item);
     const name = itemName(item, byId);
-    toast(item.product_id ? `${name}: comprado, ahora Hay.` : `${name}: comprado.`, {
-      label: 'Deshacer',
+    toast(item.product_id ? m.stock.list.boughtNowOk(name) : m.stock.list.bought(name), {
+      label: m.common.undo,
       run: () => unpurchaseItem({ ...item, checked_at: new Date().toISOString() }),
     });
   };
 
   return (
     <>
-      <Header title="Lista de compras" />
+      <Header title={m.stock.list.title} />
       <div className="space-y-6 px-5 pt-1">
         <SyncBadge />
         {groups.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
             <button className="btn-ghost" onClick={() => ui.openScan('bought')}>
-              <Icon name="barcode" size={20} /> Volví del súper
+              <Icon name="barcode" size={20} /> {m.stock.list.backFromStore}
             </button>
             <button className="btn-ghost" onClick={ui.openReceipt}>
-              <Icon name="receipt" size={20} /> Ticket
+              <Icon name="receipt" size={20} /> {m.stock.list.receipt}
             </button>
           </div>
         )}
@@ -76,12 +80,12 @@ export function ShoppingList() {
           <div className="flex gap-2">
             <input
               className="field"
-              placeholder="Agregar a la lista…"
+              placeholder={m.stock.list.addPlaceholder}
               value={text}
               onChange={(e) => setText(e.target.value)}
               enterKeyHint="done"
             />
-            <button type="submit" className="btn-primary min-w-[52px] px-0" aria-label="Agregar" disabled={!text.trim()}>
+            <button type="submit" className="btn-primary min-w-[52px] px-0" aria-label={m.common.add} disabled={!text.trim()}>
               <Icon name="plus" />
             </button>
           </div>
@@ -98,7 +102,7 @@ export function ShoppingList() {
         </form>
 
         {groups.length === 0 && (
-          <EmptyCard icon="cart" title="No falta nada" hint="Cuando marques que algo no hay, aparece acá solo." />
+          <EmptyCard icon="cart" title={m.stock.list.emptyTitle} hint={m.stock.list.emptyHint} />
         )}
 
         {groups.map((g) => (
@@ -113,14 +117,14 @@ export function ShoppingList() {
                   <button
                     className="flex min-h-[60px] flex-1 items-center gap-3 px-4 text-left"
                     onClick={() => buy(item)}
-                    aria-label={`Marcar ${itemName(item, byId)} como comprado`}
+                    aria-label={m.stock.list.markBought(itemName(item, byId))}
                   >
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-muted/50" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{itemName(item, byId)}</span>
-                      {(item.note || REASON_LABEL[item.reason]) && (
+                      {(item.note || reasonLabel(item.reason)) && (
                         <span className={`block truncate text-xs ${item.reason === 'out' ? 'text-out' : item.reason === 'low' ? 'text-[#9A6300] dark:text-low' : 'text-muted'}`}>
-                          {item.note || REASON_LABEL[item.reason]}
+                          {item.note || reasonLabel(item.reason)}
                         </span>
                       )}
                     </span>
@@ -128,7 +132,7 @@ export function ShoppingList() {
                   {item.product_id && (
                     <button
                       className={`chip min-h-[36px] tabular-nums ${item.quantity ? 'border-primary/40 text-ink' : 'text-muted'}`}
-                      aria-label={`Cuántos comprar de ${itemName(item, byId)}`}
+                      aria-label={m.stock.list.howMany(itemName(item, byId))}
                       onClick={() => ui.openQuantity(item.product_id!, 'list')}
                     >
                       × {item.quantity ?? 1}
@@ -136,7 +140,7 @@ export function ShoppingList() {
                   )}
                   <button
                     className="flex min-h-tap min-w-tap items-center justify-center text-muted/70"
-                    aria-label={`Quitar ${itemName(item, byId)} de la lista`}
+                    aria-label={m.stock.list.remove(itemName(item, byId))}
                     onClick={() => removeItem(item)}
                   >
                     <Icon name="x" size={18} />
@@ -150,16 +154,16 @@ export function ShoppingList() {
         {checked.length > 0 && (
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="section-title">Comprado</h2>
+              <h2 className="section-title">{m.stock.list.checkedTitle}</h2>
               <button className="min-h-tap px-2 text-sm font-semibold text-primary" onClick={clearChecked}>
-                Limpiar
+                {m.stock.list.clear}
               </button>
             </div>
             <ul className="card divide-y divide-line opacity-80">
               {checked.map((item) => (
                 <li key={item.id}>
                   <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => unpurchaseItem(item)}
-                    aria-label={`Desmarcar ${itemName(item, byId)}`}>
+                    aria-label={m.stock.list.uncheck(itemName(item, byId))}>
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ok text-white">
                       <Icon name="check" size={14} strokeWidth={2.5} />
                     </span>

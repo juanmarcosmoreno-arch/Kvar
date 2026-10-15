@@ -1,0 +1,106 @@
+import { isOne } from '..';
+import type { Messages } from '../es';
+
+export const capture: Messages['capture'] = {
+  quote: (s) => `”${s}”`,
+  newBadge: 'ny',
+
+  scan: {
+    titles: {
+      ask: 'Skanna en produkt',
+      out: 'Skanna den tomma förpackningen',
+      bought: 'Skanna det du köpt',
+      link: 'Skanna streckkoden',
+    },
+    hints: {
+      ask: 'Jag visar produkten och du väljer om den är slut eller om du har köpt den.',
+      out: 'Jag markerar den som ”Slut” och den hamnar på listan.',
+      bought: 'Varje produkt du skannar markeras som ”Finns”. Kameran förblir öppen.',
+      link: 'Nästa gång du skannar den känner jag igen den.',
+    },
+    linked: (name) => `Klart: den här koden är nu ${name ?? 'produkten'}.`,
+    boughtToast: (name) => `${name}: finns.`,
+    ranOut: 'Slut',
+    bought: 'Köpt',
+    otherCode: 'Annan kod',
+    viewProduct: 'Visa produkt',
+    demoHint: 'Den här demon har ingen kamera. Tryck på en exempelkod eller skriv in en nedan, som om du hade skannat den.',
+    looking: 'Söker efter produkten…',
+    manualPlaceholder: 'Går den inte att läsa? Skriv numret',
+    searchCode: 'Sök kod',
+  },
+
+  scanner: {
+    deniedApp: 'Stoka har inte behörighet att använda kameran. Slå på det i Inställningar → Stoka → Kamera.',
+    deniedWeb: 'Webbläsaren har inte behörighet att använda kameran. Kontrollera webbplatsens behörigheter.',
+    cantOpen: 'Det gick inte att öppna kameran.',
+  },
+
+  receipt: {
+    title: 'Foto av kvittot',
+    found: (n) => `Hittade ${n} ${isOne(n) ? 'produkt' : 'produkter'}`,
+    noLines: 'Jag hittade inga produktrader. Prova ett rakare foto med bra ljus, eller klistra in texten.',
+    cantRead: 'Jag kunde inte läsa fotot. Försök igen med kvittot utsträckt och bra ljus.',
+    applied: (updated, created) =>
+      `Klart: ${updated} ${isOne(updated) ? 'uppdaterad' : 'uppdaterade'}${created ? ` och ${created} ${isOne(created) ? 'ny' : 'nya'}` : ''}. Nästa gång känner jag igen dem.`,
+    intro:
+      'Jag läser kvittot, föreslår vilken produkt varje rad motsvarar och du bekräftar allt på en gång. Det du bekräftar lär jag mig till nästa gång.',
+    takePhoto: 'Fotografera kvittot',
+    photoTip: 'Lägg det plant på bordet, i bra ljus och helt med på bilden.',
+    paste: 'Klistra in kvittots text',
+    photosInApp:
+      'Att läsa kvittofoton finns i iPhone-appen. Här kan du klistra in texten, till exempel från ett digitalt kvitto du fått via mejl.',
+    tryDemo: 'Prova med ett exempelkvitto (Macromercado)',
+    textLabel: 'Kvittots text',
+    read: 'Läs',
+    reading: 'Läser kvittot…',
+    ticket: 'Kvitto',
+    known: (n) => `${n} ${isOne(n) ? 'känd' : 'kända'}`,
+    fresh: (n) => `${n} ${isOne(n) ? 'ny' : 'nya'}`,
+    sumMatches: (total) => `Summan blir $${total}, samma som totalen.`,
+    sumMismatch: (diff) =>
+      `Summan stämmer inte med totalen (skillnad $${diff}). Någon rad kan ha lästs fel: kontrollera dem.`,
+    onlyKnown: 'Bara kända',
+    all: 'Alla',
+    skipLine: 'Lägg inte till raden',
+    includeLine: 'Lägg till raden',
+    confirm: (n) => `Bekräfta ${n} ${isOne(n) ? 'produkt' : 'produkter'}`,
+    searchPlaceholder: 'Sök bland dina produkter',
+    searchLabel: 'Sök produkt',
+    newNameLabel: 'Namn på ny produkt',
+    newButton: 'Ny',
+  },
+
+  voice: {
+    title: 'Säg det',
+    kinds: { bought: 'Du köpte', out: 'Slut', low: 'Snart slut', list: 'Till listan', ask: 'Finns det?' },
+    examples: ['Jag köpte mjölk och två paket pasta', 'Oljan är slut', 'Finns det ris?'],
+    micError: 'Det gick inte att använda mikrofonen.',
+    speechDenied: 'Stoka har inte behörighet att känna igen tal. Slå på det i Inställningar → Stoka.',
+    micDenied: 'Stoka har inte behörighet att använda mikrofonen. Slå på det i Inställningar → Stoka.',
+    applied: (n) => `Klart: ${n} ${isOne(n) ? 'ändring' : 'ändringar'}.`,
+    nothingToChange: 'Det fanns inget att ändra.',
+    stopTalking: 'Klar med att prata',
+    startTalking: 'Börja prata',
+    listening: 'Jag lyssnar…',
+    tapHint: 'Tryck och säg till exempel: ”Jag köpte mjölk och två paket pasta”.',
+    noSpeech: 'Taligenkänning är inte tillgänglig på den här iPhonen. Du kan skriva i stället.',
+    appOnly: 'Röst finns i iPhone-appen. Här kan du skriva meningen så förstår jag den ändå.',
+    typePlaceholder: 'eller skriv det här',
+    phraseLabel: 'Mening',
+    thinkingAI: 'Tolkar med Apple Intelligence…',
+    thinking: 'Tolkar…',
+    byAI: 'tolkat med Apple Intelligence',
+    notUnderstood: 'Jag förstod inte vilka produkter. Försök igen, till exempel: ”Mjölken är slut”.',
+    notLoaded: 'Finns inte bland dina produkter',
+    skip: 'Tillämpa inte',
+    apply: 'Tillämpa',
+    again: 'Igen',
+    confirm: 'Bekräfta',
+    aiHints: {
+      notEnabled: 'Slå på Apple Intelligence i Inställningar → Apple Intelligence och Siri så förstår jag bättre.',
+      notEligible: 'Den här iPhonen har inte Apple Intelligence: jag förstår enkla meningar.',
+      notReady: 'Apple Intelligence laddas ner: under tiden förstår jag enkla meningar.',
+    },
+  },
+};

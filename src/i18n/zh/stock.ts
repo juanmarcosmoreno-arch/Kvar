@@ -1,0 +1,160 @@
+import type { Messages } from '../es';
+
+export const stock: Messages['stock'] = {
+  home: {
+    settings: '设置',
+    searchPlaceholder: '搜索商品…',
+    voice: '用语音告诉我',
+    scan: '扫描条形码',
+    addNamed: (name) => `添加“${name}”`,
+    ranOutTitle: '有东西用完了？',
+    ranOutHint: '点一下就直接加入清单',
+    restock: '需要补货',
+    viewList: (n) => `查看清单（${n}）`,
+    allGoodTitle: '一切充足',
+    allGoodHint: '有东西快用完或用完时，会显示在这里。',
+    emptyTitle: '先添加家里有的东西',
+    emptyHint: '点 + 按钮逐个添加商品，只需填写名称。',
+    addProduct: '添加商品',
+    expiringSoon: '即将过期',
+  },
+
+  expiry: (days) => {
+    if (days < 0) return days === -1 ? '昨天已过期' : `已过期 ${-days} 天`;
+    if (days === 0) return '今天过期';
+    if (days === 1) return '明天过期';
+    return `${days} 天后过期`;
+  },
+
+  inventory: {
+    title: '商品',
+    addProduct: '添加商品',
+    searchPlaceholder: '搜索…',
+    filterAll: '全部',
+    filterStaple: '常备品',
+    noMatchTitle: '没有符合筛选条件的商品',
+    noMatchHint: '试试去掉一些筛选条件。',
+    emptyTitle: '还没有商品',
+    emptyHint: '添加家里有的东西，只需填写名称。',
+    swipeHint: '向左滑动标记“快用完了”，向右滑动标记“有”。',
+  },
+
+  list: {
+    title: '购物清单',
+    reasons: {
+      recipe: '用于食谱',
+      plan: '每周计划',
+      predicted: '可能快用完了',
+    },
+    boughtNowOk: (name) => `${name}：已购买，现在有了。`,
+    bought: (name) => `${name}：已购买。`,
+    backFromStore: '购物回来了',
+    receipt: '小票',
+    addPlaceholder: '添加到清单…',
+    emptyTitle: '什么都不缺',
+    emptyHint: '标记某样东西没有了，它就会自动出现在这里。',
+    markBought: (name) => `将${name}标记为已购买`,
+    howMany: (name) => `${name}要买多少`,
+    remove: (name) => `从清单中移除${name}`,
+    checkedTitle: '已购买',
+    clear: '清除',
+    uncheck: (name) => `取消勾选${name}`,
+  },
+
+  row: {
+    staple: '常备品',
+    unidentified: '未识别',
+    minusOne: (name) => `${name}减一（长按选择数量）`,
+    plusOne: (name) => `${name}加一（长按选择数量）`,
+    chooseAmount: (unitPlural, name) => `选择${name}的数量（${unitPlural}）`,
+    changeStatus: (name) => `更改${name}的状态`,
+  },
+
+  product: {
+    changePhoto: '更换照片',
+    noCutoutNative: '无法把商品从背景中分离出来，已保存整张照片。',
+    noCutoutWeb: '照片已保存。去背景功能仅在 iPhone 应用中提供。',
+    anotherBarcode: '再添加条码',
+    linkBarcode: '关联条码',
+    minusOne: '减一',
+    plusOne: '加一',
+    tapForMany: '点击可一次加减多个',
+    addedToList: (name) => `已将${name}加入清单。`,
+    addToList: '加入清单',
+    inList: '已在购物清单中',
+    buyN: (n) => `买 ${n}`,
+    howManyToBuy: '买多少',
+    name: '名称',
+    location: '位置',
+    category: '类别',
+    staple: '常备品',
+    stapleHint: '在用完之前提醒你：标记为“快用完了”时就会加入清单。',
+    countUnits: '按数量计',
+    countUnitsHint: '适用于纸尿裤、罐头或冷冻室里的东西。',
+    unit: '单位',
+    lowAt: '“快用完了”的数量',
+    confirmDelete: '确定删除',
+    deleteProduct: '删除商品',
+  },
+
+  add: {
+    titleNew: '新商品',
+    title: '添加商品',
+    linked: (name) => `好了：下次扫描时，会识别为${name}。`,
+    addedToList: (name) => `已添加${name}，并加入清单。`,
+    added: (name) => `已添加${name}。`,
+    foundOff: '在 Open Food Facts 上找到了。',
+    unknownCode: '不认识这个条码。',
+    confirmOnce: '只需确认一次：下次扫描时就能识别。',
+    namePlaceholder: '例如：咖啡、牛奶、纸尿裤…',
+    isOneOfThese: '是其中一个吗？',
+    alreadyHave: '已经有了吗？',
+    anotherPhoto: '换一张照片',
+    photo: '照片',
+    isExisting: (name) => `是${name}`,
+    viewExisting: (name) => `查看${name}`,
+  },
+
+  quantity: {
+    titles: {
+      add: '添加多少？',
+      remove: '用了多少？',
+      set: '现在有多少？',
+      bought: '买了多少？',
+      list: '要买多少？',
+    },
+    modes: { add: '添加', remove: '减少', set: '盘点' },
+    toastBuy: (name, n) => `${name}：买 ${n}。`,
+    toastLeft: (name, quantity) => `${name}：还剩 ${quantity}。`,
+    toastOk: (name) => `${name}：有。`,
+    has: (quantity) => `现有 ${quantity}`,
+    oneLess: '减一',
+    oneMore: '加一',
+    amount: '数量',
+  },
+
+  ranOut: {
+    title: '有东西用完了？',
+    searchPlaceholder: '搜索商品…',
+    scanEmpty: '扫描空包装',
+    frequent: '最常用完的',
+    alreadyInList: '已在清单中',
+    addedOut: (name) => `${name}：没有了。已加入清单。`,
+    addToList: (name) => `将“${name}”加入清单`,
+    empty: '还没有商品。搜索一个来添加。',
+  },
+
+  unitPicker: {
+    other: '其他',
+    placeholder: '例如：片、罐',
+    use: '使用',
+  },
+
+  status: { label: '状态' },
+
+  photo: {
+    take: '拍张照片',
+    failed: '无法处理照片，请换一张试试。',
+    cropping: '正在裁剪…',
+  },
+};

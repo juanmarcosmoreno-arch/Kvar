@@ -9,6 +9,14 @@
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>es</string>
+		<string>en</string>
+		<string>pt-BR</string>
+		<string>fr</string>
+		<string>it</string>
+		<string>sv</string>
+		<string>da</string>
+		<string>zh-Hans</string>
+		<string>ja</string>
 	</array>
 	<key>CFBundleDisplayName</key>
         <string>Stoka</string>

@@ -1,3 +1,4 @@
+import { compareText, m } from '../i18n';
 import type { Product, StockStatus } from './types';
 
 const ORDER: StockStatus[] = ['ok', 'low', 'out'];
@@ -63,7 +64,7 @@ export function needsAttention(products: Product[]): Product[] {
       (a, b) =>
         severity(b.status) - severity(a.status) ||
         Number(b.is_staple) - Number(a.is_staple) ||
-        a.name.localeCompare(b.name, 'es'),
+        compareText(a.name, b.name),
     );
 }
 
@@ -82,10 +83,7 @@ export function expiringSoon(products: Product[], withinDays = 5, today = new Da
 }
 
 export function expiryLabel(days: number): string {
-  if (days < 0) return days === -1 ? 'Venció ayer' : `Venció hace ${-days} días`;
-  if (days === 0) return 'Vence hoy';
-  if (days === 1) return 'Vence mañana';
-  return `Vence en ${days} días`;
+  return m.stock.expiry(days);
 }
 
 /**
@@ -103,7 +101,7 @@ export function frequentProducts(
       (a, b) =>
         (outCounts[b.id] ?? 0) - (outCounts[a.id] ?? 0) ||
         Number(b.is_staple) - Number(a.is_staple) ||
-        a.name.localeCompare(b.name, 'es'),
+        compareText(a.name, b.name),
     )
     .slice(0, limit);
 }

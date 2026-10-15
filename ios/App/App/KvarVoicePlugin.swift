@@ -54,14 +54,22 @@ public class KvarVoicePlugin: CAPPlugin, CAPBridgedPlugin {
 
     // MARK: - Dictado
 
+    /// Idioma del dictado: el de la app (lo manda la web, ej. «en-US»); si no, el del teléfono; si no, español.
+    private var preferredLocale: String?
+
     private func recognizer() -> SFSpeechRecognizer? {
-        for id in ["es-UY", "es-AR", "es-419", "es-ES", "es-MX"] {
+        var ids: [String] = []
+        if let p = preferredLocale { ids.append(p) }
+        ids.append(Locale.current.identifier)
+        ids += ["es-UY", "es-AR", "es-419", "es-ES", "es-MX", "en-US"]
+        for id in ids {
             if let r = SFSpeechRecognizer(locale: Locale(identifier: id)), r.isAvailable { return r }
         }
         return nil
     }
 
     @objc func start(_ call: CAPPluginCall) {
+        preferredLocale = call.getString("locale")
         SFSpeechRecognizer.requestAuthorization { status in
             guard status == .authorized else {
                 call.reject("Stoka no tiene permiso para reconocer la voz. Activalo en Ajustes → Stoka.", "SPEECH_DENIED")
@@ -156,10 +164,12 @@ public class KvarVoicePlugin: CAPPlugin, CAPBridgedPlugin {
             Task {
                 do {
                     let session = LanguageModelSession(instructions: """
-                    Sos el asistente de Stoka, una app para el stock de la casa, en Uruguay.
+                    Sos el asistente de Stoka, una app para el stock de la casa.
                     Convertí lo que dice la persona en acciones sobre productos de la casa.
                     No inventes productos que no dijo. El producto va sin cantidad ni envase
                     («dos paquetes de fideos» → producto «fideos», cantidad 2).
+                    La persona puede hablar en cualquier idioma: escribí el producto en el mismo idioma
+                    en que lo dijo («two cartons of milk» → producto «milk», cantidad 2).
                     """)
                     let response = try await session.respond(to: text, generating: StokaVoiceCommand.self)
                     let actions = response.content.actions.map { action in

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { normalizeBarcode, resolveAlias } from '../domain/aliases';
 import { guessCategory, guessLocation } from '../domain/openFoodFacts';
 import type { Product } from '../domain/types';
-import { STATUS_LABEL } from '../domain/types';
 import { lookupBarcode } from '../lib/openFoodFacts';
 import { formatQuantity } from '../domain/units';
 import { learnBarcode, markBought, setStatus } from '../store/actions';
@@ -14,26 +13,13 @@ import { DEMO_CODES, isDemo } from '../lib/demo';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
 import { Sheet } from './Sheet';
-
-const TITLE: Record<ScanMode, string> = {
-  ask: 'Escaneá un producto',
-  out: 'Escaneá el envase vacío',
-  bought: 'Escaneá lo que compraste',
-  link: 'Escaneá su código',
-};
-
-const HINT: Record<ScanMode, string> = {
-  ask: 'Te muestro el producto y elegís si se terminó o lo compraste.',
-  out: 'Lo marco como «No hay» y va a la lista.',
-  bought: 'Cada producto que escanees pasa a «Hay». La cámara sigue abierta.',
-  link: 'La próxima vez que lo escanees, lo reconozco.',
-};
+import { m } from '../i18n';
 
 export function ScanSheet({
   mode, productId, onClose,
 }: { mode: ScanMode | null; productId?: string; onClose: () => void }) {
   return (
-    <Sheet open={mode !== null} onClose={onClose} title={mode ? TITLE[mode] : ''}>
+    <Sheet open={mode !== null} onClose={onClose} title={mode ? m.capture.scan.titles[mode] : ''}>
       {mode && <Body mode={mode} productId={productId} onClose={onClose} />}
     </Sheet>
   );
@@ -61,7 +47,7 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
     if (mode === 'link' && productId) {
       const p = v.products.find((x) => x.id === productId);
       learnBarcode(productId, code);
-      toast(`Listo: este código ahora es ${p?.name ?? 'el producto'}.`);
+      toast(m.capture.scan.linked(p?.name));
       onClose();
       return;
     }
@@ -111,14 +97,14 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
             <p className="truncate text-xl font-semibold">{current.name}</p>
             <p className="text-muted">
               {current.track_quantity ? `${formatQuantity(current.quantity, current.unit)} · ` : ''}
-              {STATUS_LABEL[current.status]}
+              {m.common.status[current.status]}
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn min-h-[64px] flex-col gap-0.5 border border-out/40 text-[#B53A2A] dark:text-out"
             onClick={() => { setStatus(current, 'out', 'barcode'); onClose(); }}>
-            Se terminó
+            {m.capture.scan.ranOut}
           </button>
           <button className="btn-primary min-h-[64px]"
             onClick={() => {
@@ -127,18 +113,18 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
                 return;
               }
               markBought(current);
-              toast(`${current.name}: Hay.`);
+              toast(m.capture.scan.boughtToast(current.name));
               onClose();
             }}>
-            Compré
+            {m.capture.scan.bought}
           </button>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-ghost" onClick={() => setFound(null)}>
-            <Icon name="barcode" size={18} /> Otro código
+            <Icon name="barcode" size={18} /> {m.capture.scan.otherCode}
           </button>
           <button className="btn-ghost" onClick={() => { onClose(); ui.openProduct(current.id); }}>
-            Ver producto
+            {m.capture.scan.viewProduct}
           </button>
         </div>
       </div>
@@ -150,7 +136,7 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
       {isDemo ? (
         <div className="space-y-3 rounded-card border border-dashed border-line p-4">
           <p className="text-sm text-muted">
-            En esta demo no hay cámara. Tocá un código de ejemplo o escribí uno abajo, como si lo hubieras escaneado.
+            {m.capture.scan.demoHint}
           </p>
           <div className="flex flex-wrap gap-2">
             {DEMO_CODES.map((c) => (
@@ -163,7 +149,7 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
       ) : (
         <BarcodeScanner onDetect={(c) => void handle(c)} paused={looking} />
       )}
-      <p className="text-center text-sm text-muted">{looking ? 'Buscando el producto…' : HINT[mode]}</p>
+      <p className="text-center text-sm text-muted">{looking ? m.capture.scan.looking : m.capture.scan.hints[mode]}</p>
 
       {mode === 'bought' && session.length > 0 && (
         <ul className="card divide-y divide-line">
@@ -186,16 +172,16 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
         <input
           className="field"
           inputMode="numeric"
-          placeholder="¿No lo lee? Escribí el número"
+          placeholder={m.capture.scan.manualPlaceholder}
           value={manual}
           onChange={(e) => setManual(e.target.value.replace(/\D/g, ''))}
         />
-        <button className="btn-ghost min-w-[52px] px-0" disabled={manual.length < 6} aria-label="Buscar código">
+        <button className="btn-ghost min-w-[52px] px-0" disabled={manual.length < 6} aria-label={m.capture.scan.searchCode}>
           <Icon name="search" size={20} />
         </button>
       </form>
       {mode === 'bought' && (
-        <button className="btn-primary w-full" onClick={onClose}>Listo</button>
+        <button className="btn-primary w-full" onClick={onClose}>{m.common.done}</button>
       )}
     </div>
   );

@@ -2,7 +2,9 @@
  * Datos de Open Food Facts → propuesta de producto para Stoka.
  * La propuesta siempre la confirma el usuario; acá solo se arma la mejor sugerencia.
  */
+import { lang } from '../i18n';
 import { normalizeAlias } from './aliases';
+import { seedNameInSpanish } from './seeds';
 
 export interface OffProduct {
   barcode: string;
@@ -20,6 +22,8 @@ interface OffResponse {
   product?: {
     product_name?: string;
     product_name_es?: string;
+    /** product_name_en, product_name_pt… según el idioma de la app */
+    [field: `product_name_${string}`]: string | undefined;
     generic_name_es?: string;
     brands?: string;
     categories_tags?: string[];
@@ -99,9 +103,10 @@ export function parseOffResponse(barcode: string, json: OffResponse): OffProduct
   const p = json.product;
   if (json.status !== 1 || !p) return null;
   const tags = cleanTags(p.categories_tags);
-  const generic = genericName(tags);
+  // Los nombres genéricos («Arroz», «Galletitas») están en español: en otros idiomas se usa el nombre de OFF
+  const generic = lang === 'es' ? genericName(tags) : null;
   const brand = firstBrand(p.brands);
-  const raw = (p.product_name_es || p.product_name || '').trim();
+  const raw = (p[`product_name_${lang}`] || (lang === 'es' ? '' : p.product_name) || p.product_name_es || p.product_name || '').trim();
   const name = raw ? proposeName(raw, brand, generic) : generic ?? brand ?? '';
   if (!name) return null;
   return {
@@ -132,7 +137,7 @@ const CATEGORY_HINTS: [RegExp, RegExp][] = [
 
 /** Elige la categoría del hogar más probable según las etiquetas de OFF. */
 export function guessCategory<T extends { id: string; name: string }>(tags: string[], categories: T[]): T | null {
-  const norm = categories.map((c) => ({ c, n: normalizeAlias(c.name) }));
+  const norm = categories.map((c) => ({ c, n: normalizeAlias(seedNameInSpanish(c.name)) }));
   for (const [tagRe, nameRe] of CATEGORY_HINTS) {
     if (!tags.some((t) => tagRe.test(t)) && tagRe.source !== '.*') continue;
     // Yerba y café van a Almacén si no hay una categoría de bebidas que los incluya
@@ -144,8 +149,8 @@ export function guessCategory<T extends { id: string; name: string }>(tags: stri
 
 /** Lugar más probable según la categoría elegida. */
 export function guessLocation<T extends { id: string; name: string }>(categoryName: string | null, locations: T[]): T | null {
-  const c = normalizeAlias(categoryName ?? '');
-  const find = (re: RegExp) => locations.find((l) => re.test(normalizeAlias(l.name))) ?? null;
+  const c = normalizeAlias(seedNameInSpanish(categoryName ?? ''));
+  const find = (re: RegExp) => locations.find((l) => re.test(normalizeAlias(seedNameInSpanish(l.name)))) ?? null;
   if (/congel/.test(c)) return find(/freezer|congel/);
   if (/lacteo|huevo|carne|pescad|fruta|verdura/.test(c)) return find(/heladera/);
   if (/limpieza/.test(c)) return find(/limpieza/);
@@ -153,8 +158,13 @@ export function guessLocation<T extends { id: string; name: string }>(categoryNa
   return find(/alacena|despensa/);
 }
 
-export const OFF_FIELDS =
+const BASE_FIELDS =
   'code,product_name,product_name_es,generic_name_es,brands,categories_tags,quantity,image_front_small_url,image_front_url';
+
+/** Campos a pedir a OFF (incluye el nombre en el idioma de la app) */
+export function offFields(): string {
+  return lang === 'es' ? BASE_FIELDS : `${BASE_FIELDS},product_name_${lang}`;
+}
 
 // Palabra del nombre del producto → palabras de la categoría del hogar (para tickets, sin datos de OFF).
 const NAME_HINTS: [RegExp, RegExp][] = [
@@ -174,7 +184,7 @@ const NAME_HINTS: [RegExp, RegExp][] = [
 /** Categoría del hogar más probable por el nombre del producto (null si no hay pista). */
 export function guessCategoryFromName<T extends { id: string; name: string }>(productName: string, categories: T[]): T | null {
   const words = normalizeAlias(productName).split(' ').filter((w) => w.length > 1 && !NOISE.has(w));
-  const norm = categories.map((c) => ({ c, n: normalizeAlias(c.name) }));
+  const norm = categories.map((c) => ({ c, n: normalizeAlias(seedNameInSpanish(c.name)) }));
   // Primero las dos primeras palabras (dicen qué es: «galletitas … con leche» son galletitas), después todo
   for (const text of [words.slice(0, 2).join(' '), words.join(' ')]) {
     for (const [nameRe, catRe] of NAME_HINTS) {

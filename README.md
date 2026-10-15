@@ -213,6 +213,15 @@ El código está en `ios/StokaWatch/`. El *target* del reloj se crea una vez en 
 5. Abrí Stoka en el iPhone (así le pasa el hogar al reloj). Después, arriba, elegí el esquema
    **StokaWatch Watch App** y tu Apple Watch, y ▶︎.
 
+## Idiomas
+
+Stoka está en español, inglés, portugués, francés, italiano, sueco, danés, chino simplificado y japonés
+(ver [docs/i18n.md](docs/i18n.md)). Usa el idioma del teléfono; en **Ajustes → Idioma** se puede elegir otro.
+
+En el iPhone, para que los avisos de permisos (cámara, micrófono, fotos) también salgan en cada idioma, una sola vez:
+en Xcode arrastrá `ios/App/App/InfoPlist.xcstrings` a la carpeta **App** del panel izquierdo, con el target **App**
+marcado. Sin ese paso la app anda igual, pero esos avisos quedan en español.
+
 ## Demo sin servidor
 
 `npm run build:demo` arma una versión de prueba que funciona sola, sin Supabase ni cuentas: un hogar de ejemplo,

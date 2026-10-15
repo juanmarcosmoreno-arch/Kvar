@@ -10,16 +10,17 @@ import { categoryIcon, locationIcon } from '../lib/categoryIcon';
 import { useView } from '../store/store';
 import { useUI } from '../store/ui';
 import { EmptyCard } from './Home';
+import { compareText, m } from '../i18n';
 
 type StatusFilter = 'all' | StockStatus | 'staple';
 
-const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [
-  { id: 'all', label: 'Todos' },
-  { id: 'ok', label: 'Hay' },
-  { id: 'low', label: 'Queda poco' },
-  { id: 'out', label: 'No hay' },
-  { id: 'staple', label: 'Básicos' },
-];
+const STATUS_FILTERS: StatusFilter[] = ['all', 'ok', 'low', 'out', 'staple'];
+
+function filterLabel(f: StatusFilter): string {
+  if (f === 'all') return m.stock.inventory.filterAll;
+  if (f === 'staple') return m.stock.inventory.filterStaple;
+  return m.common.status[f];
+}
 
 export function Inventory() {
   const view = useView()!;
@@ -39,7 +40,7 @@ export function Inventory() {
     if (location) ps = ps.filter((p) => p.location_id === location);
     if (category) ps = ps.filter((p) => p.category_id === category);
     if (!q.trim()) {
-      ps.sort((a, b) => Number(b.unidentified) - Number(a.unidentified) || severity(b.status) - severity(a.status) || a.name.localeCompare(b.name, 'es'));
+      ps.sort((a, b) => Number(b.unidentified) - Number(a.unidentified) || severity(b.status) - severity(a.status) || compareText(a.name, b.name));
     }
     return ps;
   }, [view.products, q, status, location, category]);
@@ -47,10 +48,10 @@ export function Inventory() {
   return (
     <>
       <Header
-        title="Productos"
+        title={m.stock.inventory.title}
         right={
           <button
-            aria-label="Agregar producto"
+            aria-label={m.stock.inventory.addProduct}
             className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-primary"
             onClick={() => ui.openAdd({ location_id: location, category_id: category })}
           >
@@ -61,17 +62,17 @@ export function Inventory() {
       <div className="sticky top-0 z-10 space-y-3 bg-bg/95 px-5 pb-3 pt-1 backdrop-blur">
         <label className="relative block">
           <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-          <input className="field rounded-full pl-12" placeholder="Buscar…" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
+          <input className="field rounded-full pl-12" placeholder={m.stock.inventory.searchPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} type="search" />
         </label>
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
           {STATUS_FILTERS.map((f) => (
             <button
-              key={f.id}
-              onClick={() => setStatusFilter(f.id)}
-              className={`chip ${status === f.id ? 'border-primary/40 bg-primary/10 text-primary' : 'border-transparent text-muted'}`}
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`chip ${status === f ? 'border-primary/40 bg-primary/10 text-primary' : 'border-transparent text-muted'}`}
             >
-              {f.id !== 'all' && f.id !== 'staple' && <StatusDot status={f.id} size={8} />}
-              {f.label}
+              {f !== 'all' && f !== 'staple' && <StatusDot status={f} size={8} />}
+              {filterLabel(f)}
             </button>
           ))}
         </div>
@@ -108,13 +109,13 @@ export function Inventory() {
         {products.length === 0 && (
           <EmptyCard
             icon="box"
-            title={view.products.length ? 'Nada con estos filtros' : 'Todavía no hay productos'}
-            hint={view.products.length ? 'Probá sacando algún filtro.' : 'Agregá lo que tenés en casa; solo hace falta el nombre.'}
-            action={{ label: 'Agregar producto', run: () => ui.openAdd({ name: q, location_id: location, category_id: category }) }}
+            title={view.products.length ? m.stock.inventory.noMatchTitle : m.stock.inventory.emptyTitle}
+            hint={view.products.length ? m.stock.inventory.noMatchHint : m.stock.inventory.emptyHint}
+            action={{ label: m.stock.inventory.addProduct, run: () => ui.openAdd({ name: q, location_id: location, category_id: category }) }}
           />
         )}
         {products.length > 0 && (
-          <p className="pt-3 text-center text-xs text-muted">Deslizá a la izquierda para «se está terminando», a la derecha para «Hay».</p>
+          <p className="pt-3 text-center text-xs text-muted">{m.stock.inventory.swipeHint}</p>
         )}
       </div>
     </>

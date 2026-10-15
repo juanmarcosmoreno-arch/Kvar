@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}：${out}。リストに追加しました。`,
+    status: (product, status) => `${product}：${status}`,
+    deleted: (name) => `${name}を削除しました。`,
+    recipeDismissed: (title) => `わかりました。しばらく${title}は提案しません。`,
+    syncRejected: '変更を保存できませんでした。家族の最新の状態に更新しました。',
+  },
+  demo: {
+    household: 'わが家',
+    me: 'あなた',
+    partner: 'ソフィア',
+    products: {
+      milk: '牛乳',
+      yerba: 'マテ茶',
+      tomato: 'トマト',
+      pasta: 'パスタ',
+      sunflowerOil: 'ひまわり油',
+      diapers: 'おむつ',
+      bread: 'パン',
+      detergent: '食器用洗剤',
+      eggs: '卵',
+      rice: '米',
+      gratedCheese: '粉チーズ',
+      coffee: 'コーヒー',
+      toiletPaper: 'トイレットペーパー',
+      milanesas: 'カツレツ',
+      apples: 'りんご',
+      dogFood: 'ドッグフード',
+      onion: '玉ねぎ',
+      potatoes: 'じゃがいも',
+      crushedTomatoes: 'カットトマト缶',
+      butter: 'バター',
+      groundBeef: '牛ひき肉',
+      ham: 'ハム',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: '誕生日ケーキのろうそく',
+    recipe: {
+      title: 'おばあちゃんのミートソース',
+      steps: 'ひき肉と玉ねぎを炒めて焼き色をつけます。\nトマトとローリエを1枚加えます。\nごく弱火で1時間半煮込みます。',
+      ingredients: {
+        groundBeef: '牛ひき肉',
+        crushedTomatoes: 'カットトマト缶',
+        onion: '玉ねぎ',
+        pasta: 'パスタ',
+        salt: '塩',
+      },
+    },
+    codes: {
+      milk: '牛乳（登録済み）',
+      pasta: 'パスタ（登録済み）',
+      newRice: 'Gallo Oro 米（新規）',
+    },
+  },
+};

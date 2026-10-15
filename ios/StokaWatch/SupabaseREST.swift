@@ -16,7 +16,7 @@ actor SupabaseREST {
         var errorDescription: String? {
             switch self {
             case .http(let code, let body): return "Error \(code): \(body.prefix(140))"
-            case .noSession: return "Sin sesión"
+            case .noSession: return L10n.noSession
             }
         }
     }

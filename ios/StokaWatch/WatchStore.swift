@@ -10,7 +10,7 @@ struct ListItem: Decodable, Identifiable {
     let reason: String
     let products: ProductName?
     struct ProductName: Decodable { let name: String }
-    var title: String { products?.name ?? name ?? "Producto" }
+    var title: String { products?.name ?? name ?? L10n.product }
 }
 
 struct Product: Decodable, Identifiable {
@@ -57,7 +57,7 @@ final class WatchStore: ObservableObject {
         do {
             if !(await api.hasSession) { try await api.signUpAnonymously() }
             if UserDefaults.standard.string(forKey: Self.joinedKey) != config.householdId {
-                let name = config.memberName.isEmpty ? "Reloj" : "Reloj de \(config.memberName)"
+                let name = config.memberName.isEmpty ? L10n.watch : L10n.watchOf(config.memberName)
                 _ = try await api.rpc("join_household", ["p_code": config.inviteCode, "p_display_name": name])
                 UserDefaults.standard.set(config.householdId, forKey: Self.joinedKey)
             }
@@ -66,7 +66,7 @@ final class WatchStore: ObservableObject {
         } catch SupabaseREST.Failure.noSession {
             // La sesión venció del todo: se crea una nueva y se vuelve a entrar con el código
             UserDefaults.standard.removeObject(forKey: Self.joinedKey)
-            phase = .failed("Reconectando…")
+            phase = .failed(L10n.reconnecting)
             try? await Task.sleep(nanoseconds: 500_000_000)
             await connect()
         } catch {

@@ -3,6 +3,7 @@
  * En Fase 1 solo se usa para buscar productos por nombre; las Fases 2–3 guardan
  * los alias en la tabla product_aliases usando `normalizeAlias` como clave.
  */
+import { compareText } from '../i18n';
 
 export type AliasKind = 'barcode' | 'receipt' | 'voice' | 'photo' | 'email';
 
@@ -41,7 +42,7 @@ export function normalizeAlias(text: string): string {
     .replace(/[̀-ͯ]/g, '')
     .replace(/ñ/g, 'n')
     .replace(/(\d),(\d)/g, '$1.$2')
-    .replace(/[^a-z0-9.\s]/g, ' ')
+    .replace(/[^\p{L}\p{N}\p{M}.\s]/gu, ' ')
     .replace(/\.(?!\d)/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -161,6 +162,6 @@ export function searchProducts<T extends Candidate>(query: string, products: T[]
       return { p, score };
     })
     .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score || a.p.name.localeCompare(b.p.name, 'es'));
+    .sort((a, b) => b.score - a.score || compareText(a.p.name, b.p.name));
   return scored.map((x) => x.p);
 }

@@ -1,4 +1,5 @@
 import { normalizeAlias } from '../domain/aliases';
+import { seedNameInSpanish } from '../domain/seeds';
 import type { IconName } from '../components/Icon';
 
 // Ícono de línea según el nombre de la categoría o del lugar (los nombres son editables).
@@ -22,7 +23,7 @@ const RULES: [RegExp, IconName][] = [
 
 export function categoryIcon(name: string | undefined | null, fallback: IconName = 'leaf'): IconName {
   if (!name) return fallback;
-  const n = normalizeAlias(name);
+  const n = normalizeAlias(seedNameInSpanish(name));
   return RULES.find(([re]) => re.test(n))?.[1] ?? fallback;
 }
 

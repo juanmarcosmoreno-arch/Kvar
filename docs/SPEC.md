@@ -42,6 +42,9 @@ Cómo se aplica en la Fase 1:
 
 ## 3. Idioma y estética
 
+La app está en 9 idiomas (español rioplatense como original; ver docs/i18n.md). Los textos de este documento
+son los de la versión en español.
+
 - Interfaz en **español de Uruguay, con voseo**: «Escaneá», «Confirmá», «¿Se terminó algo?».
 - **Estética nórdica, fina y minimalista** (nada caricaturesco): mucho espacio, tipografía del sistema (SF Pro en
   iPhone) con pesos medios, bordes de un pelo en lugar de sombras, íconos de línea finos, paleta sobria con tres

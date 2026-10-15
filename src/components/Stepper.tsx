@@ -1,3 +1,4 @@
+import { m } from '../i18n';
 import { Icon } from './Icon';
 
 /** − 2 personas + (botones de 44px, para usar con una mano). */
@@ -18,7 +19,7 @@ export function Stepper({
         className="flex min-h-tap min-w-tap items-center justify-center text-muted disabled:opacity-30"
         disabled={value <= min}
         onClick={() => onChange(Math.max(min, value - 1))}
-        aria-label="Menos"
+        aria-label={m.common.less}
       >
         <Icon name="minus" size={18} />
       </button>
@@ -30,7 +31,7 @@ export function Stepper({
         className="flex min-h-tap min-w-tap items-center justify-center text-muted disabled:opacity-30"
         disabled={value >= max}
         onClick={() => onChange(Math.min(max, value + 1))}
-        aria-label="Más"
+        aria-label={m.common.more}
       >
         <Icon name="plus" size={18} />
       </button>
@@ -38,4 +39,4 @@ export function Stepper({
   );
 }
 
-export const peopleLabel = (n: number) => `${n} ${n === 1 ? 'persona' : 'personas'}`;
+export const peopleLabel = (n: number) => m.common.people(n);

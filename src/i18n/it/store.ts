@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}: ${out}. L’ho aggiunto alla lista.`,
+    status: (product, status) => `${product}: ${status}`,
+    deleted: (name) => `Ho eliminato ${name}.`,
+    recipeDismissed: (title) => `Ok, non ti propongo ${title} per un po’.`,
+    syncRejected: 'Non è stato possibile salvare una modifica. Aggiornato con gli ultimi dati della casa.',
+  },
+  demo: {
+    household: 'Casa',
+    me: 'Tu',
+    partner: 'Sofia',
+    products: {
+      milk: 'Latte',
+      yerba: 'Yerba mate',
+      tomato: 'Pomodori',
+      pasta: 'Pasta',
+      sunflowerOil: 'Olio di semi di girasole',
+      diapers: 'Pannolini',
+      bread: 'Pane',
+      detergent: 'Detersivo per piatti',
+      eggs: 'Uova',
+      rice: 'Riso',
+      gratedCheese: 'Formaggio grattugiato',
+      coffee: 'Caffè',
+      toiletPaper: 'Carta igienica',
+      milanesas: 'Cotolette',
+      apples: 'Mele',
+      dogFood: 'Cibo per cani',
+      onion: 'Cipolle',
+      potatoes: 'Patate',
+      crushedTomatoes: 'Polpa di pomodoro',
+      butter: 'Burro',
+      groundBeef: 'Carne macinata',
+      ham: 'Prosciutto cotto',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Candeline di compleanno',
+    recipe: {
+      title: 'Il ragù della nonna',
+      steps: 'Rosola la carne con la cipolla.\nAggiungi il pomodoro e una foglia di alloro.\nCuoci a fuoco minimo per un’ora e mezza.',
+      ingredients: {
+        groundBeef: 'carne macinata',
+        crushedTomatoes: 'polpa di pomodoro',
+        onion: 'cipolla',
+        pasta: 'pasta',
+        salt: 'sale',
+      },
+    },
+    codes: {
+      milk: 'Latte (conosciuto)',
+      pasta: 'Pasta (conosciuto)',
+      newRice: 'Riso Gallo Oro (nuovo)',
+    },
+  },
+};

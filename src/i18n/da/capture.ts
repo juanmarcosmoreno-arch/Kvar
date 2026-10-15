@@ -1,0 +1,106 @@
+import { isOne } from '..';
+import type { Messages } from '../es';
+
+export const capture: Messages['capture'] = {
+  quote: (s) => `»${s}«`,
+  newBadge: 'ny',
+
+  scan: {
+    titles: {
+      ask: 'Scan et produkt',
+      out: 'Scan den tomme emballage',
+      bought: 'Scan det, du har købt',
+      link: 'Scan stregkoden',
+    },
+    hints: {
+      ask: 'Jeg viser produktet, og du vælger, om det er sluppet op, eller om du har købt det.',
+      out: 'Jeg markerer det som »Ikke på lager«, og det kommer på listen.',
+      bought: 'Hvert produkt, du scanner, markeres som »På lager«. Kameraet bliver ved med at være åbent.',
+      link: 'Næste gang du scanner det, genkender jeg det.',
+    },
+    linked: (name) => `Færdig: denne kode er nu ${name ?? 'produktet'}.`,
+    boughtToast: (name) => `${name}: på lager.`,
+    ranOut: 'Sluppet op',
+    bought: 'Købt',
+    otherCode: 'Anden kode',
+    viewProduct: 'Se produkt',
+    demoHint: 'Denne demo har intet kamera. Tryk på en eksempelkode, eller skriv en nedenfor, som om du havde scannet den.',
+    looking: 'Leder efter produktet…',
+    manualPlaceholder: 'Kan den ikke læses? Skriv nummeret',
+    searchCode: 'Søg kode',
+  },
+
+  scanner: {
+    deniedApp: 'Stoka har ikke tilladelse til at bruge kameraet. Slå det til i Indstillinger → Stoka → Kamera.',
+    deniedWeb: 'Browseren har ikke tilladelse til at bruge kameraet. Tjek webstedets tilladelser.',
+    cantOpen: 'Kameraet kunne ikke åbnes.',
+  },
+
+  receipt: {
+    title: 'Foto af kvitteringen',
+    found: (n) => `Fandt ${n} ${isOne(n) ? 'produkt' : 'produkter'}`,
+    noLines: 'Jeg fandt ingen produktlinjer. Prøv et mere lige foto med godt lys, eller indsæt teksten.',
+    cantRead: 'Jeg kunne ikke læse fotoet. Prøv igen med kvitteringen glattet ud og godt lys.',
+    applied: (updated, created) =>
+      `Færdig: ${updated} opdateret${created ? ` og ${created} ${isOne(created) ? 'ny' : 'nye'}` : ''}. Næste gang genkender jeg dem.`,
+    intro:
+      'Jeg læser kvitteringen, foreslår hvilket produkt hver linje svarer til, og du bekræfter det hele på én gang. Det, du bekræfter, husker jeg til næste gang.',
+    takePhoto: 'Tag et foto af kvitteringen',
+    photoTip: 'Læg den fladt på bordet, i godt lys og helt med på billedet.',
+    paste: 'Indsæt kvitteringens tekst',
+    photosInApp:
+      'Læsning af kvitteringsfotos findes i iPhone-appen. Her kan du indsætte teksten, f.eks. fra en digital kvittering, du har fået på mail.',
+    tryDemo: 'Prøv med en eksempelkvittering (Macromercado)',
+    textLabel: 'Kvitteringens tekst',
+    read: 'Læs',
+    reading: 'Læser kvitteringen…',
+    ticket: 'Kvittering',
+    known: (n) => `${n} ${isOne(n) ? 'kendt' : 'kendte'}`,
+    fresh: (n) => `${n} ${isOne(n) ? 'ny' : 'nye'}`,
+    sumMatches: (total) => `Summen giver $${total}, det samme som totalen.`,
+    sumMismatch: (diff) =>
+      `Summen passer ikke med totalen (forskel $${diff}). En linje kan være læst forkert: tjek dem.`,
+    onlyKnown: 'Kun kendte',
+    all: 'Alle',
+    skipLine: 'Tilføj ikke denne linje',
+    includeLine: 'Tilføj denne linje',
+    confirm: (n) => `Bekræft ${n} ${isOne(n) ? 'produkt' : 'produkter'}`,
+    searchPlaceholder: 'Søg i dine produkter',
+    searchLabel: 'Søg produkt',
+    newNameLabel: 'Navn på nyt produkt',
+    newButton: 'Ny',
+  },
+
+  voice: {
+    title: 'Sig det',
+    kinds: { bought: 'Du købte', out: 'Sluppet op', low: 'Næsten tom', list: 'På listen', ask: 'Har vi det?' },
+    examples: ['Jeg har købt mælk og to pakker pasta', 'Olien er sluppet op', 'Har vi ris?'],
+    micError: 'Mikrofonen kunne ikke bruges.',
+    speechDenied: 'Stoka har ikke tilladelse til talegenkendelse. Slå det til i Indstillinger → Stoka.',
+    micDenied: 'Stoka har ikke tilladelse til at bruge mikrofonen. Slå det til i Indstillinger → Stoka.',
+    applied: (n) => `Færdig: ${n} ${isOne(n) ? 'ændring' : 'ændringer'}.`,
+    nothingToChange: 'Der var intet at ændre.',
+    stopTalking: 'Færdig med at tale',
+    startTalking: 'Begynd at tale',
+    listening: 'Jeg lytter…',
+    tapHint: 'Tryk og sig f.eks.: »Jeg har købt mælk og to pakker pasta«.',
+    noSpeech: 'Talegenkendelse er ikke tilgængelig på denne iPhone. Du kan skrive det i stedet.',
+    appOnly: 'Stemme findes i iPhone-appen. Her kan du skrive sætningen, så forstår jeg den alligevel.',
+    typePlaceholder: 'eller skriv det her',
+    phraseLabel: 'Sætning',
+    thinkingAI: 'Forstår med Apple Intelligence…',
+    thinking: 'Forstår…',
+    byAI: 'forstået med Apple Intelligence',
+    notUnderstood: 'Jeg forstod ikke hvilke produkter. Prøv igen, f.eks.: »Mælken er sluppet op«.',
+    notLoaded: 'Ikke blandt dine produkter',
+    skip: 'Anvend ikke',
+    apply: 'Anvend',
+    again: 'Igen',
+    confirm: 'Bekræft',
+    aiHints: {
+      notEnabled: 'Slå Apple Intelligence til i Indstillinger → Apple Intelligence og Siri, så jeg forstår bedre.',
+      notEligible: 'Denne iPhone har ikke Apple Intelligence: jeg forstår enkle sætninger.',
+      notReady: 'Apple Intelligence downloades: imens forstår jeg enkle sætninger.',
+    },
+  },
+};

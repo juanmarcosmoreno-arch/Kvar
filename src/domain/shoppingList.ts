@@ -1,3 +1,4 @@
+import { compareText, m } from '../i18n';
 import type { Category, ListReason, Product, ShoppingItem, StockStatus } from './types';
 
 const AUTO_REASONS: ListReason[] = ['out', 'low', 'predicted'];
@@ -85,7 +86,7 @@ export function groupListByCategory(
   const groups = new Map<string, ListGroup>();
   const sortedCats = [...categories].sort((a, b) => a.sort_order - b.sort_order);
   for (const c of sortedCats) groups.set(c.id, { key: c.id, title: c.name, items: [] });
-  const other: ListGroup = { key: 'none', title: 'Sin categoría', items: [] };
+  const other: ListGroup = { key: 'none', title: m.common.noCategory, items: [] };
 
   for (const item of list) {
     if (item.checked_at) continue;
@@ -101,7 +102,7 @@ export function groupListByCategory(
       // "No hay" antes que "Queda poco"
       const ra = a.reason === 'out' ? 0 : 1;
       const rb = b.reason === 'out' ? 0 : 1;
-      return ra - rb || name(a).localeCompare(name(b), 'es');
+      return ra - rb || compareText(name(a), name(b));
     });
   }
   return result;

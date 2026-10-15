@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}: ${out}. Adicionei à lista.`,
+    status: (product, status) => `${product}: ${status}`,
+    deleted: (name) => `Apaguei ${name}.`,
+    recipeDismissed: (title) => `Certo, não vou sugerir ${title} por um tempo.`,
+    syncRejected: 'Não deu para salvar uma alteração. Atualizei com o mais recente da casa.',
+  },
+  demo: {
+    household: 'Casa',
+    me: 'Você',
+    partner: 'Sofia',
+    products: {
+      milk: 'Leite',
+      yerba: 'Erva-mate',
+      tomato: 'Tomate',
+      pasta: 'Macarrão',
+      sunflowerOil: 'Óleo de girassol',
+      diapers: 'Fraldas',
+      bread: 'Pão',
+      detergent: 'Detergente',
+      eggs: 'Ovos',
+      rice: 'Arroz',
+      gratedCheese: 'Queijo ralado',
+      coffee: 'Café',
+      toiletPaper: 'Papel higiênico',
+      milanesas: 'Bife à milanesa',
+      apples: 'Maçãs',
+      dogFood: 'Ração de cachorro',
+      onion: 'Cebola',
+      potatoes: 'Batatas',
+      crushedTomatoes: 'Tomate pelado',
+      butter: 'Manteiga',
+      groundBeef: 'Carne moída',
+      ham: 'Presunto',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Velas de aniversário',
+    recipe: {
+      title: 'Molho de carne da vovó',
+      steps: 'Doure a carne com a cebola.\nJunte o tomate e uma folha de louro.\nCozinhe em fogo mínimo por uma hora e meia.',
+      ingredients: {
+        groundBeef: 'carne moída',
+        crushedTomatoes: 'tomate pelado',
+        onion: 'cebola',
+        pasta: 'macarrão',
+        salt: 'sal',
+      },
+    },
+    codes: {
+      milk: 'Leite (conhecido)',
+      pasta: 'Macarrão (conhecido)',
+      newRice: 'Arroz Gallo Oro (novo)',
+    },
+  },
+};

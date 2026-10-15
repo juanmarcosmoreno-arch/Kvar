@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}: ${out}. I added it to the list.`,
+    status: (product, status) => `${product}: ${status}`,
+    deleted: (name) => `Deleted ${name}.`,
+    recipeDismissed: (title) => `Got it, I won’t suggest ${title} for a while.`,
+    syncRejected: 'A change couldn’t be saved. Updated with the household’s latest.',
+  },
+  demo: {
+    household: 'Home',
+    me: 'You',
+    partner: 'Sofia',
+    products: {
+      milk: 'Milk',
+      yerba: 'Yerba mate',
+      tomato: 'Tomatoes',
+      pasta: 'Pasta',
+      sunflowerOil: 'Sunflower oil',
+      diapers: 'Diapers',
+      bread: 'Bread',
+      detergent: 'Dish soap',
+      eggs: 'Eggs',
+      rice: 'Rice',
+      gratedCheese: 'Grated cheese',
+      coffee: 'Coffee',
+      toiletPaper: 'Toilet paper',
+      milanesas: 'Breaded cutlets',
+      apples: 'Apples',
+      dogFood: 'Dog food',
+      onion: 'Onions',
+      potatoes: 'Potatoes',
+      crushedTomatoes: 'Crushed tomatoes',
+      butter: 'Butter',
+      groundBeef: 'Ground beef',
+      ham: 'Ham',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Birthday candles',
+    recipe: {
+      title: 'Grandma’s meat sauce',
+      steps: 'Brown the beef with the onion.\nAdd the tomatoes and a bay leaf.\nSimmer on the lowest heat for an hour and a half.',
+      ingredients: {
+        groundBeef: 'ground beef',
+        crushedTomatoes: 'crushed tomatoes',
+        onion: 'onion',
+        pasta: 'pasta',
+        salt: 'salt',
+      },
+    },
+    codes: {
+      milk: 'Milk (known)',
+      pasta: 'Pasta (known)',
+      newRice: 'Gallo Oro rice (new)',
+    },
+  },
+};

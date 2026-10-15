@@ -1,0 +1,58 @@
+import type { Messages } from '../es';
+
+export const store: Messages['store'] = {
+  toasts: {
+    statusOut: (product, out) => `${product}: ${out}. Jag lade till det på listan.`,
+    status: (product, status) => `${product}: ${status}`,
+    deleted: (name) => `Tog bort ${name}.`,
+    recipeDismissed: (title) => `Okej, jag föreslår inte ${title} på ett tag.`,
+    syncRejected: 'En ändring kunde inte sparas. Uppdaterat med hushållets senaste.',
+  },
+  demo: {
+    household: 'Hemma',
+    me: 'Du',
+    partner: 'Sofia',
+    products: {
+      milk: 'Mjölk',
+      yerba: 'Yerba mate',
+      tomato: 'Tomater',
+      pasta: 'Pasta',
+      sunflowerOil: 'Solrosolja',
+      diapers: 'Blöjor',
+      bread: 'Bröd',
+      detergent: 'Diskmedel',
+      eggs: 'Ägg',
+      rice: 'Ris',
+      gratedCheese: 'Riven ost',
+      coffee: 'Kaffe',
+      toiletPaper: 'Toalettpapper',
+      milanesas: 'Panerade schnitzlar',
+      apples: 'Äpplen',
+      dogFood: 'Hundmat',
+      onion: 'Lök',
+      potatoes: 'Potatis',
+      crushedTomatoes: 'Krossade tomater',
+      butter: 'Smör',
+      groundBeef: 'Nötfärs',
+      ham: 'Skinka',
+    },
+    units: { diapers: 'unidades', eggs: 'unidades' },
+    listItem: 'Födelsedagsljus',
+    recipe: {
+      title: 'Mormors köttfärssås',
+      steps: 'Bryn färsen med löken.\nTillsätt tomaterna och ett lagerblad.\nLåt puttra på svagaste värmen i en och en halv timme.',
+      ingredients: {
+        groundBeef: 'nötfärs',
+        crushedTomatoes: 'krossade tomater',
+        onion: 'lök',
+        pasta: 'pasta',
+        salt: 'salt',
+      },
+    },
+    codes: {
+      milk: 'Mjölk (känd)',
+      pasta: 'Pasta (känd)',
+      newRice: 'Ris Gallo Oro (ny)',
+    },
+  },
+};

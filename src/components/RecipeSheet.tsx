@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
-  assessRecipe, capitalize, CONSTRAINT_LABEL, MEAL_LABEL, minutesLabel, usedProducts, type IngredientLine,
+  assessRecipe, capitalize, minutesLabel, usedProducts, type IngredientLine,
 } from '../domain/recipes';
 import type { Product, Recipe, StockStatus } from '../domain/types';
+import { formatList, m } from '../i18n';
 import { addMissingToList, cookedRecipe, deleteRecipe, dismissRecipe } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -35,6 +36,7 @@ function Body({
   const [servings, setServings] = useState(initialServings);
   const [cooking, setCooking] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const t = m.recipes.sheet;
   const s = useMemo(() => assessRecipe(recipe, view.products, servings), [recipe, view.products, servings]);
   const own = recipe.source !== 'catalog';
 
@@ -42,33 +44,33 @@ function Body({
 
   const meta = [
     minutesLabel(recipe.total_minutes),
-    ...recipe.meal_types.map((m) => MEAL_LABEL[m]),
-    ...recipe.constraints.map((c) => CONSTRAINT_LABEL[c]),
+    ...recipe.meal_types.map((k) => m.common.meals[k]),
+    ...recipe.constraints.map((c) => m.common.constraints[c]),
   ].filter(Boolean);
   const steps = (recipe.steps ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
 
   const addMissing = () => {
     const n = addMissingToList(s);
-    toast(n ? `Agregué ${n === 1 ? '1 cosa' : `${n} cosas`} a la lista.` : 'Ya estaba todo en la lista.');
+    toast(n ? t.addedToList(n) : t.allInList);
   };
 
   return (
     <div className="space-y-6 pb-2">
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
-        {own && <span className="chip min-h-[28px] border-primary/40 text-primary">De la casa</span>}
+        {own && <span className="chip min-h-[28px] border-primary/40 text-primary">{m.recipes.fromHome}</span>}
         {meta.length > 0 && <span>{meta.join(' · ')}</span>}
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <span className="text-muted">Para</span>
-        <Stepper value={servings} onChange={setServings} label="Personas a comer" unit={peopleLabel} />
+        <span className="text-muted">{t.for}</span>
+        <Stepper value={servings} onChange={setServings} label={m.recipes.servingsLabel} unit={peopleLabel} />
       </div>
       {recipe.servings && recipe.servings !== servings && (
-        <p className="-mt-4 text-sm text-muted">La receta original es para {peopleLabel(recipe.servings)}; ya ajusté las cantidades.</p>
+        <p className="-mt-4 text-sm text-muted">{t.originalFor(peopleLabel(recipe.servings))}</p>
       )}
 
       <section className="space-y-2">
-        <h3 className="section-title">Ingredientes</h3>
+        <h3 className="section-title">{t.ingredients}</h3>
         <ul className="card divide-y divide-line">
           {s.lines.map((l) => <Ingredient key={l.ingredient.id} line={l} />)}
         </ul>
@@ -76,7 +78,7 @@ function Body({
 
       {steps.length > 0 && (
         <section className="space-y-2">
-          <h3 className="section-title">Cómo se hace</h3>
+          <h3 className="section-title">{t.steps}</h3>
           <ol className="space-y-3">
             {steps.map((step, i) => (
               <li key={i} className="flex gap-3">
@@ -92,29 +94,29 @@ function Body({
         {s.missing.length > 0 && (
           <button className="btn-ghost w-full" onClick={addMissing}>
             <Icon name="cart" size={20} />
-            Agregar lo que falta a la lista ({s.missing.length})
+            {t.addMissing(s.missing.length)}
           </button>
         )}
         <button className="btn-primary w-full" onClick={() => setCooking(true)}>
-          <Icon name="check" size={20} /> La hice
+          <Icon name="check" size={20} /> {t.cooked}
         </button>
         <div className="grid grid-cols-2 gap-2">
           <button className="btn-ghost" onClick={() => onEdit(recipe)}>
-            <Icon name={own ? 'edit' : 'copy'} size={18} /> {own ? 'Editar' : 'Hacerla mía'}
+            <Icon name={own ? 'edit' : 'copy'} size={18} /> {own ? m.common.edit : t.makeMine}
           </button>
           {own ? (
             confirmDelete ? (
               <button className="btn bg-out/15 text-out" onClick={() => { deleteRecipe(recipe); onClose(); }}>
-                ¿Borrar?
+                {m.common.confirmDelete}
               </button>
             ) : (
               <button className="btn-ghost" onClick={() => setConfirmDelete(true)}>
-                <Icon name="trash" size={18} /> Borrar
+                <Icon name="trash" size={18} /> {m.common.delete}
               </button>
             )
           ) : (
             <button className="btn-ghost" onClick={() => { dismissRecipe(recipe); onClose(); }}>
-              <Icon name="x" size={18} /> No me tienta
+              <Icon name="x" size={18} /> {t.notForMe}
             </button>
           )}
         </div>
@@ -125,12 +127,13 @@ function Body({
 
 function Ingredient({ line }: { line: IngredientLine }) {
   const { ingredient: ing, product, availability } = line;
+  const t = m.recipes.sheet;
   const note =
     availability === 'missing'
-      ? line.buy ? `Falta: comprar ${line.buy}` : 'Falta'
-      : availability === 'low' ? 'Queda poco'
+      ? line.buy ? t.missingBuy(String(line.buy)) : t.missing
+      : availability === 'low' ? m.common.status.low
         : availability === 'basic' ? null
-          : product && product.name.toLowerCase() !== ing.name.toLowerCase() ? `Tenés: ${product.name}` : null;
+          : product && product.name.toLowerCase() !== ing.name.toLowerCase() ? t.youHave(product.name) : null;
   const dot: StockStatus | null =
     availability === 'missing' ? 'out' : availability === 'low' ? 'low' : availability === 'have' ? 'ok' : null;
   return (
@@ -139,7 +142,7 @@ function Ingredient({ line }: { line: IngredientLine }) {
       <span className="min-w-0 flex-1">
         <span className="block">
           {capitalize(ing.name)}
-          {ing.optional && <span className="text-muted"> (opcional)</span>}
+          {ing.optional && <span className="text-muted">{t.optional(m.common.optional)}</span>}
         </span>
         {note && (
           <span className={`block text-xs ${availability === 'missing' ? 'text-[#B53A2A] dark:text-out' : availability === 'low' ? 'text-[#9A6300] dark:text-low' : 'text-muted'}`}>
@@ -166,8 +169,8 @@ function Cooked({
   const [left, setLeft] = useState<Record<string, number>>(() =>
     Object.fromEntries(counted.map((u) => [u.product.id, Math.max(0, (u.product.quantity ?? 0) - (u.uses ?? 0))])),
   );
-  const names = used.map((u) => u.product.name.toLowerCase());
-  const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}` : names[0];
+  const t = m.recipes.cooked;
+  const list = formatList(used.map((u) => u.product.name.toLowerCase()));
 
   const save = () => {
     cookedRecipe(recipe, [
@@ -177,7 +180,7 @@ function Cooked({
       })),
       ...counted.map((u) => ({ product: u.product, quantity: left[u.product.id] })),
     ]);
-    toast('¡Buen provecho! Actualicé lo que hay.');
+    toast(t.enjoy);
     onDone();
   };
 
@@ -185,17 +188,17 @@ function Cooked({
     <div className="space-y-5 pb-2">
       {used.length ? (
         <p className="text-lg">
-          Usaste {list}. <span className="font-semibold">¿Se terminó alguno?</span>
+          {t.used(list)} <span className="font-semibold">{t.anyFinished}</span>
         </p>
       ) : (
-        <p className="text-lg">No usaste nada de lo que está cargado. ¡Buen provecho!</p>
+        <p className="text-lg">{t.nothingUsed}</p>
       )}
       {plain.length > 0 && (
         <ul className="card divide-y divide-line">
           {plain.map(({ product }) => (
             <li key={product.id} className="space-y-2 px-4 py-3">
               <span className="block font-medium">{product.name}</span>
-              <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label={`¿Queda ${product.name}?`}>
+              <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label={t.isThereAria(product.name)}>
                 {(['keep', 'low', 'out'] as Choice[]).map((c) => {
                   const active = choices[product.id] === c;
                   const tone = c === 'out' ? 'bg-out/15 text-[#B53A2A] dark:text-out border-current' : c === 'low' ? 'bg-low/20 text-[#9A6300] dark:text-low border-current' : 'bg-ok/15 text-[#2E7A4A] dark:text-ok border-current';
@@ -207,7 +210,7 @@ function Cooked({
                       onClick={() => setChoices((x) => ({ ...x, [product.id]: c }))}
                       className={`min-h-[44px] rounded-xl border text-sm ${active ? `${tone} font-medium` : 'border-line bg-surface'}`}
                     >
-                      {c === 'keep' ? 'Queda' : c === 'low' ? 'Queda poco' : 'Se terminó'}
+                      {t[c]}
                     </button>
                   );
                 })}
@@ -222,24 +225,24 @@ function Cooked({
             <li key={product.id} className="flex min-h-[64px] flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3">
               <span className="min-w-0">
                 <span className="block font-medium">{product.name}</span>
-                <span className="text-xs text-muted">Usaste {uses}. ¿Cuántos quedan?</span>
+                <span className="text-xs text-muted">{t.usedCount(uses ?? 0)}</span>
               </span>
               <Stepper
                 value={left[product.id]}
                 min={0}
                 max={999}
                 onChange={(n) => setLeft((x) => ({ ...x, [product.id]: n }))}
-                label={`Cuántos quedan de ${product.name}`}
+                label={t.howManyLeft(product.name)}
               />
             </li>
           ))}
         </ul>
       )}
       <div className="grid grid-cols-[auto_1fr] gap-2">
-        <button className="btn-ghost" onClick={onBack} aria-label="Volver a la receta">
+        <button className="btn-ghost" onClick={onBack} aria-label={t.backToRecipe}>
           <Icon name="back" size={20} />
         </button>
-        <button className="btn-primary" onClick={save}>Listo</button>
+        <button className="btn-primary" onClick={save}>{m.common.done}</button>
       </div>
     </div>
   );

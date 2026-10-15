@@ -1,0 +1,245 @@
+{
+  "sourceLanguage": "es",
+  "strings": {
+    "CFBundleDisplayName": {
+      "shouldTranslate": false
+    },
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka usa la cámara para escanear códigos de barras y sacarle foto a tus productos."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka uses the camera to scan barcodes and take photos of your products."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Stoka usa a câmera para escanear códigos de barras e fotografar seus produtos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka utilise l’appareil photo pour scanner les codes-barres et photographier vos produits."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka usa la fotocamera per scansionare i codici a barre e fotografare i tuoi prodotti."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka använder kameran för att skanna streckkoder och fotografera dina varor."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka bruger kameraet til at scanne stregkoder og tage billeder af dine varer."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka 使用相机扫描条形码并为你的商品拍照。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka はバーコードの読み取りと商品の撮影にカメラを使います。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka puede usar una foto de tu biblioteca como imagen de un producto o para leer un ticket."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka can use a photo from your library as a product image or to read a receipt."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Stoka pode usar uma foto da sua biblioteca como imagem de um produto ou para ler um cupom fiscal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka peut utiliser une photo de votre photothèque comme image d’un produit ou pour lire un ticket de caisse."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka può usare una foto della tua libreria come immagine di un prodotto o per leggere uno scontrino."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka kan använda en bild från ditt bibliotek som bild på en vara eller för att läsa ett kvitto."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka kan bruge et billede fra dit bibliotek som billede af en vare eller til at læse en kvittering."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka 可以使用照片库中的照片作为商品图片，或用来读取小票。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka はライブラリの写真を商品の画像やレシートの読み取りに使えます。"
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka pasa a texto lo que le decís (en el teléfono) para anotar lo que compraste o se terminó."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka turns what you say into text (on your phone) to note what you bought or what ran out."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Stoka transforma o que você diz em texto (no celular) para anotar o que você comprou ou o que acabou."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka transcrit ce que vous dites (sur le téléphone) pour noter ce que vous avez acheté ou ce qui est épuisé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka trascrive quello che dici (sul telefono) per annotare cosa hai comprato o cosa è finito."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka gör om det du säger till text (på telefonen) för att anteckna vad du köpt eller vad som tagit slut."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka laver det, du siger, om til tekst (på telefonen) for at notere, hvad du har købt, eller hvad der er sluppet op."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka 会在手机上把你说的话转成文字，用来记录你买了什么或什么用完了。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka は話した内容を端末上で文字にして、買ったものや切れたものを記録します。"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka usa el micrófono para que le digas qué compraste o qué se terminó."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka uses the microphone so you can tell it what you bought or what ran out."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Stoka usa o microfone para você dizer o que comprou ou o que acabou."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka utilise le micro pour que vous lui disiez ce que vous avez acheté ou ce qui est épuisé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka usa il microfono per farti dire cosa hai comprato o cosa è finito."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka använder mikrofonen så att du kan säga vad du köpt eller vad som tagit slut."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka bruger mikrofonen, så du kan sige, hvad du har købt, eller hvad der er sluppet op."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka 使用麦克风，让你说出买了什么或什么用完了。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoka はマイクを使って、買ったものや切れたものを話して記録できます。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -1,4 +1,5 @@
-import { OFF_FIELDS, parseOffResponse, type OffProduct } from '../domain/openFoodFacts';
+import { offFields, parseOffResponse, type OffProduct } from '../domain/openFoodFacts';
+import { lang } from '../i18n';
 import { isDemo } from './demo';
 
 /**
@@ -21,7 +22,7 @@ export async function lookupBarcode(barcode: string, timeoutMs = 6000): Promise<
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const res = await fetch(
-      `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}?fields=${OFF_FIELDS}&lc=es`,
+      `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}?fields=${offFields()}&lc=${lang}`,
       { signal: ctrl.signal },
     );
     if (res.status === 404) return null;

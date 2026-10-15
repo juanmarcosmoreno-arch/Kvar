@@ -8,6 +8,7 @@ import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
 import { Sheet } from './Sheet';
+import { m } from '../i18n';
 
 /** "¿Se terminó algo?": un toque y va a la lista. */
 export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -24,16 +25,16 @@ export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => v
   };
 
   return (
-    <Sheet open={open} onClose={close} title="¿Se terminó algo?">
+    <Sheet open={open} onClose={close} title={m.stock.ranOut.title}>
       <div className="space-y-4 pb-4">
         <label className="relative block">
           <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-          <input className="field pl-12" placeholder="Buscá un producto…" value={q} onChange={(e) => setQ(e.target.value)} enterKeyHint="search" />
+          <input className="field pl-12" placeholder={m.stock.ranOut.searchPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} enterKeyHint="search" />
         </label>
         <button className="btn-ghost w-full" onClick={() => { close(); ui.openScan('out'); }}>
-          <Icon name="barcode" size={20} /> Escaneá el envase vacío
+          <Icon name="barcode" size={20} /> {m.stock.ranOut.scanEmpty}
         </button>
-        {!q && results.length > 0 && <p className="text-sm text-muted">Los que más se terminan</p>}
+        {!q && results.length > 0 && <p className="text-sm text-muted">{m.stock.ranOut.frequent}</p>}
         <div className="grid grid-cols-2 gap-2">
           {results.map((p) => (
             <button
@@ -48,7 +49,7 @@ export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => v
               <ProductThumb product={p} categoryName={p.category_id ? catName.get(p.category_id) : undefined} size="sm" />
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{p.name}</span>
-                {p.status === 'out' && <span className="text-xs text-out">Ya está en la lista</span>}
+                {p.status === 'out' && <span className="text-xs text-out">{m.stock.ranOut.alreadyInList}</span>}
               </span>
             </button>
           ))}
@@ -58,15 +59,15 @@ export function RanOutSheet({ open, onClose }: { open: boolean; onClose: () => v
             className="btn-ghost w-full"
             onClick={() => {
               const p = createProduct({ name: q, status: 'out' });
-              if (p) toast(`${p.name}: No hay. Lo agregué a la lista.`);
+              if (p) toast(m.stock.ranOut.addedOut(p.name));
               setQ('');
             }}
           >
-            <Icon name="plus" size={20} /> Agregar «{q.trim()}» a la lista
+            <Icon name="plus" size={20} /> {m.stock.ranOut.addToList(q.trim())}
           </button>
         )}
         {!q && results.length === 0 && (
-          <p className="py-6 text-center text-muted">Todavía no hay productos. Buscá uno para agregarlo.</p>
+          <p className="py-6 text-center text-muted">{m.stock.ranOut.empty}</p>
         )}
       </div>
     </Sheet>
