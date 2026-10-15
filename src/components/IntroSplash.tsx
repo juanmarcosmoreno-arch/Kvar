@@ -42,7 +42,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     // Respaldo: si el video no arranca (ahorro de batería, error), igual se sigue
-    const t = setTimeout(finish, reduced ? 1200 : 4500);
+    const t = setTimeout(finish, reduced ? 1200 : 7000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
