@@ -169,6 +169,12 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
       check(await supabase.rpc('unpurchase_list_item', { p_item_id: id }));
       return;
     }
+    case 'update_item': {
+      const id = await realItemId(op.itemId);
+      if (!id) return;
+      check(await supabase.from('shopping_list_items').update(op.patch).eq('id', id));
+      return;
+    }
     case 'remove_item': {
       const id = await realItemId(op.itemId);
       if (!id) return;

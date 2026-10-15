@@ -43,6 +43,12 @@ export function ShoppingList() {
   };
 
   const buy = (item: ShoppingItem) => {
+    const product = item.product_id ? byId.get(item.product_id) : undefined;
+    // Lo que lleva conteo (pañales, latas) pregunta cuántos: tocar un número ya confirma
+    if (product?.track_quantity) {
+      ui.openQuantity(product.id, 'bought');
+      return;
+    }
     purchaseItem(item);
     const name = itemName(item, byId);
     toast(item.product_id ? `${name}: comprado, ahora Hay.` : `${name}: comprado.`, {
@@ -106,10 +112,7 @@ export function ShoppingList() {
                   >
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-muted/50" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">
-                        {itemName(item, byId)}
-                        {item.quantity ? <span className="text-muted"> × {item.quantity}</span> : null}
-                      </span>
+                      <span className="block truncate font-medium">{itemName(item, byId)}</span>
                       {REASON_LABEL[item.reason] && (
                         <span className={`text-xs ${item.reason === 'out' ? 'text-out' : item.reason === 'low' ? 'text-[#9A6300] dark:text-low' : 'text-muted'}`}>
                           {REASON_LABEL[item.reason]}
@@ -117,6 +120,15 @@ export function ShoppingList() {
                       )}
                     </span>
                   </button>
+                  {item.product_id && (
+                    <button
+                      className={`chip min-h-[36px] tabular-nums ${item.quantity ? 'border-primary/40 text-ink' : 'text-muted'}`}
+                      aria-label={`Cuántos comprar de ${itemName(item, byId)}`}
+                      onClick={() => ui.openQuantity(item.product_id!, 'list')}
+                    >
+                      × {item.quantity ?? 1}
+                    </button>
+                  )}
                   <button
                     className="flex min-h-tap min-w-tap items-center justify-center text-muted/70"
                     aria-label={`Quitar ${itemName(item, byId)} de la lista`}

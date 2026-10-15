@@ -120,7 +120,15 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
             Se terminó
           </button>
           <button className="btn-primary min-h-[64px]"
-            onClick={() => { markBought(current); toast(`${current.name}: Hay.`); onClose(); }}>
+            onClick={() => {
+              if (current.track_quantity) {
+                ui.openQuantity(current.id, 'bought'); // pañales, latas: ¿cuántos?
+                return;
+              }
+              markBought(current);
+              toast(`${current.name}: Hay.`);
+              onClose();
+            }}>
             Compré
           </button>
         </div>

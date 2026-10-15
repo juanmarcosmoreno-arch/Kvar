@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { Icon } from './Icon';
+import { dismissToast } from '../store/toast';
 
 /** Hoja inferior (bottom sheet): se usa con una mano y se cierra tocando afuera. */
 export function Sheet({
@@ -7,6 +8,7 @@ export function Sheet({
 }: { open: boolean; onClose: () => void; title?: ReactNode; children: ReactNode }) {
   useEffect(() => {
     if (!open) return;
+    dismissToast(); // que el aviso anterior no tape la hoja
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;

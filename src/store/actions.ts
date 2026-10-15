@@ -2,6 +2,7 @@
 import { normalizeAlias, normalizeBarcode, type AliasKind } from '../domain/aliases';
 import type { Op } from '../domain/ops';
 import { openItemFor } from '../domain/shoppingList';
+import { nextQuantity, type QuantityMode } from '../domain/quantity';
 import type { Category, EventSource, Location, Product, ShoppingItem, StockStatus } from '../domain/types';
 import { STATUS_LABEL } from '../domain/types';
 import { nowIso, uuid } from '../lib/id';
@@ -81,7 +82,7 @@ export function deleteProduct(product: Product) {
   toast(`Borré ${product.name}.`);
 }
 
-export function addListItem(input: { productId?: string; name?: string }) {
+export function addListItem(input: { productId?: string; name?: string; quantity?: number | null }) {
   const view = getView();
   if (!view) return;
   const item: ShoppingItem = {
@@ -89,7 +90,7 @@ export function addListItem(input: { productId?: string; name?: string }) {
     household_id: view.household.id,
     product_id: input.productId ?? null,
     name: input.productId ? null : input.name?.trim() || null,
-    quantity: null,
+    quantity: input.quantity ?? null,
     note: null,
     reason: 'manual',
     checked_at: null,
@@ -205,4 +206,30 @@ export async function setProductPhoto(product: Pick<Product, 'id' | 'household_i
   const path = imagePath(product.household_id, product.id, blob.type);
   await imageStore.put(path, blob);
   dispatch({ kind: 'set_image', ...base(), productId: product.id, path, previousPath: product.image_path ?? null });
+}
+
+export function setItemQuantity(item: ShoppingItem, quantity: number | null) {
+  dispatch({ kind: 'update_item', ...base(), itemId: item.id, patch: { quantity } });
+}
+
+/**
+ * Aplica una cantidad elegida en el selector.
+ * - bought: si el producto está en la lista se marca comprado con esa cantidad; si no, se suma.
+ * - list: solo cambia cuántos comprar.
+ * - add / remove / set: cambia el stock.
+ */
+export function applyQuantity(product: Product, mode: QuantityMode, amount: number, source: EventSource = 'manual') {
+  const view = getView();
+  const item = view ? openItemFor(view.list, product.id) : undefined;
+  if (mode === 'list') {
+    if (item) setItemQuantity(item, amount);
+    else addListItem({ productId: product.id, quantity: amount });
+    return;
+  }
+  if (mode === 'bought' && item) {
+    if (item.quantity !== amount) setItemQuantity(item, amount);
+    purchaseItem({ ...item, quantity: amount });
+    return;
+  }
+  dispatch({ kind: 'set_status', ...base(), productId: product.id, quantity: nextQuantity(product.quantity, mode, amount), source });
 }

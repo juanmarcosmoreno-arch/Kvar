@@ -2,6 +2,8 @@ import { useRef, useState, type PointerEvent } from 'react';
 import { cycleStatus, worseStatus } from '../domain/status';
 import type { Product } from '../domain/types';
 import { setQuantity, setStatus } from '../store/actions';
+import { useUI } from '../store/ui';
+import { useLongPress } from '../lib/useLongPress';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
 import { STATUS_BG, STATUS_TEXT, StatusPill } from './Status';
@@ -18,6 +20,9 @@ export function ProductRow({
   product, categoryName, subtitle, onOpen,
 }: { product: Product; categoryName?: string; subtitle?: string; onOpen: () => void }) {
   const [dx, setDx] = useState(0);
+  const ui = useUI();
+  const minus = useLongPress(() => setQuantity(product, (product.quantity ?? 0) - 1), () => ui.openQuantity(product.id, 'remove'));
+  const plus = useLongPress(() => setQuantity(product, (product.quantity ?? 0) + 1), () => ui.openQuantity(product.id, 'add'));
   const start = useRef<{ x: number; y: number; locked: boolean | null } | null>(null);
   const swiped = useRef(false); // evita que el click posterior al deslizamiento abra el detalle
 
@@ -83,21 +88,24 @@ export function ProductRow({
         {product.track_quantity ? (
           <div className="flex items-center">
             <button
-              aria-label={`Restar uno de ${product.name}`}
-              className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted active:bg-sunken"
-              onClick={() => setQuantity(product, (product.quantity ?? 0) - 1)}
+              aria-label={`Restar uno de ${product.name} (mantené apretado para elegir cuántos)`}
+              className="flex min-h-tap min-w-tap select-none items-center justify-center rounded-full text-muted active:bg-sunken"
+              {...minus}
             >
               <Icon name="minus" size={20} />
             </button>
-            <span
-              className={`inline-flex min-w-[2.25rem] justify-center rounded-full border border-current px-2 py-0.5 text-sm tabular-nums ${STATUS_TEXT[product.status]}`}
+            <button
+              aria-label={`Elegir cuántos ${product.unit ?? 'unidades'} de ${product.name}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => ui.openQuantity(product.id, 'add')}
+              className={`inline-flex min-h-[32px] min-w-[2.5rem] items-center justify-center rounded-full border border-current px-2 text-sm tabular-nums ${STATUS_TEXT[product.status]}`}
             >
               {product.quantity ?? 0}
-            </span>
+            </button>
             <button
-              aria-label={`Sumar uno de ${product.name}`}
-              className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted active:bg-sunken"
-              onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}
+              aria-label={`Sumar uno de ${product.name} (mantené apretado para elegir cuántos)`}
+              className="flex min-h-tap min-w-tap select-none items-center justify-center rounded-full text-muted active:bg-sunken"
+              {...plus}
             >
               <Icon name="plus" size={20} />
             </button>

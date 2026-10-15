@@ -20,6 +20,7 @@ export type Op =
   | { kind: 'purchase_item'; id: string; at: string; itemId: string }
   | { kind: 'unpurchase_item'; id: string; at: string; itemId: string }
   | { kind: 'remove_item'; id: string; at: string; itemId: string }
+  | { kind: 'update_item'; id: string; at: string; itemId: string; patch: Partial<Pick<ShoppingItem, 'quantity' | 'note'>> }
   | { kind: 'clear_checked'; id: string; at: string }
   | { kind: 'upsert_location'; id: string; at: string; location: Location }
   | { kind: 'delete_location'; id: string; at: string; locationId: string }
@@ -120,6 +121,8 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
     }
     case 'remove_item':
       return { ...s, list: s.list.filter((i) => i.id !== op.itemId) };
+    case 'update_item':
+      return { ...s, list: s.list.map((i) => (i.id === op.itemId ? { ...i, ...op.patch } : i)) };
     case 'clear_checked':
       return { ...s, list: s.list.filter((i) => !i.checked_at) };
     case 'upsert_location':

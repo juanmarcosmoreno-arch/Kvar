@@ -32,7 +32,8 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => setName(product.name), [product.name]);
   const ui = useUI();
-  const inList = Boolean(openItemFor(view.list, product.id));
+  const listItem = openItemFor(view.list, product.id);
+  const inList = Boolean(listItem);
   const barcodes = (view.aliases ?? []).filter((a) => a.product_id === product.id && a.kind === 'barcode');
   const categoryName = view.categories.find((c) => c.id === product.category_id)?.name;
   const locations = [...view.locations].sort((a, b) => a.sort_order - b.sort_order);
@@ -74,10 +75,10 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           <button className="btn-ghost min-w-[56px]" aria-label="Restar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) - 1)}>
             <Icon name="minus" />
           </button>
-          <div className="text-center">
+          <button className="min-h-[56px] flex-1 text-center" onClick={() => ui.openQuantity(product.id, 'add')}>
             <div className="text-3xl font-semibold tabular-nums">{product.quantity ?? 0}</div>
-            <div className="text-xs text-muted">{product.unit ?? 'unidades'}</div>
-          </div>
+            <div className="text-xs text-muted">{product.unit ?? 'unidades'} · tocá para sumar o restar varios</div>
+          </button>
           <button className="btn-ghost min-w-[56px]" aria-label="Sumar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}>
             <Icon name="plus" />
           </button>
@@ -89,9 +90,13 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           <Icon name="cart" size={20} /> Agregar a la lista
         </button>
       ) : (
-        <p className="flex items-center gap-2 text-sm text-muted">
-          <Icon name="check" size={18} className="text-ok" /> Está en la lista de compras
-        </p>
+        <div className="flex items-center gap-2 text-sm text-muted">
+          <Icon name="check" size={18} className="text-ok" />
+          <span className="flex-1">Está en la lista de compras</span>
+          <button className="chip min-h-[36px] bg-surface text-ink" onClick={() => ui.openQuantity(product.id, 'list')}>
+            {listItem?.quantity ? `Comprar ${listItem.quantity}` : 'Cuántos comprar'}
+          </button>
+        </div>
       )}
 
       <section className="space-y-2">

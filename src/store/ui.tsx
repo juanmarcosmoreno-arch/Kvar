@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { QuantityMode } from '../domain/quantity';
 
 export interface AddDefaults {
   name?: string;
@@ -27,6 +28,8 @@ export interface UI {
   openAdd: (defaults?: AddDefaults) => void;
   openRanOut: () => void;
   openScan: (mode: ScanMode, productId?: string) => void;
+  /** Selector de cantidad: sumar, restar, fijar, «¿cuántos compraste?» o «¿cuántos comprar?» */
+  openQuantity: (productId: string, mode: QuantityMode) => void;
 }
 
 export const UIContext = createContext<UI>({
@@ -34,6 +37,7 @@ export const UIContext = createContext<UI>({
   openAdd: () => {},
   openRanOut: () => {},
   openScan: () => {},
+  openQuantity: () => {},
 });
 
 export const useUI = () => useContext(UIContext);

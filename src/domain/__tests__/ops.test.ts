@@ -139,3 +139,16 @@ describe('Fase 2: códigos de barras y fotos', () => {
     expect(compactOps(ops)).toEqual([]);
   });
 });
+
+describe('cantidades en la lista', () => {
+  it('poner cuántos comprar y comprar esa cantidad suma al stock', () => {
+    const s = snapshot({
+      products: [product({ id: 'panales', track_quantity: true, quantity: 2, low_threshold: 5, status: 'low' })],
+      list: [item({ id: 'i1', product_id: 'panales', reason: 'low' })],
+    });
+    const withQty = applyOp(s, { kind: 'update_item', id: 'o1', at, itemId: 'i1', patch: { quantity: 26 } });
+    expect(withQty.list[0].quantity).toBe(26);
+    const bought = applyOp(withQty, { kind: 'purchase_item', id: 'o2', at, itemId: 'i1' });
+    expect(bought.products[0]).toMatchObject({ quantity: 28, status: 'ok' });
+  });
+});

@@ -49,7 +49,7 @@ function seed(): Snapshot {
     P('p6', 'Pañales', 'c9', 'l3', 'ok', { track_quantity: true, quantity: 12, low_threshold: 5, unit: 'pañales' }),
     P('p7', 'Pan', 'c1', 'l2', 'ok', { image_url: pan }),
     P('p8', 'Detergente', 'c7', 'l4', 'ok'),
-    P('p9', 'Huevos', 'c3', 'l0', 'ok', { track_quantity: true, quantity: 4, low_threshold: 4, unit: 'huevos', image_url: huevos }),
+    P('p9', 'Huevos', 'c3', 'l0', 'low', { track_quantity: true, quantity: 3, low_threshold: 4, unit: 'huevos', is_staple: true, image_url: huevos }),
     P('p10', 'Arroz', 'c4', 'l2', 'ok'),
     P('p11', 'Queso rallado', 'c3', 'l0', 'ok', { expires_on: date(4), image_url: queso }),
     P('p12', 'Café', 'c4', 'l2', 'ok', { is_staple: true, image_url: cafe }),
@@ -62,7 +62,7 @@ function seed(): Snapshot {
     id, household_id: HH, product_id, name: null, quantity: null, note: null, reason, checked_at: null, checked_by: null,
     created_at: iso(-1), ...extra,
   });
-  const list = [I('i1', 'p1', 'out'), I('i2', 'p2', 'low'), I('i3', null, 'manual', { name: 'Velas de cumpleaños' })];
+  const list = [I('i1', 'p1', 'out', { quantity: 2 }), I('i2', 'p2', 'low'), I('i4', 'p9', 'low', { quantity: 12 }), I('i3', null, 'manual', { name: 'Velas de cumpleaños' })];
   const alias = (id: string, product_id: string, code: string) =>
     ({ id, household_id: HH, product_id, kind: 'barcode' as const, alias: code, normalized: code, hits: 2 });
   return {

@@ -4,6 +4,8 @@ import { openCount } from '../domain/shoppingList';
 import { useView } from '../store/store';
 import { UIContext, type AddDefaults, type ScanMode } from '../store/ui';
 import { ScanSheet } from './ScanSheet';
+import { QuantitySheet } from './QuantitySheet';
+import type { QuantityMode } from '../domain/quantity';
 import { DemoBar } from './DemoBar';
 import { isDemo } from '../lib/demo';
 import { AddProductSheet } from './AddProductSheet';
@@ -19,6 +21,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [ranOut, setRanOut] = useState(false);
   const [actions, setActions] = useState(false);
   const [scan, setScan] = useState<{ mode: ScanMode; productId?: string } | null>(null);
+  const [quantity, setQuantityTarget] = useState<{ productId: string; mode: QuantityMode } | null>(null);
 
   const ui = {
     openProduct: (id: string) => {
@@ -31,6 +34,10 @@ export function Shell({ children }: { children: ReactNode }) {
       setRanOut(false);
       setProductId(null);
       setScan({ mode, productId });
+    },
+    openQuantity: (productId: string, mode: QuantityMode) => {
+      setScan(null);
+      setQuantityTarget({ productId, mode });
     },
   };
 
@@ -77,6 +84,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <AddProductSheet defaults={addDefaults} onClose={() => setAddDefaults(null)} onOpenExisting={ui.openProduct} />
       <ProductSheet productId={productId} onClose={() => setProductId(null)} />
       <ScanSheet mode={scan?.mode ?? null} productId={scan?.productId} onClose={() => setScan(null)} />
+      <QuantitySheet target={quantity} onClose={() => setQuantityTarget(null)} />
     </UIContext.Provider>
   );
 }
