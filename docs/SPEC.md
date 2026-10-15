@@ -254,6 +254,16 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   usa las mismas funciones (`purchase_list_item`, `set_product_status`) y la misma seguridad por hogar.
 - Código en `ios/StokaWatch/` (SwiftUI, watchOS 10+). El target se crea una vez en Xcode (ver README).
 
+### Estadísticas de consumo (implementadas)
+- Pantalla **Estadísticas** (ícono de gráfico en Inicio): período 3 / 6 / 12 meses; compras, cosas que se
+  terminaron y compras por mes en promedio; columnas por mes (compras o «se terminó», con tabla); «Probablemente
+  se termine pronto» (un toque → a la lista con motivo `predicted`); lo que más se termina (veces por mes y
+  cuánto dura); compras por categoría.
+- En la ficha de cada producto, **Consumo**: cuánto le dura a la casa, cada cuánto se compra (o unidades por mes
+  si lleva conteo), columnas por mes, última compra y cuándo se terminaría.
+- Todo se calcula en el teléfono a partir de `product_events` (`src/domain/stats.ts`); el historial se guarda
+  para verlo sin conexión.
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

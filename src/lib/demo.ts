@@ -145,3 +145,49 @@ export const DEMO_CODES: readonly { readonly code: string; readonly label: strin
   { code: '7790000000010', get label() { return m.store.demo.codes.pasta; } },
   { code: '7790070411716', get label() { return m.store.demo.codes.newRice; } },
 ];
+
+/**
+ * Historial de ejemplo para las estadísticas: 12 meses de compras y de cosas que se terminan, con el ritmo
+ * típico de cada producto (la leche dura una semana, el arroz casi un mes…). Siempre el mismo (semilla fija).
+ */
+export function demoEvents(now = Date.now()): import('../domain/stats').StockEvent[] {
+  // id → [días que dura, días hasta volver a comprar después de terminarse]
+  const rhythm: Record<string, [number, number]> = {
+    p1: [6, 1], p2: [13, 2], p3: [5, 2], p4: [9, 3], p5: [28, 4], p7: [2, 1], p8: [35, 6], p10: [24, 5],
+    p11: [11, 3], p12: [17, 1], p13: [19, 1], p14: [15, 6], p15: [7, 4], p16: [27, 1], p17: [8, 3], p18: [10, 3],
+    p20: [14, 4], p22: [6, 5],
+  };
+  let s = 7;
+  const rand = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  const events: import('../domain/stats').StockEvent[] = [];
+  const start = now - 365 * day;
+  const ev = (product_id: string, t: number, type: string, from: 'ok' | 'low' | 'out', to: 'ok' | 'low' | 'out', fq: number | null = null, tq: number | null = null) =>
+    events.push({ product_id, type, from_status: from, to_status: to, from_quantity: fq, to_quantity: tq, at: new Date(t).toISOString() });
+  for (const [id, [lasts, gap]] of Object.entries(rhythm)) {
+    let t = start + rand() * lasts * day;
+    while (t < now) {
+      ev(id, t, 'purchased', 'out', 'ok');
+      const end = t + lasts * (0.75 + rand() * 0.5) * day;
+      if (end >= now) break;
+      if (lasts > 5 && rand() < 0.6) ev(id, end - lasts * 0.25 * day, 'status_changed', 'ok', 'low');
+      ev(id, end, 'status_changed', rand() < 0.6 ? 'low' : 'ok', 'out');
+      t = end + gap * (0.5 + rand()) * day;
+    }
+  }
+  // Con conteo: huevos (se usan ~2 por día, se compran por docena) y pañales (~5 por día, paquetes de 30)
+  for (const [id, perDay, pack] of [['p9', 1.6, 12], ['p6', 5, 30]] as const) {
+    let q = pack;
+    for (let t = start; t < now; t += day) {
+      const used = Math.min(q, Math.round(perDay * (0.6 + rand() * 0.8)));
+      if (used > 0) {
+        ev(id, t + 9 * 3_600_000, 'quantity_changed', 'ok', q - used === 0 ? 'out' : 'ok', q, q - used);
+        q -= used;
+      }
+      if (q <= (id === 'p9' ? 2 : 6)) {
+        ev(id, t + 19 * 3_600_000, 'purchased', q === 0 ? 'out' : 'low', 'ok', q, q + pack);
+        q += pack;
+      }
+    }
+  }
+  return events.sort((a, b) => a.at.localeCompare(b.at));
+}

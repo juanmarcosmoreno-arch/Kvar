@@ -16,6 +16,7 @@
   --ok: 76 175 107;         /* #4CAF6B Hay */
   --low: 246 166 35;        /* #F6A623 Queda poco */
   --out: 235 93 74;         /* #EB5D4A No hay */
+  --chart-quiet: 118 154 131;  /* #769A83 meses de contexto en los gráficos (validado ≥3:1) */
   color-scheme: light;
 }
 
@@ -27,6 +28,7 @@
   --muted: 150 160 148;
   --line: 42 58 47;
   --primary: 92 186 122;
+  --chart-quiet: 79 122 94;    /* #4F7A5E */
   --on-primary: 14 22 17;
   color-scheme: dark;
 }

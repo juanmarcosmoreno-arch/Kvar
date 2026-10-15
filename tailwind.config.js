@@ -19,6 +19,7 @@ export default {
         ok: v('ok'),
         low: v('low'),
         out: v('out'),
+        'chart-quiet': v('chart-quiet'),
         // Colores fijos de la marca (guía de estilo)
         forest: '#1B5E3F',
         leaf: '#4CAF6B',

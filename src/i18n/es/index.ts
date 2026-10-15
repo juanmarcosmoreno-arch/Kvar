@@ -4,6 +4,7 @@ import { common } from './common';
 import { recipes } from './recipes';
 import { settings } from './settings';
 import { shell } from './shell';
+import { stats } from './stats';
 import { stock } from './stock';
 import { store } from './store';
 
@@ -15,6 +16,7 @@ export const es = {
   settings,
   recipes,
   store,
+  stats,
   /** El recetario está escrito en español: no necesita traducción */
   catalog: null as CatalogTranslation | null,
 };

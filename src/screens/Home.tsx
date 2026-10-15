@@ -33,6 +33,9 @@ export function Home() {
         right={
           <>
             <SyncBadge />
+            <Link to="/estadisticas" aria-label={m.stats.open} className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
+              <Icon name="chart" />
+            </Link>
             <Link to="/ajustes" aria-label={m.stock.home.settings} className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
               <Icon name="gear" />
             </Link>

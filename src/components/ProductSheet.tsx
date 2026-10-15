@@ -4,6 +4,7 @@ import type { Product } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
 import { addListItem, deleteProduct, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
 import { useUI } from '../store/ui';
+import { ProductStats } from './ProductStats';
 import { isNative } from '../lib/platform';
 import { PhotoButton } from './PhotoButton';
 import { UnitPicker } from './UnitPicker';
@@ -167,6 +168,8 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           </div>
         )}
       </section>
+
+      <ProductStats product={product} />
 
       {confirmDelete ? (
         <div className="flex gap-2">
