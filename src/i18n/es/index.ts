@@ -5,6 +5,12 @@ import { recipes } from './recipes';
 import { settings } from './settings';
 import { shell } from './shell';
 import { stats } from './stats';
+import { money } from './money';
+import { alerts } from './alerts';
+import { shopping } from './shopping';
+import { plan } from './plan';
+import { importer } from './importer';
+import { expiry } from './expiry';
 import { stock } from './stock';
 import { store } from './store';
 
@@ -17,6 +23,12 @@ export const es = {
   recipes,
   store,
   stats,
+  money,
+  alerts,
+  shopping,
+  plan,
+  importer,
+  expiry,
   /** El recetario está escrito en español: no necesita traducción */
   catalog: null as CatalogTranslation | null,
 };
