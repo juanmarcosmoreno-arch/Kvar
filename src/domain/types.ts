@@ -54,8 +54,11 @@ export interface Product {
   is_staple: boolean;
   unidentified: boolean;
   expires_on: string | null;
-  /** Foto del producto recortada sin fondo (Fase 2) */
+  /** Imagen externa (Open Food Facts) */
   image_url: string | null;
+  /** Foto propia recortada sin fondo, en Storage (product-images/<hogar>/<archivo>) */
+  image_path?: string | null;
+  brand?: string | null;
   notes: string | null;
   status_changed_at: string;
   created_at: string;
@@ -96,6 +99,18 @@ export interface Snapshot {
   list: ShoppingItem[];
   /** product_id -> cantidad de veces que se marcó "No hay" (para "frecuentes") */
   outCounts: Record<string, number>;
+  /** Equivalencias aprendidas (código de barras, ticket, voz → producto) */
+  aliases?: ProductAlias[];
+}
+
+export interface ProductAlias {
+  id: string;
+  household_id: string;
+  product_id: string;
+  kind: 'barcode' | 'receipt' | 'voice' | 'photo' | 'email';
+  alias: string;
+  normalized: string;
+  hits: number;
 }
 
 export const STATUS_LABEL: Record<StockStatus, string> = {

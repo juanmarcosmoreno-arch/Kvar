@@ -8,7 +8,7 @@
 import { applyStatusToList } from './shoppingList';
 import { resolveStock } from './status';
 import type {
-  Category, EventSource, Household, Location, Product, ShoppingItem, Snapshot, StockStatus,
+  Category, EventSource, Household, Location, Product, ProductAlias, ShoppingItem, Snapshot, StockStatus,
 } from './types';
 
 export type Op =
@@ -25,7 +25,10 @@ export type Op =
   | { kind: 'delete_location'; id: string; at: string; locationId: string }
   | { kind: 'upsert_category'; id: string; at: string; category: Category }
   | { kind: 'delete_category'; id: string; at: string; categoryId: string }
-  | { kind: 'update_household'; id: string; at: string; patch: Partial<Pick<Household, 'name' | 'list_on_low'>> };
+  | { kind: 'update_household'; id: string; at: string; patch: Partial<Pick<Household, 'name' | 'list_on_low'>> }
+  | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
+  /** La foto ya está guardada en el teléfono (IndexedDB) bajo `path`; se sube al sincronizar. */
+  | { kind: 'set_image'; id: string; at: string; productId: string; path: string; previousPath: string | null };
 
 /** Id determinístico para ítems que la app agrega sola mientras no hay confirmación del servidor. */
 export const localItemId = (productId: string) => `local-${productId}`;
@@ -82,6 +85,7 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
         ...s,
         products: s.products.filter((p) => p.id !== op.productId),
         list: s.list.filter((i) => i.product_id !== op.productId),
+        aliases: s.aliases?.filter((a) => a.product_id !== op.productId),
       };
     case 'add_item': {
       if (op.item.product_id && s.list.some((i) => i.product_id === op.item.product_id && !i.checked_at)) return s;
@@ -136,6 +140,22 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       };
     case 'update_household':
       return { ...s, household: { ...s.household, ...op.patch } };
+    case 'learn_alias': {
+      const aliases = s.aliases ?? [];
+      const a = op.alias;
+      const existing = aliases.find((x) => x.kind === a.kind && x.normalized === a.normalized);
+      if (!existing) return { ...s, aliases: [...aliases, a] };
+      const updated: ProductAlias =
+        existing.product_id === a.product_id
+          ? { ...existing, hits: existing.hits + 1 }
+          : { ...existing, product_id: a.product_id, alias: a.alias, hits: 1 };
+      return { ...s, aliases: aliases.map((x) => (x === existing ? updated : x)) };
+    }
+    case 'set_image':
+      return {
+        ...s,
+        products: s.products.map((p) => (p.id === op.productId ? { ...p, image_path: op.path } : p)),
+      };
   }
 }
 
@@ -160,6 +180,7 @@ export function compactOps(ops: Op[]): Op[] {
     if (op.kind === 'create_product') return !createdThenDeleted.has(op.product.id);
     if ('productId' in op) return !createdThenDeleted.has(op.productId);
     if (op.kind === 'add_item') return !op.item.product_id || !createdThenDeleted.has(op.item.product_id);
+    if (op.kind === 'learn_alias') return !createdThenDeleted.has(op.alias.product_id);
     return true;
   });
 }

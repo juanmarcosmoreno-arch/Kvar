@@ -97,3 +97,45 @@ describe('operaciones offline', () => {
     expect(compactOps(ops).map((o) => o.id)).toEqual(['3']);
   });
 });
+
+describe('Fase 2: códigos de barras y fotos', () => {
+  const alias = (product_id: string, id = 'a1') => ({
+    id, household_id: 'hh-1', product_id, kind: 'barcode' as const, alias: '7790070411716', normalized: '7790070411716', hits: 1,
+  });
+
+  it('aprender un código lo deja disponible al instante (también offline)', () => {
+    const s = snapshot({ products: [product({ id: 'arroz' })] });
+    const next = applyOp(s, { kind: 'learn_alias', id: 'o', at, alias: alias('arroz') });
+    expect(next.aliases).toEqual([alias('arroz')]);
+    const again = applyOp(next, { kind: 'learn_alias', id: 'o2', at, alias: alias('arroz', 'a2') });
+    expect(again.aliases).toHaveLength(1);
+    expect(again.aliases![0].hits).toBe(2);
+  });
+
+  it('si el usuario corrige a qué producto corresponde, gana la corrección', () => {
+    const s = snapshot({ aliases: [alias('arroz')] });
+    const next = applyOp(s, { kind: 'learn_alias', id: 'o', at, alias: alias('fideos', 'a2') });
+    expect(next.aliases).toEqual([expect.objectContaining({ id: 'a1', product_id: 'fideos', hits: 1 })]);
+  });
+
+  it('borrar el producto borra sus códigos', () => {
+    const s = snapshot({ products: [product({ id: 'arroz' })], aliases: [alias('arroz')] });
+    expect(applyOp(s, { kind: 'delete_product', id: 'o', at, productId: 'arroz' }).aliases).toEqual([]);
+  });
+
+  it('la foto nueva se ve antes de subirse', () => {
+    const s = snapshot({ products: [product({ id: 'arroz' })] });
+    const next = applyOp(s, { kind: 'set_image', id: 'o', at, productId: 'arroz', path: 'hh-1/arroz-1.png', previousPath: null });
+    expect(next.products[0].image_path).toBe('hh-1/arroz-1.png');
+  });
+
+  it('producto creado y borrado offline: su código tampoco viaja', () => {
+    const p = product({ id: 'tmp' });
+    const ops: Op[] = [
+      { kind: 'create_product', id: '1', at, product: p },
+      { kind: 'learn_alias', id: '2', at, alias: alias('tmp') },
+      { kind: 'delete_product', id: '3', at, productId: 'tmp' },
+    ];
+    expect(compactOps(ops)).toEqual([]);
+  });
+});
