@@ -10,6 +10,12 @@ describe('configuración de Supabase', () => {
     expect(cleanSupabaseUrl('https://abcd.supabase.co\\')).toBe('https://abcd.supabase.co');
     expect(cleanSupabaseUrl('https://abcd.supabase.co/rest/v1/')).toBe('https://abcd.supabase.co');
     expect(cleanSupabaseUrl('<https://abcd.supabase.co>')).toBe('https://abcd.supabase.co');
+    // Caso real: «https:» duplicado y la ruta de la API al final
+    expect(cleanSupabaseUrl('https:https://ahcdgfmutzizcdmwwlyj.supabase.co/rest/v1/')).toBe('https://ahcdgfmutzizcdmwwlyj.supabase.co');
+    expect(cleanSupabaseUrl('https://https://abcd.supabase.co')).toBe('https://abcd.supabase.co');
+    expect(cleanSupabaseUrl('http//abcd.supabase.co')).toBe('https://abcd.supabase.co');
+    expect(cleanSupabaseUrl('http://localhost:54321')).toBe('http://localhost:54321');
+    expect(cleanSupabaseUrl('http://127.0.0.1:54321/')).toBe('http://127.0.0.1:54321');
   });
 
   it('rechaza lo que no es una dirección', () => {

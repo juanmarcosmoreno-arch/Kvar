@@ -9,11 +9,15 @@ const JUNK = /^[\s"'“”‘’`<>\\]+|[\s"'“”‘’`<>\\]+$/g;
 export function cleanSupabaseUrl(raw: string | undefined | null): string | null {
   let s = (raw ?? '').replace(JUNK, '');
   if (!s) return null;
-  if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
+  // Supabase local (npx supabase start) usa http://localhost: se respeta
+  const local = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.exec(s);
+  if (local) return local[0].toLowerCase();
+  // «https:https://…», «https://https://…», «http//…»: se deja solo la dirección y se pone un https:// limpio
+  s = `https://${s.replace(/^((https?:?)\/*)+/i, '')}`;
   s = s.replace(/\/+$/, '').replace(/\/rest\/v1$/i, '');
   try {
     const u = new URL(s);
-    if (!/^https?:$/.test(u.protocol) || !u.hostname.includes('.')) return null;
+    if (!u.hostname.includes('.')) return null;
     return `${u.protocol}//${u.host}`;
   } catch {
     return null;
