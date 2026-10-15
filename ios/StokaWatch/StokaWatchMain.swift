@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// App de Stoka para Apple Watch: la lista de compras en la muñeca y «¿Se terminó algo?» con un toque.
