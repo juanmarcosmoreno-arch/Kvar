@@ -1,60 +1,55 @@
-// Genera los PNG de la PWA (apple-touch-icon, 192, 512, maskable) a partir de los SVG
-// de public/brand usando el Chromium de Playwright. Si existe public/brand/kvar-icon.png
-// (ícono original en alta resolución), se usa ese en lugar del SVG.
+// Genera los íconos de la PWA y de iOS a partir de public/brand/stoka-icon.png (ícono de la app,
+// fondo crema de borde a borde) y stoka-icon-maskable.png (con más margen, para Android/PWA).
+// Para usar el ícono de la casa: npm run icons -- --casa
 import { chromium } from 'playwright';
-import { existsSync, readFileSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
+const brand = (f) => resolve(root, 'public/brand', f);
+const variant = process.argv.includes('--casa') ? 'stoka-icon-casa' : 'stoka-icon';
+const dataUrl = (file) => `data:image/png;base64,${readFileSync(brand(file)).toString('base64')}`;
+const main = dataUrl(`${variant}.png`);
+const maskable = dataUrl(`${variant}-maskable.png`);
+
 const out = resolve(root, 'public/icons');
 mkdirSync(out, { recursive: true });
 
-const custom = resolve(root, 'public/brand/kvar-icon.png');
-const src = (file) =>
-  existsSync(custom)
-    ? `data:image/png;base64,${readFileSync(custom).toString('base64')}`
-    : `data:image/svg+xml;base64,${readFileSync(resolve(root, 'public/brand', file)).toString('base64')}`;
-
-const jobs = [
-  { name: 'apple-touch-icon.png', size: 180, file: 'kvar-mark-maskable.svg' }, // iOS redondea solo
-  { name: 'icon-192.png', size: 192, file: 'kvar-mark.svg' },
-  { name: 'icon-512.png', size: 512, file: 'kvar-mark.svg' },
-  { name: 'icon-maskable-512.png', size: 512, file: 'kvar-mark-maskable.svg' },
-];
-
 const browser = await chromium.launch();
 const page = await browser.newPage();
-for (const j of jobs) {
-  await page.setViewportSize({ width: j.size, height: j.size });
-  await page.setContent(
-    `<html><body style="margin:0;background:#1B5E3F"><img src="${src(j.file)}" style="width:${j.size}px;height:${j.size}px;display:block"></body></html>`,
-  );
+
+async function render(src, size, path, type = 'png') {
+  await page.setViewportSize({ width: size, height: size });
+  await page.setContent(`<html><body style="margin:0;background:#FAF5E8"><img src="${src}" style="width:${size}px;height:${size}px;display:block"></body></html>`);
   await page.waitForLoadState('networkidle');
-  await page.screenshot({ path: resolve(out, j.name), omitBackground: false });
-  console.log('✓', j.name);
+  return page.screenshot({ path, type });
 }
+
+for (const [name, size, src] of [
+  ['apple-touch-icon.png', 180, main], // iOS redondea las esquinas solo
+  ['icon-192.png', 192, main],
+  ['icon-512.png', 512, main],
+  ['icon-maskable-512.png', 512, maskable],
+]) {
+  await render(src, size, resolve(out, name));
+  console.log('✓', name);
+}
+await render(main, 64, resolve(root, 'public/favicon.png'));
+console.log('✓ favicon.png');
 
 // iOS nativo (Capacitor): ícono 1024 sin transparencia y pantalla de arranque lisa, color crema.
 const iosAssets = resolve(root, 'ios/App/App/Assets.xcassets');
 if (existsSync(iosAssets)) {
-  await page.setViewportSize({ width: 1024, height: 1024 });
-  await page.setContent(
-    `<html><body style="margin:0;background:#1B5E3F"><img src="${src('kvar-mark-maskable.svg')}" style="width:1024px;height:1024px;display:block"></body></html>`,
-  );
-  await page.waitForLoadState('networkidle');
   // JPEG intermedio = sin canal alfa (App Store rechaza íconos con transparencia)
-  const jpg = await page.screenshot({ type: 'jpeg', quality: 100 });
+  const jpg = await render(main, 1024, undefined, 'jpeg');
   await page.setContent(`<html><body style="margin:0"><img src="data:image/jpeg;base64,${jpg.toString('base64')}" style="display:block"></body></html>`);
   await page.waitForLoadState('networkidle');
   await page.screenshot({ path: resolve(iosAssets, 'AppIcon.appiconset/AppIcon-512@2x.png') });
   console.log('✓ iOS AppIcon 1024');
 
   await page.setViewportSize({ width: 2732, height: 2732 });
-  await page.setContent(
-    // Solo el fondo crema: así la bienvenida animada (o la app) aparece sin saltos, como recomienda Apple
-    `<html><body style="margin:0;background:#F5F3EE;height:2732px"></body></html>`,
-  );
-  await page.waitForLoadState('networkidle');
+  // Solo el fondo crema: así la bienvenida (o la app) aparece sin saltos, como recomienda Apple
+  await page.setContent('<html><body style="margin:0;background:#F5F3EE;height:2732px"></body></html>');
   for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
     await page.screenshot({ path: resolve(iosAssets, 'Splash.imageset', name) });
   }

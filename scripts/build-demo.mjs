@@ -1,6 +1,6 @@
 // Arma la demo publicable: toma dist-demo/index.html (todo en línea) y deja solo el contenido
 // de la página (estilos, raíz y scripts), sin <html>/<head>/<body>, en dist-demo/kvar-demo.html.
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const dir = resolve(import.meta.dirname, '../dist-demo');
@@ -12,8 +12,8 @@ const themeScript = scripts.find((s) => s.includes('kvar:theme') && !s.includes(
 const appScripts = scripts.filter((s) => s !== themeScript);
 
 const page = [
-  '<title>Kvar</title>',
-  '<meta name="description" content="Kvar: el stock de la casa, la lista de compras y qué cocinar con lo que hay. Demo con datos de ejemplo.">',
+  '<title>Stoka</title>',
+  '<meta name="description" content="Stoka: el stock de la casa, la lista de compras y qué cocinar con lo que hay. Demo con datos de ejemplo.">',
   themeScript ?? '',
   ...styles,
   '<div id="root"></div>',
@@ -21,5 +21,5 @@ const page = [
 ].join('\n');
 
 writeFileSync(resolve(dir, 'kvar-demo.html'), page);
-const videos = readdirSync(resolve(dir, 'assets'));
-console.log(`kvar-demo.html: ${(page.length / 1024).toFixed(0)} KB · archivos aparte: ${videos.join(', ')}`);
+const extra = existsSync(resolve(dir, 'assets')) ? readdirSync(resolve(dir, 'assets')) : [];
+console.log(`kvar-demo.html: ${(page.length / 1024).toFixed(0)} KB · archivos aparte: ${extra.join(', ') || 'ninguno'}`);

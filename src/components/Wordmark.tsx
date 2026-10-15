@@ -1,14 +1,12 @@
-/** "Kvar" con la hoja sobre la K, como en el logo. */
-export function Wordmark({ className = '' }: { className?: string }) {
+import wordmark from '../assets/brand/stoka-wordmark.webp';
+import wordmarkDark from '../assets/brand/stoka-wordmark-dark.webp';
+
+/** «Stoka» con su trazo de pincel y los destellos sobre la o, como en el logo. */
+export function Wordmark({ className = 'h-9' }: { className?: string }) {
   return (
-    <span className={`relative inline-flex items-end font-semibold tracking-tight text-forest dark:text-primary ${className}`}>
-      <span className="relative">
-        K
-        <svg viewBox="0 0 40 40" className="absolute -right-[0.18em] -top-[0.12em] h-[0.55em] w-[0.55em]" aria-hidden>
-          <path d="M4 36 C 8 18, 20 6, 38 2 C 36 22, 24 32, 4 36 Z" fill="#4CAF6B" />
-        </svg>
-      </span>
-      <span>var</span>
+    <span className={`inline-flex items-center ${className}`} role="img" aria-label="Stoka">
+      <img src={wordmark} alt="" className="h-full w-auto dark:hidden" />
+      <img src={wordmarkDark} alt="" className="hidden h-full w-auto dark:block" />
     </span>
   );
 }

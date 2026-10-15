@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="public/brand/kvar-mark.svg" alt="Kvar" width="96" />
+  <img src="public/brand/stoka-icon.png" alt="Stoka" width="96" />
 </p>
 
-# Kvar
+# Stoka
 
-**Kvar** («lo que queda», en sueco) controla el stock de víveres e insumos de la casa, arma la lista de compras sola
+**Stoka** controla el stock de víveres e insumos de la casa, arma la lista de compras sola
 y, más adelante, sugiere qué cocinar con lo que hay. Es una PWA para instalar en el iPhone, pensada para usarse con
 una mano y con el menor esfuerzo posible.
 
@@ -79,7 +79,7 @@ Las fotos de productos van al bucket privado **product-images**, que crean las m
 hogar solo puede leer y escribir su carpeta.
 
 ### 4. Ingreso sin correo (un interruptor)
-Kvar entra **sin correo ni contraseña**: al tocar «Empezar», Supabase crea un usuario propio de ese teléfono. Lo que
+Stoka entra **sin correo ni contraseña**: al tocar «Empezar», Supabase crea un usuario propio de ese teléfono. Lo que
 se comparte es el **hogar**, con su código de invitación.
 
 - **Authentication → Sign In / Providers** → activá **Allow anonymous sign-ins** → **Save**.
@@ -99,7 +99,7 @@ servidor de correo propio (SMTP) antes de dejar cambiar las plantillas:
 2. **Emails → Magic link or OTP** y **Confirm sign up** → **Source**: el cuerpo tiene que incluir `{{ .Token }}`:
 
    ```html
-   <h2>Kvar</h2>
+   <h2>Stoka</h2>
    <p>Tu código para entrar:</p>
    <p style="font-size:32px;letter-spacing:8px"><strong>{{ .Token }}</strong></p>
    ```
@@ -131,7 +131,7 @@ variables.
 ### Instalar en el iPhone
 1. Abrí la URL en **Safari**.
 2. **Compartir** → **Agregar a inicio**.
-3. Abrí Kvar desde el ícono: arranca en modo standalone, sin barra de Safari, y funciona sin conexión.
+3. Abrí Stoka desde el ícono: arranca en modo standalone, sin barra de Safari, y funciona sin conexión.
 
 Para compartir el hogar: **Ajustes → Invitar** manda un link `https://tu-dominio/unirse/CODIGO`; la otra persona entra
 con su correo y queda en el mismo hogar. También puede escribir el código a mano.
@@ -151,7 +151,7 @@ que la versión web. El proyecto de Xcode está en `ios/` y usa Swift Package Ma
    y en Xcode (*Signing & Capabilities → Bundle Identifier*). Una vez registrado en App Store Connect no se cambia.
 2. En Xcode: *Signing & Capabilities → Team* = tu equipo de Apple Developer.
 3. En [App Store Connect](https://appstoreconnect.apple.com): *Apps → +* con ese identificador.
-4. Vas a necesitar una **política de privacidad** con URL pública (Apple la pide). Kvar guarda: correo, productos,
+4. Vas a necesitar una **política de privacidad** con URL pública (Apple la pide). Stoka guarda: correo, productos,
    lista y el historial de cambios del hogar, en Supabase.
 
 ### Probar en tu iPhone
@@ -174,7 +174,7 @@ Las personas actualizan la app del App Store en momentos distintos, así que la 
 versiones viejas:
 - En las migraciones, **solo agregar** (tablas, columnas con valor por defecto, funciones). No renombrar ni borrar lo
   que use una versión publicada.
-- Si un cambio rompe compatibilidad, subí la versión mínima y las apps viejas muestran «Actualizá Kvar»:
+- Si un cambio rompe compatibilidad, subí la versión mínima y las apps viejas muestran «Actualizá Stoka»:
   ```sql
   update app_config set value = '0.3.0' where key = 'min_client_version';
   ```
@@ -208,9 +208,13 @@ página estática.
 de Supabase. Ver `supabase/tests/`.
 
 ### Logo e íconos
-Los SVG de `public/brand/` son una versión vectorial del logo. Si tenés el ícono original en alta resolución, guardalo
-como `public/brand/kvar-icon.png` (cuadrado, 1024 px) y corré `npm run icons`: los PNG de la PWA se generan desde ese
-archivo. La pantalla de ingreso usa `public/brand/kvar-mark.svg`.
+- `public/brand/stoka-icon.png`: ícono de la app (la S con los destellos, fondo crema de borde a borde).
+  `stoka-icon-maskable.png` es la misma con más margen. También están las versiones con la casa
+  (`stoka-icon-casa*.png`).
+- `npm run icons` genera los íconos de la PWA, el favicon y el ícono de iOS (1024 px, sin transparencia) desde
+  esos archivos. Para usar el ícono de la casa: `npm run icons -- --casa`.
+- `src/assets/brand/`: logo con la casa (bienvenida e ingreso) y la palabra «Stoka» para el encabezado, en versión
+  clara y oscura.
 
 ## Estructura
 

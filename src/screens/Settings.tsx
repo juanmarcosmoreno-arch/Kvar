@@ -32,10 +32,10 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
       toast(`En la app real esto comparte el link de invitación. Código: ${view.household.invite_code}`);
       return;
     }
-    const text = `Sumate a «${view.household.name}» en Kvar: ${link}  (código ${view.household.invite_code})`;
+    const text = `Sumate a «${view.household.name}» en Stoka: ${link}  (código ${view.household.invite_code})`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Kvar', text, url: link });
+        await navigator.share({ title: 'Stoka', text, url: link });
       } catch {
         /* cancelado */
       }
@@ -95,7 +95,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
       <div className="space-y-8 px-5 pb-6">
         {!isNative && !isStandalone() && (
           <div className="card space-y-1 border border-lime/50 p-4">
-            <p className="font-semibold">Instalá Kvar en tu iPhone</p>
+            <p className="font-semibold">Instalá Stoka en tu iPhone</p>
             <p className="text-sm text-muted">
               En Safari tocá <strong>Compartir</strong> <Icon name="share" size={14} className="inline" /> y después{' '}
               <strong>Agregar a inicio</strong>. Así abre como app y funciona sin conexión.
@@ -235,7 +235,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             </div>
           )}
         </Section>
-        <p className="text-center text-xs text-muted">Kvar {APP_VERSION} · «lo que queda»</p>
+        <p className="text-center text-xs text-muted">Stoka {APP_VERSION} · Tu hogar siempre provisto</p>
       </div>
     </>
   );

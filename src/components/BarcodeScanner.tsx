@@ -48,7 +48,7 @@ export function BarcodeScanner({ onDetect, paused }: { onDetect: (code: string) 
         setError(
           name === 'NotAllowedError'
             ? isNative
-              ? 'Kvar no tiene permiso para usar la cámara. Activalo en Ajustes → Kvar → Cámara.'
+              ? 'Stoka no tiene permiso para usar la cámara. Activalo en Ajustes → Stoka → Cámara.'
               : 'El navegador no tiene permiso para usar la cámara. Revisá los permisos del sitio.'
             : 'No se pudo abrir la cámara.',
         );

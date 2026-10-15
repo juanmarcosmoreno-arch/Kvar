@@ -28,7 +28,7 @@ export function Home() {
   return (
     <>
       <Header
-        title={<Wordmark className="text-[1.9rem]" />}
+        title={<Wordmark className="h-9" />}
         right={
           <>
             <SyncBadge />

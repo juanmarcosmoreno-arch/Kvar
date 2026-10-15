@@ -11,7 +11,7 @@
 		<string>es</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-        <string>Kvar</string>
+        <string>Stoka</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -62,11 +62,11 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Kvar usa la cámara para escanear códigos de barras y sacarle foto a tus productos.</string>
+	<string>Stoka usa la cámara para escanear códigos de barras y sacarle foto a tus productos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Kvar puede usar una foto de tu biblioteca como imagen de un producto o para leer un ticket.</string>
+	<string>Stoka puede usar una foto de tu biblioteca como imagen de un producto o para leer un ticket.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Kvar usa el micrófono para que le digas qué compraste o qué se terminó.</string>
+	<string>Stoka usa el micrófono para que le digas qué compraste o qué se terminó.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 </dict>

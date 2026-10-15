@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import finalFrame from '../assets/brand/kvar-intro-final.webp';
+import logo from '../assets/brand/stoka-logo.webp';
 import { supabase } from '../lib/supabase';
 
 /**
@@ -123,9 +123,9 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-full max-w-sm flex-col justify-center px-6 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-[calc(env(safe-area-inset-top)+24px)]">
       <div className="mb-8 flex flex-col items-center text-center">
-        {/* Último cuadro de la animación de bienvenida: la casa con la despensa y «Kvar» */}
+        {/* Logo: la casa con la despensa y «Stoka» */}
         <div className="dark:overflow-hidden dark:rounded-[2rem] dark:bg-white">
-          <img src={finalFrame} alt="Kvar" className="h-48 w-48 mix-blend-multiply dark:mix-blend-normal" />
+          <img src={logo} alt="Stoka" className="h-48 w-auto mix-blend-multiply dark:mix-blend-normal" />
         </div>
         <span className="mt-2 text-[11px] uppercase tracking-[0.32em] text-muted">Tu hogar siempre provisto</span>
       </div>

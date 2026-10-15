@@ -37,10 +37,10 @@ export default isDemo ? demoConfig : defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['brand/kvar-mark.svg', 'icons/apple-touch-icon.png', 'favicon.svg'],
+      includeAssets: ['icons/apple-touch-icon.png', 'favicon.png'],
       manifest: {
-        name: 'Kvar — lo que queda',
-        short_name: 'Kvar',
+        name: 'Stoka',
+        short_name: 'Stoka',
         description: 'Stock de la casa, lista de compras y qué cocinar con lo que hay.',
         lang: 'es-UY',
         start_url: '/',
@@ -57,6 +57,8 @@ export default isDemo ? demoConfig : defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,mp4,webm}'],
+        // Los originales del logo (public/brand) son para generar íconos, no para la app
+        globIgnores: ['brand/**'],
         navigateFallback: '/index.html',
         // Supabase nunca se cachea en el service worker: los datos offline viven en IndexedDB.
         navigateFallbackDenylist: [/^\/auth\//],

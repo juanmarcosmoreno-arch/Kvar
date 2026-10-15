@@ -1,5 +1,5 @@
 /**
- * Datos de Open Food Facts → propuesta de producto para Kvar.
+ * Datos de Open Food Facts → propuesta de producto para Stoka.
  * La propuesta siempre la confirma el usuario; acá solo se arma la mejor sugerencia.
  */
 import { normalizeAlias } from './aliases';

@@ -34,8 +34,8 @@ export function Onboarding({ onReady }: { onReady: (householdId: string) => void
     <AuthLayout>
       {mode === 'choose' && (
         <div className="space-y-3">
-          <h1 className="text-2xl font-semibold">¡Bienvenido a Kvar!</h1>
-          <p className="text-muted">Kvar es «lo que queda» en sueco. Empezá creando tu hogar o sumate al de alguien.</p>
+          <h1 className="text-2xl font-semibold">¡Bienvenido a Stoka!</h1>
+          <p className="text-muted">Tu hogar siempre provisto. Empezá creando tu hogar o sumate al de alguien.</p>
           <button className="btn-primary w-full" onClick={() => setMode('create')}>Crear mi hogar</button>
           <button className="btn-ghost w-full" onClick={() => setMode('join')}>Tengo un código</button>
         </div>

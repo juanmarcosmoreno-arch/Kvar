@@ -1,6 +1,6 @@
-# Kvar — especificación del producto
+# Stoka — especificación del producto
 
-> **Kvar** significa «lo que queda» en sueco. Es una app para controlar el stock de víveres e
+> **Stoka** — «Tu hogar siempre provisto». Es una app para controlar el stock de víveres e
 > insumos de una casa, sugerir comidas con lo que hay y armar la lista de compras.
 
 Estado: **Fase 1 implementada.** Las fases 2 a 6 están especificadas acá, y el modelo de datos ya las contempla
@@ -58,9 +58,10 @@ Cómo se aplica en la Fase 1:
 | Tomate · **No hay** | `#EB5D4A` |
 | Crema (fondo) | `#F5F3EE` |
 
-- Marca: la palabra «Kvar» con una hoja sobre la K. Lema: «Tu hogar siempre provisto». (La ilustración de la casa con
-  la despensa queda para material de comunicación; dentro de la app se usa la versión sobria.)
-- Ícono de app: «K» crema con hoja verde sobre verde bosque.
+- Marca: **Stoka**, palabra de trazo de pincel en verde bosque con tres destellos verdes sobre la «o». Lema:
+  «Tu hogar siempre provisto». Logo completo: la casa con la despensa (frascos, aceite, tomate, lata, pasta, leche)
+  y «Stoka» debajo; se usa en la bienvenida y el ingreso. Dentro de la app, la palabra sola en el encabezado.
+- Ícono de app: la «S» de pincel con los destellos, sobre crema. Alternativa: la casa con la despensa.
 - Íconos de línea finos (trazo 1,5–1,75) para categorías, lugares y navegación.
 - **Imagen del producto real:** cuando hay foto, la miniatura muestra el producto recortado, sin fondo, sobre el
   fondo neutro de la tarjeta. Si no hay foto, el ícono de línea de su categoría.

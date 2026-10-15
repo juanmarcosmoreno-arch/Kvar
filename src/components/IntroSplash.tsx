@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import finalFrame from '../assets/brand/kvar-intro-final.webp';
-import introMp4 from '../assets/brand/kvar-intro.mp4';
-import introWebm from '../assets/brand/kvar-intro.webm';
+import logo from '../assets/brand/stoka-logo.webp';
 
-const SEEN_KEY = 'kvar:intro-visto';
+const SEEN_KEY = 'kvar:intro-visto'; // clave interna: se mantiene para no repetir la bienvenida
 
 export function introSeen(): boolean {
   try {
@@ -22,9 +20,8 @@ function markSeen() {
 }
 
 /**
- * Bienvenida animada: la casa se dibuja, se llena la despensa y aparece «Kvar».
- * Solo la primera vez que se abre la app en el dispositivo. Sin sonido; un toque la saltea.
- * Con «reducir movimiento» se muestra el logo quieto un instante.
+ * Bienvenida: aparece el logo de Stoka. Solo la primera vez en cada dispositivo; un toque la saltea.
+ * (Si se agrega un video del logo, va acá, como en la versión anterior.)
  */
 export function IntroSplash({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
@@ -41,8 +38,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
   };
 
   useEffect(() => {
-    // Respaldo: si el video no arranca (ahorro de batería, error), igual se sigue
-    const t = setTimeout(finish, reduced ? 1200 : 7000);
+    const t = setTimeout(finish, reduced ? 1200 : 2400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -55,25 +51,9 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
         leaving ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      <div className="dark:overflow-hidden dark:rounded-[2.5rem] dark:bg-white">
-        {reduced ? (
-          <img src={finalFrame} alt="Kvar" className="h-72 w-72 mix-blend-multiply dark:mix-blend-normal" />
-        ) : (
-          <video
-            poster={finalFrame}
-            className="h-72 w-72 mix-blend-multiply dark:mix-blend-normal"
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            onEnded={() => setTimeout(finish, 450)}
-            aria-label="Kvar"
-          >
-            {/* MP4 (H.264) para Safari y la app de iPhone; WebM para navegadores sin H.264 */}
-            <source src={introMp4} type="video/mp4" />
-            <source src={introWebm} type="video/webm" onError={finish} />
-          </video>
-        )}
+      {/* El fundido va en la capa animada: si va en la imagen, la animación lo aísla y se ve el blanco */}
+      <div className="animate-intro mix-blend-multiply dark:overflow-hidden dark:rounded-[2.5rem] dark:bg-white dark:p-4 dark:mix-blend-normal">
+        <img src={logo} alt="Stoka" className="h-72 w-auto" />
       </div>
     </div>
   );
