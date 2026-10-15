@@ -178,3 +178,33 @@ describe('recetas offline', () => {
     expect(applyOps(snapshot(), [op, op]).feedback).toHaveLength(1);
   });
 });
+
+describe('unir productos', () => {
+  it('el duplicado pasa al que queda: códigos, lista, estado y frecuentes', () => {
+    const s = snapshot({
+      products: [product({ id: 'a', name: 'Azúcar', status: 'out' }), product({ id: 'b', name: 'Azúcar Bella Unión', status: 'ok', is_staple: true })],
+      list: [item({ id: 'ia', product_id: 'a', reason: 'out' }), item({ id: 'ib', product_id: 'b', reason: 'low' })],
+      outCounts: { a: 2, b: 3 },
+      aliases: [{ id: 'al', household_id: 'hh-1', product_id: 'b', kind: 'barcode', alias: '7730', normalized: '7730', hits: 1 }],
+    });
+    const next = applyOp(s, { kind: 'merge_products', id: 'm', at, sourceId: 'b', targetId: 'a' });
+    expect(next.products.map((p) => p.id)).toEqual(['a']);
+    expect(next.products[0]).toMatchObject({ status: 'ok', is_staple: true });
+    expect(next.list.map((i) => i.id)).toEqual(['ia']);
+    expect(next.outCounts).toEqual({ a: 5 });
+    expect(next.aliases![0].product_id).toBe('a');
+    // reintento: no pasa nada
+    expect(applyOp(next, { kind: 'merge_products', id: 'm', at, sourceId: 'b', targetId: 'a' })).toBe(next);
+  });
+
+  it('con conteo se suman las unidades', () => {
+    const s = snapshot({
+      products: [
+        product({ id: 'a', track_quantity: true, quantity: 1, low_threshold: 2, status: 'low' }),
+        product({ id: 'b', track_quantity: true, quantity: 3, low_threshold: 1, status: 'ok' }),
+      ],
+    });
+    const next = applyOp(s, { kind: 'merge_products', id: 'm', at, sourceId: 'b', targetId: 'a' });
+    expect(next.products[0]).toMatchObject({ quantity: 4, status: 'ok' });
+  });
+});

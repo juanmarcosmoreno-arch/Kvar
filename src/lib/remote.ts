@@ -237,6 +237,12 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
       );
       return;
     }
+    case 'merge_products':
+      check(await supabase.rpc('merge_products', { p_source: op.sourceId, p_target: op.targetId }));
+      return;
+    case 'remove_alias':
+      check(await supabase.from('product_aliases').delete().eq('id', op.aliasId));
+      return;
     case 'save_recipe': {
       const { ingredients, created_at: _c, updated_at: _u, ...recipe } = op.recipe;
       check(

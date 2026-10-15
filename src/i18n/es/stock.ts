@@ -157,4 +157,24 @@ export const stock = {
     failed: 'No pude procesar la foto. Probá con otra.',
     cropping: 'Recortando…',
   },
+
+  /** Códigos de barras de un producto y «Unir con otro producto» */
+  codes: {
+    title: 'Códigos de barras',
+    remove: (code: string) => `Quitar el código ${code}`,
+    removed: 'Saqué el código. Si lo volvés a escanear, te pregunto qué es.',
+  },
+  merge: {
+    open: 'Unir con otro producto',
+    hint: 'Para dos marcas que son lo mismo o un producto cargado dos veces.',
+    title: 'Unir con otro producto',
+    search: 'Buscar el otro producto…',
+    pick: (name: string) => `¿Cuál es lo mismo que ${name}?`,
+    none: 'No hay otro producto con ese nombre.',
+    confirmTitle: (keep: string) => `Queda ${keep}`,
+    confirmBody: (duplicate: string, keep: string) =>
+      `${duplicate} se borra y pasa a ser ${keep}: sus códigos de barras, su historial, la lista y las recetas.`,
+    confirm: 'Unir',
+    done: (duplicate: string, keep: string) => `Listo: ${duplicate} ahora es ${keep}.`,
+  },
 };

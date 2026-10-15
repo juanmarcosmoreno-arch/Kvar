@@ -158,4 +158,23 @@ export const stock: Messages['stock'] = {
     failed: 'Kunne ikke behandle fotoet. Prøv et andet.',
     cropping: 'Beskærer…',
   },
+
+  codes: {
+    title: 'Stregkoder',
+    remove: (code) => `Fjern koden ${code}`,
+    removed: 'Jeg har fjernet koden. Hvis du scanner den igen, spørger jeg, hvad det er.',
+  },
+  merge: {
+    open: 'Slå sammen med et andet produkt',
+    hint: 'Til to mærker, der er det samme, eller et produkt, der er tilføjet to gange.',
+    title: 'Slå sammen med et andet produkt',
+    search: 'Søg efter det andet produkt…',
+    pick: (name) => `Hvilket er det samme som ${name}?`,
+    none: 'Der er ikke noget andet produkt med det navn.',
+    confirmTitle: (keep) => `${keep} bliver`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate} slettes og bliver til ${keep}: stregkoder, historik, listen og opskrifterne.`,
+    confirm: 'Slå sammen',
+    done: (duplicate, keep) => `Færdig: ${duplicate} er nu ${keep}.`,
+  },
 };

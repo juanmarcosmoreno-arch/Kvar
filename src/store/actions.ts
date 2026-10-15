@@ -9,7 +9,7 @@ import { guessCategoryFromName, guessLocation } from '../domain/openFoodFacts';
 import type {
   Category, EventSource, ListReason, Location, Product, Recipe, RecipeFeedback, ShoppingItem, StockStatus,
 } from '../domain/types';
-import { missingForList, type Suggestion } from '../domain/recipes';
+import { isHouseRecipe, missingForList, type Suggestion } from '../domain/recipes';
 import { nowIso, uuid } from '../lib/id';
 import { imagePath, imageStore } from '../lib/images';
 import { localizedSeeds } from '../domain/seeds';
@@ -345,7 +345,7 @@ export function addMissingToList(s: Suggestion): number {
 export function recipeFeedback(recipe: Recipe, action: RecipeFeedback['action']) {
   const view = getView();
   if (!view) return;
-  const own = recipe.source !== 'catalog';
+  const own = isHouseRecipe(recipe);
   const feedback: RecipeFeedback = {
     id: uuid(),
     household_id: view.household.id,
@@ -417,4 +417,14 @@ export function localizeNewHousehold() {
   const { categories, locations } = localizedSeeds(view.categories, view.locations);
   for (const category of categories) dispatch({ kind: 'upsert_category', ...base(), category });
   for (const location of locations) dispatch({ kind: 'upsert_location', ...base(), location });
+}
+
+/** «Unir con otro producto»: `duplicate` pasa a ser `keep` (códigos, historial, lista, recetas) y se borra. */
+export function mergeProducts(keep: Product, duplicate: Product) {
+  dispatch({ kind: 'merge_products', ...base(), sourceId: duplicate.id, targetId: keep.id });
+  toast(m.stock.merge.done(duplicate.name, keep.name));
+}
+
+export function removeAlias(aliasId: string) {
+  dispatch({ kind: 'remove_alias', ...base(), aliasId });
 }

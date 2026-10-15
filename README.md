@@ -58,6 +58,8 @@ Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden
 2. [`20261016000000_fase2_codigos_y_fotos.sql`](supabase/migrations/20261016000000_fase2_codigos_y_fotos.sql)
 3. [`20261017000000_fase5_recetas.sql`](supabase/migrations/20261017000000_fase5_recetas.sql) (recetas de la casa;
    si ya tenías la base andando, alcanza con pegar solo esta)
+4. [`20261018000000_unir_productos.sql`](supabase/migrations/20261018000000_unir_productos.sql) («Unir con otro
+   producto»)
 
 Cuando aparezcan migraciones nuevas (fases siguientes), se corre solo la nueva.
 

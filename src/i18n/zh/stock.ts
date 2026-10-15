@@ -157,4 +157,23 @@ export const stock: Messages['stock'] = {
     failed: '无法处理照片，请换一张试试。',
     cropping: '正在裁剪…',
   },
+
+  codes: {
+    title: '条码',
+    remove: (code) => `移除条码 ${code}`,
+    removed: '已移除条码。再次扫描时，我会问你这是什么。',
+  },
+  merge: {
+    open: '与其他商品合并',
+    hint: '适用于其实是同一种东西的两个品牌，或重复添加的商品。',
+    title: '与其他商品合并',
+    search: '搜索另一个商品…',
+    pick: (name) => `哪个和${name}是同一种？`,
+    none: '没有其他同名商品。',
+    confirmTitle: (keep) => `保留${keep}`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate}将被删除并合并为${keep}：包括条码、历史记录、清单和菜谱。`,
+    confirm: '合并',
+    done: (duplicate, keep) => `完成：${duplicate}现在是${keep}。`,
+  },
 };

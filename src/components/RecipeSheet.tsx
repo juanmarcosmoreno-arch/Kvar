@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   assessRecipe, capitalize, minutesLabel, usedProducts, type IngredientLine,
+  isHouseRecipe,
 } from '../domain/recipes';
 import type { Product, Recipe, StockStatus } from '../domain/types';
 import { formatList, m } from '../i18n';
@@ -38,7 +39,7 @@ function Body({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const t = m.recipes.sheet;
   const s = useMemo(() => assessRecipe(recipe, view.products, servings), [recipe, view.products, servings]);
-  const own = recipe.source !== 'catalog';
+  const own = isHouseRecipe(recipe);
 
   if (cooking) return <Cooked recipe={recipe} used={usedProducts(s)} onDone={onClose} onBack={() => setCooking(false)} />;
 

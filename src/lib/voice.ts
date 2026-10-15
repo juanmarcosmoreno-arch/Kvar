@@ -15,10 +15,13 @@ interface KvarVoicePlugin {
   start(options?: { locale: string }): Promise<void>;
   stop(): Promise<{ text: string }>;
   interpret(options: { text: string }): Promise<{ actions: { kind: string; product: string; quantity: number }[] }>;
+  recipeIdeas(options: { have: string[]; expiring: string[]; avoid: string[]; servings: number; language: string }): Promise<{
+    recipes: { title: string; minutes: number; ingredients: { name: string; quantity: number; unit: string }[]; steps: string[] }[];
+  }>;
   addListener(event: 'partial', cb: (data: { text: string; final: boolean }) => void): Promise<PluginListenerHandle>;
 }
 
-const KvarVoice = registerPlugin<KvarVoicePlugin>('KvarVoice');
+export const KvarVoice = registerPlugin<KvarVoicePlugin>('KvarVoice');
 
 export const canDictate = isNative;
 

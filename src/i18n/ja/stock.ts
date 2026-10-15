@@ -157,4 +157,23 @@ export const stock: Messages['stock'] = {
     failed: '写真を処理できませんでした。別の写真でお試しください。',
     cropping: '切り抜き中…',
   },
+
+  codes: {
+    title: 'バーコード',
+    remove: (code) => `バーコード ${code} を削除`,
+    removed: 'バーコードを削除しました。もう一度スキャンすると、何か確認します。',
+  },
+  merge: {
+    open: 'ほかの商品とまとめる',
+    hint: '同じものの別ブランドや、二重に登録した商品に。',
+    title: 'ほかの商品とまとめる',
+    search: 'もう一方の商品を検索…',
+    pick: (name) => `${name}と同じものはどれですか？`,
+    none: 'その名前の商品はほかにありません。',
+    confirmTitle: (keep) => `${keep}を残します`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate}は削除され、${keep}になります。バーコード、履歴、リスト、レシピも移ります。`,
+    confirm: 'まとめる',
+    done: (duplicate, keep) => `完了：${duplicate}は${keep}になりました。`,
+  },
 };

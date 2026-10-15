@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   amountLabel, capitalize, ingredientLine, parseIngredientLine,
+  isHouseRecipe,
 } from '../domain/recipes';
 import type { MealType, Recipe, RecipeConstraint } from '../domain/types';
 import { m } from '../i18n';
@@ -23,7 +24,7 @@ export function RecipeEditor({ base, open, onClose, onSaved }: {
   onSaved?: (r: Recipe) => void;
 }) {
   return (
-    <Sheet open={open} onClose={onClose} title={base && base.source !== 'catalog' ? m.recipes.editor.editTitle : m.recipes.editor.newTitle}>
+    <Sheet open={open} onClose={onClose} title={base && isHouseRecipe(base) ? m.recipes.editor.editTitle : m.recipes.editor.newTitle}>
       {open && <Form key={base?.id ?? 'new'} base={base} onClose={onClose} onSaved={onSaved} />}
     </Sheet>
   );
@@ -33,7 +34,7 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
   const view = useView()!;
   const t = m.recipes.editor;
   const { meals: mealLabels, constraints: constraintLabels } = m.common;
-  const editing = base && base.source !== 'catalog' ? base : null;
+  const editing = base && isHouseRecipe(base) ? base : null;
   const [title, setTitle] = useState(base?.title ?? '');
   const [servings, setServings] = useState(base?.servings ?? view.household.default_servings ?? 2);
   const [minutes, setMinutes] = useState(base?.total_minutes ? String(base.total_minutes) : '');
@@ -61,7 +62,7 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
       id,
       household_id: hh,
       title: capitalize(title.trim()),
-      source: editing?.source ?? 'own',
+      source: editing?.source ?? (base?.source === 'ai' ? 'ai' : 'own'),
       source_url: editing?.source_url ?? null,
       servings,
       total_minutes: Number(minutes) > 0 ? Math.round(Number(minutes)) : null,

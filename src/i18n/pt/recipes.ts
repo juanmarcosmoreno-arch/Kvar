@@ -7,6 +7,14 @@ export const recipes: Messages['recipes'] = {
   listSep: ', ',
 
   cook: {
+    think: 'Pensar em receitas com o que tem',
+    thinkAgain: 'Pensar de novo',
+    thinking: 'Pensando com o que tem…',
+    thought: (n) => `Pronto: pensei com ${isOne(n) ? 'o 1 produto que tem' : `os ${n} produtos que tem`}.`,
+    autoUpdate: 'As sugestões se atualizam sozinhas sempre que muda o que tem.',
+    ideasTitle: 'Ideias novas com o que tem',
+    ideasHint: 'Criadas pela Apple Intelligence no seu iPhone. Se gostar de uma, salve como receita da casa.',
+    ideasError: 'A Apple Intelligence não conseguiu pensar em ideias agora. Vou mostrar as do livro de receitas.',
     title: 'O que eu cozinho?',
     addRecipe: 'Adicionar uma receita',
     eating: 'Vamos comer em',

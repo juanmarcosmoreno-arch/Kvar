@@ -158,4 +158,23 @@ export const stock: Messages['stock'] = {
     failed: 'Impossible de traiter la photo. Essayez-en une autre.',
     cropping: 'Détourage…',
   },
+
+  codes: {
+    title: 'Codes-barres',
+    remove: (code) => `Retirer le code ${code}`,
+    removed: 'Code retiré. Si vous le scannez à nouveau, je vous demanderai ce que c’est.',
+  },
+  merge: {
+    open: 'Fusionner avec un autre produit',
+    hint: 'Pour deux marques qui sont la même chose ou un produit ajouté deux fois.',
+    title: 'Fusionner avec un autre produit',
+    search: 'Rechercher l’autre produit…',
+    pick: (name) => `Lequel est la même chose que ${name} ?`,
+    none: 'Aucun autre produit avec ce nom.',
+    confirmTitle: (keep) => `On garde ${keep}`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate} sera supprimé et deviendra ${keep} : ses codes-barres, son historique, la liste et les recettes.`,
+    confirm: 'Fusionner',
+    done: (duplicate, keep) => `C’est fait : ${duplicate} est maintenant ${keep}.`,
+  },
 };

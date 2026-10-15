@@ -158,4 +158,23 @@ export const stock: Messages['stock'] = {
     failed: 'Couldn’t process the photo. Try another one.',
     cropping: 'Cropping…',
   },
+
+  codes: {
+    title: 'Barcodes',
+    remove: (code) => `Remove barcode ${code}`,
+    removed: 'Removed the barcode. If you scan it again, I’ll ask what it is.',
+  },
+  merge: {
+    open: 'Merge with another product',
+    hint: 'For two brands that are the same thing, or a product added twice.',
+    title: 'Merge with another product',
+    search: 'Search for the other product…',
+    pick: (name) => `Which one is the same as ${name}?`,
+    none: 'No other product with that name.',
+    confirmTitle: (keep) => `Keep ${keep}`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate} will be deleted and become ${keep}: its barcodes, history, list item and recipes.`,
+    confirm: 'Merge',
+    done: (duplicate, keep) => `Done: ${duplicate} is now ${keep}.`,
+  },
 };

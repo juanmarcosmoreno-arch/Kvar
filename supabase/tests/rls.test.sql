@@ -173,6 +173,24 @@ do $$ begin
   assert (select title from public.recipes) = 'Tuco de la abuela', 'se actualiza';
   assert (select count(*) from public.recipe_ingredients) = 1, 'ingredientes reemplazados';
 end $$;
+-- Unir productos: «Azúcar Bella Unión» pasa a ser «Azúcar» con su código y su historial
+insert into public.products (household_id, name, status) values
+  (current_setting('kvar.hh')::uuid, 'Azúcar', 'out'),
+  (current_setting('kvar.hh')::uuid, 'Azúcar Bella Unión', 'ok');
+select 1 as x from public.learn_alias(current_setting('kvar.hh')::uuid,
+  (select id from public.products where name = 'Azúcar Bella Unión'), 'barcode', '7730000000999', '7730000000999') \gset ignored_
+select 1 as x from public.merge_products(
+  (select id from public.products where name = 'Azúcar Bella Unión'),
+  (select id from public.products where name = 'Azúcar')) \gset ignored_
+do $$ begin
+  assert (select count(*) from public.products where name like 'Azúcar%') = 1, 'queda uno';
+  assert (select status from public.products where name = 'Azúcar') = 'ok', 'si una marca hay, hay';
+  assert (select p.name from public.product_aliases a join public.products p on p.id = a.product_id
+          where a.normalized = '7730000000999') = 'Azúcar', 'el código pasa al que queda';
+  assert (select count(*) from public.product_events e join public.products p on p.id = e.product_id
+          where p.name = 'Azúcar') >= 2, 'el historial también';
+end $$;
+
 insert into public.recipe_feedback (household_id, catalog_key, recipe_title, action)
 values (current_setting('kvar.hh')::uuid, 'catalog:fideos-con-tuco', 'Fideos con tuco', 'cooked');
 reset role;

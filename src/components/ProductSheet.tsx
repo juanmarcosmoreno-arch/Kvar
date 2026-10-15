@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { openItemFor } from '../domain/shoppingList';
 import type { Product } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
-import { addListItem, deleteProduct, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
+import { addListItem, deleteProduct, removeAlias, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
 import { useUI } from '../store/ui';
+import { MergeSheet } from './MergeSheet';
 import { ProductStats } from './ProductStats';
 import { isNative } from '../lib/platform';
 import { PhotoButton } from './PhotoButton';
@@ -34,6 +35,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
   const view = useView()!;
   const [name, setName] = useState(product.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [merging, setMerging] = useState(false);
   useEffect(() => setName(product.name), [product.name]);
   const ui = useUI();
   const listItem = openItemFor(view.list, product.id);
@@ -170,6 +172,35 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
       </section>
 
       <ProductStats product={product} />
+
+      {barcodes.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="section-title">{m.stock.codes.title}</h3>
+          <ul className="card divide-y divide-line">
+            {barcodes.map((a) => (
+              <li key={a.id} className="flex min-h-[48px] items-center gap-3 pl-4">
+                <Icon name="barcode" size={18} className="text-muted" />
+                <span className="flex-1 font-mono text-sm tabular-nums">{a.alias}</span>
+                <button
+                  className="flex min-h-tap min-w-tap items-center justify-center text-muted"
+                  aria-label={m.stock.codes.remove(a.alias)}
+                  onClick={() => { removeAlias(a.id); toast(m.stock.codes.removed); }}
+                >
+                  <Icon name="x" size={18} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="space-y-1">
+        <button className="btn-ghost w-full" onClick={() => setMerging(true)}>
+          <Icon name="copy" size={20} /> {m.stock.merge.open}
+        </button>
+        <p className="px-1 text-center text-xs text-muted">{m.stock.merge.hint}</p>
+      </div>
+      <MergeSheet keep={merging ? product : null} onClose={() => setMerging(false)} />
 
       {confirmDelete ? (
         <div className="flex gap-2">

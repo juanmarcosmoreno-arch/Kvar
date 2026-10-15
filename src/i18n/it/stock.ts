@@ -158,4 +158,23 @@ export const stock: Messages['stock'] = {
     failed: 'Non sono riuscito a elaborare la foto. Provane un’altra.',
     cropping: 'Scontorno…',
   },
+
+  codes: {
+    title: 'Codici a barre',
+    remove: (code) => `Rimuovi il codice ${code}`,
+    removed: 'Ho tolto il codice. Se lo scansioni di nuovo, ti chiedo cos’è.',
+  },
+  merge: {
+    open: 'Unisci a un altro prodotto',
+    hint: 'Per due marche che sono la stessa cosa o un prodotto aggiunto due volte.',
+    title: 'Unisci a un altro prodotto',
+    search: 'Cerca l’altro prodotto…',
+    pick: (name) => `Qual è la stessa cosa di ${name}?`,
+    none: 'Nessun altro prodotto con quel nome.',
+    confirmTitle: (keep) => `Resta ${keep}`,
+    confirmBody: (duplicate, keep) =>
+      `${duplicate} viene eliminato e diventa ${keep}: i codici a barre, lo storico, la lista e le ricette.`,
+    confirm: 'Unisci',
+    done: (duplicate, keep) => `Fatto: ${duplicate} ora è ${keep}.`,
+  },
 };

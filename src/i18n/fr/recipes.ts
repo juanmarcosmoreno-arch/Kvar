@@ -7,6 +7,14 @@ export const recipes: Messages['recipes'] = {
   listSep: ', ',
 
   cook: {
+    think: 'Trouver des recettes avec ce qu’il y a',
+    thinkAgain: 'Chercher à nouveau',
+    thinking: 'Je réfléchis avec ce qu’il y a…',
+    thought: (n) => `C’est fait : j’ai réfléchi avec ${isOne(n) ? 'le seul produit' : `les ${n} produits`} qu’il y a.`,
+    autoUpdate: 'Les suggestions se mettent à jour toutes seules dès que ce qu’il y a change.',
+    ideasTitle: 'Nouvelles idées avec ce qu’il y a',
+    ideasHint: 'Imaginées par Apple Intelligence sur votre iPhone. Si l’une vous plaît, enregistrez-la comme recette de la maison.',
+    ideasError: 'Apple Intelligence n’a pas pu trouver d’idées pour le moment. Voici celles du livre de recettes.',
     title: 'Qu’est-ce que je cuisine ?',
     addRecipe: 'Ajouter une recette',
     eating: 'Nous sommes',

@@ -430,6 +430,13 @@ export interface CookFilters {
 
 export const QUICK_MINUTES = 30;
 const MAX_EXPIRING = 4;
+
+/** Un número entre 0 y 1.5, siempre el mismo para la misma receta y la misma vuelta */
+function jitter(id: string, seed: number): number {
+  let h = seed | 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(h ^ id.charCodeAt(i), 2654435761) >>> 0);
+  return ((h >>> 0) % 1000) / 1000 * 1.5;
+}
 const DAY = 86_400_000;
 
 export function assessRecipe(recipe: Recipe, products: Product[], servings: number, now = Date.now()): Suggestion {
@@ -449,6 +456,8 @@ export function assessRecipe(recipe: Recipe, products: Product[], servings: numb
 }
 
 export const recipeKey = (r: Pick<Recipe, 'id'>) => r.id;
+/** Receta guardada del hogar (no las del recetario ni las ideas sin guardar de Apple Intelligence, «ai:…») */
+export const isHouseRecipe = (r: Pick<Recipe, 'id' | 'source'>) => r.source !== 'catalog' && !r.id.startsWith('ai:');
 const feedbackKey = (f: RecipeFeedback) => f.recipe_id ?? f.catalog_key;
 
 export interface Preferences {
@@ -497,7 +506,7 @@ export function matchesFilters(recipe: Recipe, filters: CookFilters): boolean {
 function score(s: Suggestion, prefs: Preferences): number {
   const key = recipeKey(s.recipe);
   let n = 0;
-  if (s.recipe.source !== 'catalog') n += 3; // las recetas propias tienen prioridad
+  if (isHouseRecipe(s.recipe)) n += 3; // las recetas propias tienen prioridad
   n += 2 * s.expiring.length;
   n -= 0.2 * s.lines.filter((l) => l.availability === 'low').length;
   if (prefs.cookedEver.has(key)) n += 0.5;
@@ -513,18 +522,25 @@ function score(s: Suggestion, prefs: Preferences): number {
 export function suggestRecipes(
   recipes: Recipe[],
   products: Product[],
-  opts: { servings: number; filters?: CookFilters; feedback?: RecipeFeedback[]; now?: number },
+  opts: {
+    servings: number;
+    filters?: CookFilters;
+    feedback?: RecipeFeedback[];
+    now?: number;
+    /** «Pensar de nuevo»: cambia el orden entre recetas parecidas para proponer otras */
+    variety?: number;
+  },
 ): SuggestionGroups {
   const now = opts.now ?? Date.now();
   const prefs = learnPreferences(opts.feedback ?? [], now);
   const groups: SuggestionGroups = { expiring: [], ready: [], oneMissing: [], more: [] };
   for (const recipe of recipes) {
     if (!matchesFilters(recipe, opts.filters ?? {})) continue;
-    const own = recipe.source !== 'catalog';
+    const own = isHouseRecipe(recipe);
     if (prefs.hidden.has(recipeKey(recipe))) continue;
     if (!own && recipe.tags.some((t) => prefs.blockedTags.has(t))) continue;
     const s = assessRecipe(recipe, products, opts.servings, now);
-    s.score = score(s, prefs);
+    s.score = score(s, prefs) + (opts.variety ? jitter(recipe.id, opts.variety) : 0);
     const missing = s.missing.length;
     if (s.expiring.length && missing <= 1) groups.expiring.push(s);
     else if (missing === 0) groups.ready.push(s);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  amountLabel, assessRecipe, findProduct, formatAmount, ingredientLine, isBasic, kitchenRound, learnPreferences,
+  amountLabel, assessRecipe, findProduct, formatAmount, ingredientLine, isBasic, isHouseRecipe, kitchenRound, learnPreferences,
   missingForList, nameScore, parseIngredientLine, suggestRecipes, usedProducts,
 } from '../recipes';
 import { recipeCatalog } from '../recipeCatalog';
@@ -208,5 +208,22 @@ describe('para aprovechar lo que vence', () => {
     const g = suggestRecipes(many, [queso], { servings: 2, now });
     expect(g.expiring).toHaveLength(4);
     expect(g.ready).toHaveLength(3);
+  });
+});
+
+describe('pensar de nuevo', () => {
+  it('cambia el orden entre recetas parecidas, siempre igual para la misma vuelta', () => {
+    const products = [product({ id: 'f', name: 'Fideos' })];
+    const many = Array.from({ length: 8 }, (_, i) => ({ ...recipe({ id: `catalog:r${i}`, title: `R${i}`, lines: ['fideos'] }), source: 'catalog' as const }));
+    const order = (variety?: number) => suggestRecipes(many, products, { servings: 2, now, variety }).ready.map((s) => s.recipe.id);
+    expect(order(1)).toEqual(order(1));
+    expect(new Set([order(1).join(), order(2).join(), order(3).join()]).size).toBeGreaterThan(1);
+    expect(order(1)).toHaveLength(8);
+  });
+
+  it('las ideas sin guardar no son recetas de la casa', () => {
+    expect(isHouseRecipe({ id: 'ai:123', source: 'ai' })).toBe(false);
+    expect(isHouseRecipe({ id: 'r1', source: 'ai' })).toBe(true);
+    expect(isHouseRecipe({ id: 'catalog:x', source: 'catalog' })).toBe(false);
   });
 });

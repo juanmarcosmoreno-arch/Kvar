@@ -32,6 +32,9 @@ export type Op =
   | { kind: 'save_recipe'; id: string; at: string; recipe: Recipe }
   | { kind: 'delete_recipe'; id: string; at: string; recipeId: string }
   | { kind: 'recipe_feedback'; id: string; at: string; feedback: RecipeFeedback }
+  /** Dos productos que son lo mismo: `sourceId` pasa a ser `targetId` (códigos, lista, recetas) y se borra */
+  | { kind: 'merge_products'; id: string; at: string; sourceId: string; targetId: string }
+  | { kind: 'remove_alias'; id: string; at: string; aliasId: string }
   | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
   /** La foto ya está guardada en el teléfono (IndexedDB) bajo `path`; se sube al sincronizar. */
   | { kind: 'set_image'; id: string; at: string; productId: string; path: string; previousPath: string | null };
@@ -65,6 +68,40 @@ function withStock(s: Snapshot, product: Product, wanted: { status?: StockStatus
 /** Como upsert, pero reemplaza la fila entera (una receta trae sus ingredientes). */
 function upsertReplace<T extends { id: string }>(arr: T[], row: T): T[] {
   return arr.some((x) => x.id === row.id) ? arr.map((x) => (x.id === row.id ? row : x)) : [...arr, row];
+}
+
+const STATUS_RANK: Record<StockStatus, number> = { ok: 0, low: 1, out: 2 };
+
+/** Igual que la función merge_products de la base, para verlo al instante (también sin conexión). */
+function mergeProducts(s: Snapshot, sourceId: string, targetId: string): Snapshot {
+  const src = s.products.find((p) => p.id === sourceId);
+  const dst = s.products.find((p) => p.id === targetId);
+  if (!src || !dst || src.id === dst.id) return s;
+  const merged: Product = { ...dst, is_staple: dst.is_staple || src.is_staple };
+  if (dst.track_quantity && src.track_quantity) {
+    const quantity = (dst.quantity ?? 0) + (src.quantity ?? 0);
+    Object.assign(merged, resolveStock(dst, { quantity }));
+  } else {
+    merged.status = STATUS_RANK[src.status] < STATUS_RANK[dst.status] ? src.status : dst.status;
+    merged.image_path = dst.image_path ?? src.image_path ?? null;
+    merged.image_url = dst.image_url ?? src.image_url;
+  }
+  const targetOpen = s.list.some((i) => i.product_id === dst.id && !i.checked_at);
+  const list = s.list
+    .filter((i) => !(i.product_id === src.id && !i.checked_at && targetOpen))
+    .map((i) => (i.product_id === src.id ? { ...i, product_id: dst.id } : i));
+  const { [src.id]: srcOuts = 0, ...outCounts } = s.outCounts;
+  return {
+    ...s,
+    products: s.products.filter((p) => p.id !== src.id).map((p) => (p.id === dst.id ? merged : p)),
+    list,
+    outCounts: { ...outCounts, [dst.id]: (outCounts[dst.id] ?? 0) + srcOuts },
+    aliases: s.aliases?.map((a) => (a.product_id === src.id ? { ...a, product_id: dst.id } : a)),
+    recipes: s.recipes?.map((r) =>
+      r.ingredients.some((i) => i.product_id === src.id)
+        ? { ...r, ingredients: r.ingredients.map((i) => (i.product_id === src.id ? { ...i, product_id: dst.id } : i)) }
+        : r),
+  };
 }
 
 export function applyOp(s: Snapshot, op: Op): Snapshot {
@@ -171,6 +208,10 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
     case 'recipe_feedback':
       if (s.feedback?.some((f) => f.id === op.feedback.id)) return s;
       return { ...s, feedback: [...(s.feedback ?? []), op.feedback] };
+    case 'merge_products':
+      return mergeProducts(s, op.sourceId, op.targetId);
+    case 'remove_alias':
+      return { ...s, aliases: s.aliases?.filter((a) => a.id !== op.aliasId) };
     case 'set_image':
       return {
         ...s,
