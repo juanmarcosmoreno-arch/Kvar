@@ -5,6 +5,7 @@ import { useView } from '../store/store';
 import { UIContext, type AddDefaults, type ScanMode } from '../store/ui';
 import { ScanSheet } from './ScanSheet';
 import { QuantitySheet } from './QuantitySheet';
+import { ReceiptSheet } from './ReceiptSheet';
 import type { QuantityMode } from '../domain/quantity';
 import { DemoBar } from './DemoBar';
 import { isDemo } from '../lib/demo';
@@ -22,6 +23,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState(false);
   const [scan, setScan] = useState<{ mode: ScanMode; productId?: string } | null>(null);
   const [quantity, setQuantityTarget] = useState<{ productId: string; mode: QuantityMode } | null>(null);
+  const [receipt, setReceipt] = useState(false);
 
   const ui = {
     openProduct: (id: string) => {
@@ -39,6 +41,7 @@ export function Shell({ children }: { children: ReactNode }) {
       setScan(null);
       setQuantityTarget({ productId, mode });
     },
+    openReceipt: () => setReceipt(true),
   };
 
   return (
@@ -71,12 +74,18 @@ export function Shell({ children }: { children: ReactNode }) {
             onClick={() => { setActions(false); ui.openScan('bought'); }}
           />
           <BigAction
+            icon="receipt"
+            title="Foto del ticket"
+            hint="Cargo toda la compra de una vez"
+            onClick={() => { setActions(false); setReceipt(true); }}
+          />
+          <BigAction
             icon="plus"
             title="Agregar producto"
             hint="Solo el nombre; lo demás es opcional"
             onClick={() => { setActions(false); setAddDefaults({}); }}
           />
-          <p className="pt-1 text-center text-xs text-muted">Pronto: foto del ticket y voz.</p>
+          <p className="pt-1 text-center text-xs text-muted">Pronto: decíselo por voz.</p>
         </div>
       </Sheet>
 
@@ -85,6 +94,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <ProductSheet productId={productId} onClose={() => setProductId(null)} />
       <ScanSheet mode={scan?.mode ?? null} productId={scan?.productId} onClose={() => setScan(null)} />
       <QuantitySheet target={quantity} onClose={() => setQuantityTarget(null)} />
+      <ReceiptSheet open={receipt} onClose={() => setReceipt(false)} />
     </UIContext.Provider>
   );
 }

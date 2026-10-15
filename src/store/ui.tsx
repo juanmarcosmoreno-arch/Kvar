@@ -30,6 +30,7 @@ export interface UI {
   openScan: (mode: ScanMode, productId?: string) => void;
   /** Selector de cantidad: sumar, restar, fijar, «¿cuántos compraste?» o «¿cuántos comprar?» */
   openQuantity: (productId: string, mode: QuantityMode) => void;
+  openReceipt: () => void;
 }
 
 export const UIContext = createContext<UI>({
@@ -38,6 +39,7 @@ export const UIContext = createContext<UI>({
   openRanOut: () => {},
   openScan: () => {},
   openQuantity: () => {},
+  openReceipt: () => {},
 });
 
 export const useUI = () => useContext(UIContext);

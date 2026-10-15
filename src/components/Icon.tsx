@@ -1,6 +1,6 @@
 // Íconos de línea finos (lucide), trazo 1.75 para una estética sobria.
 import {
-  Apple, Archive, Camera, Barcode, Baby, Bath, Beef, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CloudOff,
+  Apple, Archive, Camera, Barcode, ReceiptText, Baby, Bath, Beef, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CloudOff,
   CookingPot, Copy, Croissant, CupSoda, Fish, House, Leaf, Milk, Minus, Package, PawPrint, Pencil, Plus,
   Refrigerator, RefreshCw, ScanBarcode, Search, Settings, Share, ShoppingBasket, Snowflake, Soup, SprayCan,
   Star, Trash2, Undo2, Wheat, X, type LucideIcon,
@@ -50,6 +50,7 @@ const icons = {
   leaf: Leaf,
   camera: Camera,
   barcode: Barcode,
+  receipt: ReceiptText,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;

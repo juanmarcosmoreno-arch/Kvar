@@ -206,6 +206,19 @@ real, PWA offline.
 - La **voz** pasó a la Fase 3, junto con la IA.
 
 ### Fase 3 — Ticket, fotos con IA y voz
+
+**Implementado (sin IA en la nube, sin costo):** foto del ticket en la app de iPhone → texto con Vision de Apple
+(plugin `KvarOCR`, en el dispositivo) → renglones (`src/domain/ocr.ts`: une descripción y números aunque la foto esté
+torcida, usando la inclinación de cada pedazo) → lector de tickets → pantalla de revisión «Encontré N productos»:
+- cada línea propone un producto del hogar o uno nuevo (con categoría y lugar adivinados por el nombre);
+- se corrige con un toque (buscar otro producto o renombrar el nuevo), se descarta, o «Solo los conocidos»;
+- control de suma contra el total;
+- al confirmar: lo existente pasa a «Hay» (suma unidades si lleva conteo), lo nuevo se crea, y se aprenden el
+  código del súper y el texto de cada línea.
+En la web se puede pegar el texto del ticket (por ejemplo, el e-Ticket que llega por correo).
+
+**Pendiente:** voz; fotos de varios productos y líneas que no se reconocen con Claude (requiere clave de IA).
+
 - Subida de imagen a Supabase Storage (bucket privado por hogar) → registro en `imports`.
 - Edge Function `receipt-parse` / `photo-identify` con el proveedor de `AI_PROVIDER`; resultado en `imports.result`.
 - Pantalla de revisión: «Encontré 14 productos, ¿confirmás?», corregir / descartar líneas, crear «sin identificar».

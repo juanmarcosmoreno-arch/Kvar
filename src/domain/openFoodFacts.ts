@@ -155,3 +155,36 @@ export function guessLocation<T extends { id: string; name: string }>(categoryNa
 
 export const OFF_FIELDS =
   'code,product_name,product_name_es,generic_name_es,brands,categories_tags,quantity,image_front_small_url,image_front_url';
+
+// Palabra del nombre del producto → palabras de la categoría del hogar (para tickets, sin datos de OFF).
+const NAME_HINTS: [RegExp, RegExp][] = [
+  [/\b(leche|yogur|queso|manteca|huevos?|crema|dulce de leche|requeson)\b/, /lacteo|huevo/],
+  [/\b(pollo|carne|milanesas?|hamburguesas?|chorizos?|pescado|merluza|carniceria)\b/, /carne|pescad/],
+  [/\b(pan|masa|tapas?|bizcochos?|pascualina)\b/, /panad|panific/],
+  [/\b(tomates?|cebollas?|papas?|manzanas?|bananas?|lechuga|zanahorias?|limon(es)?|naranjas?)\b/, /fruta|verdura/],
+  [/\b(limpiador|detergente|lavandina|esponja|abrillantador|lustramuebles|cif|poett|jabon en polvo|suavizante|desengrasante)\b/, /limpieza/],
+  [/\b(vino|cerveza|agua|refresco|jugo|soda|coca)\b/, /bebida/],
+  [/\b(champu|shampoo|desodorante|papel higienico|pasta dental|jabon|acondicionador|algodon|toallitas)\b/, /higiene/],
+  [/\b(panales|mamadera)\b/, /bebe/],
+  [/\b(perro|gato|mascota)\b/, /mascota/],
+  [/\b(congelad[oa]s?|helado)\b/, /congel/],
+  [/\b(fideos|arroz|harina|azucar|yerba|sal|aceite|lentejas|garbanzos|galletitas|cafe|cocoa|pulpa|ketchup|mayonesa|aceitunas|almidon|levadura|pasas|nueces|pure|vinagre|aderezo|atun|arvejas|polenta|te)\b/, /almacen/],
+];
+
+/** Categoría del hogar más probable por el nombre del producto (null si no hay pista). */
+export function guessCategoryFromName<T extends { id: string; name: string }>(productName: string, categories: T[]): T | null {
+  const words = normalizeAlias(productName).split(' ').filter((w) => w.length > 1 && !NOISE.has(w));
+  const norm = categories.map((c) => ({ c, n: normalizeAlias(c.name) }));
+  // Primero las dos primeras palabras (dicen qué es: «galletitas … con leche» son galletitas), después todo
+  for (const text of [words.slice(0, 2).join(' '), words.join(' ')]) {
+    for (const [nameRe, catRe] of NAME_HINTS) {
+      if (!nameRe.test(text)) continue;
+      const hit = norm.find((x) => catRe.test(x.n));
+      if (hit) return hit.c;
+    }
+  }
+  return null;
+}
+
+/** Marcas propias y prefijos de ticket que van antes del producto */
+const NOISE = new Set(['cefa', 'prodal', 'of', 'e']);

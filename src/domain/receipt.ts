@@ -190,3 +190,80 @@ export function matchReceiptLine(
   }
   return best;
 }
+
+/**
+ * Nombre de producto a partir de una línea ya legible:
+ * «Cefa pasas de uva sultaninas 500 grs.» → «Cefa pasas de uva sultaninas».
+ */
+export function productNameFromLine(clean: string): string {
+  const s = clean
+    .replace(/\b\d+([.,]\d+)?\s*(k|kg|kgs|g|gr|grs|ml|cc|l|lt|lts|u|un|uds|unid)\b\.?(\s*\+\s*\d+\s*(k|kg|g|gr|grs)\b\.?)?/gi, '')
+    .replace(/\bx\s?\d+\b/gi, '')
+    .replace(/\s+(gratis|dp|d\.p\.?|c\/e|ce)\b\.?/gi, '')
+    .replace(/[+.,]+(\s|$)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const out = s || clean.trim();
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+export interface ReviewLine {
+  key: string;            // id estable de la línea en la revisión
+  line: ReceiptLine;
+  productId: string | null; // producto del hogar propuesto (o elegido)
+  via: 'alias' | 'name' | 'user' | null;
+  newName: string;        // nombre si se crea un producto nuevo
+  include: boolean;
+}
+
+/** Arma la propuesta de la pantalla de revisión. */
+export function buildReview(
+  parsed: ParsedReceipt,
+  aliases: Alias[],
+  products: Candidate[],
+): ReviewLine[] {
+  return parsed.lines.map((line, i) => {
+    const m = matchReceiptLine(line, parsed.store, aliases, products);
+    return {
+      key: `${i}-${line.storeCode ?? ''}`,
+      line,
+      productId: m?.product_id ?? null,
+      via: m?.via ?? null,
+      newName: productNameFromLine(line.clean),
+      include: true,
+    };
+  });
+}
+
+export interface ReceiptPlan {
+  /** Producto existente → unidades compradas (las líneas del mismo producto se suman) */
+  existing: Map<string, number>;
+  /** Productos nuevos a crear: nombre → unidades */
+  created: Map<string, { units: number; lines: ReceiptLine[] }>;
+  /** Equivalencias a aprender: texto/código → producto (o nombre nuevo) */
+  learn: { text: string; productId: string | null; newName: string | null }[];
+}
+
+export function planReceipt(review: ReviewLine[], store: string | null): ReceiptPlan {
+  const existing = new Map<string, number>();
+  const created = new Map<string, { units: number; lines: ReceiptLine[] }>();
+  const learn: ReceiptPlan['learn'] = [];
+  for (const r of review) {
+    if (!r.include) continue;
+    const units = r.line.units;
+    const target = r.productId;
+    if (target) existing.set(target, (existing.get(target) ?? 0) + units);
+    else {
+      const name = r.newName.trim() || productNameFromLine(r.line.clean);
+      const c = created.get(name) ?? { units: 0, lines: [] };
+      c.units += units;
+      c.lines.push(r.line);
+      created.set(name, c);
+    }
+    const key = storeCodeKey(store, r.line.storeCode);
+    const newName = target ? null : r.newName.trim() || productNameFromLine(r.line.clean);
+    if (key) learn.push({ text: key, productId: target, newName });
+    learn.push({ text: r.line.description, productId: target, newName });
+  }
+  return { existing, created, learn };
+}

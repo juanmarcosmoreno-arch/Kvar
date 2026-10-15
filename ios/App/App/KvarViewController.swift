@@ -5,5 +5,6 @@ import UIKit
 class KvarViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(KvarCutoutPlugin())
+        bridge?.registerPluginInstance(KvarOCRPlugin())
     }
 }

@@ -3,6 +3,8 @@ import { normalizeAlias, normalizeBarcode, type AliasKind } from '../domain/alia
 import type { Op } from '../domain/ops';
 import { openItemFor } from '../domain/shoppingList';
 import { nextQuantity, type QuantityMode } from '../domain/quantity';
+import { planReceipt, type ReviewLine } from '../domain/receipt';
+import { guessCategoryFromName, guessLocation } from '../domain/openFoodFacts';
 import type { Category, EventSource, Location, Product, ShoppingItem, StockStatus } from '../domain/types';
 import { STATUS_LABEL } from '../domain/types';
 import { nowIso, uuid } from '../lib/id';
@@ -232,4 +234,40 @@ export function applyQuantity(product: Product, mode: QuantityMode, amount: numb
     return;
   }
   dispatch({ kind: 'set_status', ...base(), productId: product.id, quantity: nextQuantity(product.quantity, mode, amount), source });
+}
+
+/**
+ * Aplica un ticket revisado: marca como comprado lo que ya existía (sumando unidades si lleva
+ * conteo), crea lo nuevo y aprende las equivalencias para el próximo ticket.
+ */
+export function applyReceipt(review: ReviewLine[], store: string | null): { updated: number; created: number } {
+  const view = getView();
+  if (!view) return { updated: 0, created: 0 };
+  const plan = planReceipt(review, store);
+  let updated = 0;
+  for (const [productId, units] of plan.existing) {
+    const p = view.products.find((x) => x.id === productId);
+    if (!p) continue;
+    if (p.track_quantity) applyQuantity(p, 'bought', units, 'receipt');
+    else markBought(p, 'receipt');
+    updated++;
+  }
+  const createdIds = new Map<string, string>();
+  for (const name of plan.created.keys()) {
+    const category = guessCategoryFromName(name, view.categories);
+    const location = category ? guessLocation(category.name, view.locations) : null;
+    const p = createProduct({
+      name,
+      status: 'ok',
+      category_id: category?.id ?? null,
+      location_id: location?.id ?? null,
+      unidentified: !category, // sin categoría: queda para completar después
+    });
+    if (p) createdIds.set(name, p.id);
+  }
+  for (const l of plan.learn) {
+    const productId = l.productId ?? (l.newName ? createdIds.get(l.newName) : undefined);
+    if (productId) learnAlias(productId, 'receipt', l.text);
+  }
+  return { updated, created: createdIds.size };
 }

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { learnAlias } from '../aliases';
 import { cleanDescription, matchReceiptLine, packSizeOf, parseNumber, parseReceiptText, storeCodeKey } from '../receipt';
 
-const ticket = readFileSync(resolve(__dirname, 'fixtures/ticket-macromercado.txt'), 'utf8');
+const ticket = readFileSync(resolve(__dirname, '../../assets/demo/ticket-macromercado.txt'), 'utf8');
 
 describe('ticket de Macromercado', () => {
   const r = parseReceiptText(ticket);

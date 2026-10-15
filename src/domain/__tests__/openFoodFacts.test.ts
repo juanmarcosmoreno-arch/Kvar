@@ -59,3 +59,21 @@ describe('Open Food Facts', () => {
     expect(guessCategory(['dairies'], [{ id: 'x', name: 'Cosas' }])).toBeNull();
   });
 });
+
+describe('categoría por el nombre (tickets)', () => {
+  it('adivina la categoría de líneas reales del ticket', async () => {
+    const { guessCategoryFromName } = await import('../openFoodFacts');
+    const g = (n: string) => guessCategoryFromName(n, cats)?.name ?? null;
+    expect(g('Agua lavandina m max')).toBe('Limpieza');
+    expect(g('Yogur conaprole biotop vainilla')).toBe('Lácteos y huevos');
+    expect(g('Pollo con menudos')).toBe('Carnes y pescados');
+    expect(g('Galletitas el trigal con leche')).toBe('Almacén'); // son galletitas, no leche
+    expect(g('Leche clady ultra entera')).toBe('Lácteos y huevos');
+    expect(g('Champu dove hidrat')).toBe('Higiene');
+    expect(g('Pañales bummis pants xg')).toBe('Bebé');
+    expect(g('Cefa pasas de uva sultaninas')).toBe('Almacén');
+    expect(g('Vino ariano rosado dulce')).toBe('Bebidas');
+    expect(g('Agua salus 2 l')).toBe('Bebidas');
+    expect(g('Cosa rara')).toBeNull();
+  });
+});

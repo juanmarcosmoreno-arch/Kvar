@@ -63,9 +63,14 @@ export function ShoppingList() {
       <div className="space-y-6 px-5 pt-1">
         <SyncBadge />
         {groups.length > 0 && (
-          <button className="btn-ghost w-full" onClick={() => ui.openScan('bought')}>
-            <Icon name="barcode" size={20} /> Volví del súper
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button className="btn-ghost" onClick={() => ui.openScan('bought')}>
+              <Icon name="barcode" size={20} /> Volví del súper
+            </button>
+            <button className="btn-ghost" onClick={ui.openReceipt}>
+              <Icon name="receipt" size={20} /> Ticket
+            </button>
+          </div>
         )}
         <form onSubmit={add} className="space-y-2">
           <div className="flex gap-2">
