@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280">
+  <!-- Logo: casa con despensa (versión vectorial del logo de Kvar) -->
+  <g fill="none" stroke="#1B5E3F" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 120 L160 24 L220 72 L220 40 L248 40 L248 94 L282 120"/>
+    <path d="M62 112 L62 248 Q62 262 76 262 L244 262 Q258 262 258 248 L258 112"/>
+    <path d="M88 42 L74 26 M104 34 L100 14" stroke-width="7"/>
+  </g>
+  <g stroke="#1B5E3F" stroke-width="4" stroke-linejoin="round">
+    <!-- estante 1 -->
+    <rect x="90" y="96" width="46" height="52" rx="8" fill="#F3E9D2"/>
+    <rect x="88" y="86" width="50" height="14" rx="4" fill="#C08E52"/>
+    <circle cx="104" cy="118" r="4" fill="#D9C08F" stroke="none"/><circle cx="118" cy="128" r="4" fill="#D9C08F" stroke="none"/><circle cx="110" cy="134" r="3.5" fill="#D9C08F" stroke="none"/><circle cx="124" cy="112" r="3.5" fill="#D9C08F" stroke="none"/>
+    <path d="M152 148 L152 104 Q152 92 160 88 L160 72 L176 72 L176 88 Q184 92 184 104 L184 148 Z" fill="#9DB548"/>
+    <rect x="158" y="66" width="20" height="10" rx="3" fill="#1B5E3F"/>
+    <circle cx="214" cy="128" r="20" fill="#E5533F"/>
+    <path d="M206 108 Q214 100 222 108 M214 108 L214 100" fill="none" stroke-width="4"/>
+    <!-- estante 2 -->
+    <rect x="90" y="186" width="46" height="50" rx="6" fill="#3E6A93"/>
+    <rect x="100" y="202" width="26" height="14" rx="2" fill="#F3E9D2" stroke="none"/>
+    <rect x="148" y="188" width="46" height="48" rx="8" fill="#F3E9D2"/>
+    <rect x="146" y="178" width="50" height="14" rx="4" fill="#C08E52"/>
+    <path d="M158 228 L184 200 M162 202 L186 224 M154 214 L182 216" stroke="#E2A93A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M206 236 L206 196 L218 182 L240 182 L240 236 Z" fill="#CFE0B5"/>
+    <path d="M206 196 L240 196" fill="none"/>
+    <path d="M214 214 L230 214 M214 222 L226 222" stroke-width="3"/>
+  </g>
+  <g stroke="#B07A3E" stroke-width="7" stroke-linecap="round">
+    <path d="M80 152 L240 152"/>
+    <path d="M80 240 L240 240"/>
+  </g>
+</svg>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es-UY">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Kvar</title>
+    <meta name="description" content="Kvar — lo que queda. Stock de la casa y lista de compras." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <!-- iOS: modo standalone al agregar a la pantalla de inicio -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Kvar" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#F5F3EE" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E1611" media="(prefers-color-scheme: dark)" />
+    <meta name="format-detection" content="telephone=no" />
+    <script>
+      // Tema antes del primer pintado (evita destello)
+      (function () {
+        try {
+          var t = localStorage.getItem('kvar:theme') || 'system';
+          var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
