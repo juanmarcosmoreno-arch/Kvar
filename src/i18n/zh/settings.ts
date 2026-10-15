@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: '。这样就能像 App 一样打开，离线也能用。',
     },
     household: {
+      editName: '修改我的名字',
+      yourName: '你的名字',
+      setNameHint: '填写你的名字，让大家知道谁是谁。',
+      nameSaved: (name) => `好了，你现在叫${name}。`,
       title: '家庭',
       nameLabel: '家庭名称',
       inviteCode: '邀请码',

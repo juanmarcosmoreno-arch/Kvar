@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: 'を選びます。アプリのように開き、オフラインでも使えます。',
     },
     household: {
+      editName: '名前を変更',
+      yourName: 'あなたの名前',
+      setNameHint: '名前を入れると、誰が何をしたか分かります。',
+      nameSaved: (name) => `${name} に変更しました。`,
       title: '世帯',
       nameLabel: '世帯の名前',
       inviteCode: '招待コード',

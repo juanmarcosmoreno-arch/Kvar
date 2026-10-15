@@ -463,3 +463,9 @@ function recordReceiptPrices(
   }));
   dispatch({ kind: 'record_purchases', ...base(), lines });
 }
+
+/** Mi nombre en el hogar (lo ven los demás: «Sofía compró la leche»). */
+export function setMyName(userId: string, name: string) {
+  const clean = name.trim().slice(0, 40);
+  dispatch({ kind: 'set_member_name', ...base(), userId, name: clean || null });
+}

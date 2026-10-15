@@ -208,3 +208,14 @@ describe('unir productos', () => {
     expect(next.products[0]).toMatchObject({ quantity: 4, status: 'ok' });
   });
 });
+
+describe('nombre de cada uno', () => {
+  it('cambia solo el nombre de esa persona', () => {
+    const member = (user_id: string, display_name: string | null) =>
+      ({ household_id: 'hh-1', user_id, role: 'member' as const, display_name, joined_at: at });
+    const s = snapshot({ members: [member('u1', null), member('u2', 'Juan')] });
+    const me = 'u1';
+    const next = applyOp(s, { kind: 'set_member_name', id: 'n', at, userId: me, name: 'Sofía' });
+    expect(next.members.map((x) => x.display_name)).toEqual(['Sofía', 'Juan']);
+  });
+});

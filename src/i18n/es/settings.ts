@@ -13,6 +13,10 @@ export const settings = {
       after: '. Así abre como app y funciona sin conexión.',
     },
     household: {
+      editName: 'Cambiar mi nombre',
+      yourName: 'Tu nombre',
+      setNameHint: 'Poné tu nombre para que los demás sepan quién es quién.',
+      nameSaved: (name: string) => `Listo, ahora sos ${name}.`,
       title: 'Hogar',
       nameLabel: 'Nombre del hogar',
       inviteCode: 'Código de invitación',

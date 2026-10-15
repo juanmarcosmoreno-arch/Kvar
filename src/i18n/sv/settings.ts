@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: '. Då öppnas den som en app och fungerar offline.',
     },
     household: {
+      editName: 'Ändra mitt namn',
+      yourName: 'Ditt namn',
+      setNameHint: 'Lägg till ditt namn så att alla vet vem som är vem.',
+      nameSaved: (name) => `Klart, nu heter du ${name}.`,
       title: 'Hushåll',
       nameLabel: 'Hushållets namn',
       inviteCode: 'Inbjudningskod',

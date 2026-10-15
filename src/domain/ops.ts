@@ -36,6 +36,8 @@ export type Op =
   /** Dos productos que son lo mismo: `sourceId` pasa a ser `targetId` (códigos, lista, recetas) y se borra */
   | { kind: 'merge_products'; id: string; at: string; sourceId: string; targetId: string }
   | { kind: 'remove_alias'; id: string; at: string; aliasId: string }
+  /** Cada uno pone o cambia su nombre en el hogar */
+  | { kind: 'set_member_name'; id: string; at: string; userId: string; name: string | null }
   /** Precios de un ticket (para Gastos). No cambian lo que se ve en el stock. */
   | { kind: 'record_purchases'; id: string; at: string; lines: PurchaseLine[] }
   | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
@@ -215,6 +217,8 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       return mergeProducts(s, op.sourceId, op.targetId);
     case 'record_purchases':
       return s;
+    case 'set_member_name':
+      return { ...s, members: s.members.map((x) => (x.user_id === op.userId ? { ...x, display_name: op.name } : x)) };
     case 'remove_alias':
       return { ...s, aliases: s.aliases?.filter((a) => a.id !== op.aliasId) };
     case 'set_image':

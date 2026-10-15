@@ -17,6 +17,7 @@ import { getTheme, setTheme, type Theme } from '../lib/theme';
 import { LANGUAGES, m, savedChoice, setLanguage, type LangChoice } from '../i18n';
 import {
   deleteCategory, deleteLocation, moveCategory, saveCategory, saveLocation, updateHousehold,
+  setMyName,
 } from '../store/actions';
 import { resetLocal, sync, useStore, useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -137,10 +138,11 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 font-semibold text-primary">
                     {(mem.display_name ?? '?').slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="flex-1">
-                    {mem.display_name ?? t.household.noName}
-                    {mem.user_id === userId && <span className="text-muted">{t.household.you}</span>}
-                  </span>
+                  {mem.user_id === userId ? (
+                    <MyName current={mem.display_name} userId={userId} />
+                  ) : (
+                    <span className="flex-1">{mem.display_name ?? t.household.noName}</span>
+                  )}
                   {mem.role === 'owner' && <span className="text-xs text-muted">{t.household.owner}</span>}
                 </li>
               ))}
@@ -373,5 +375,47 @@ function CurrencyPicker() {
         </option>
       ))}
     </select>
+  );
+}
+
+/** Mi nombre en el hogar: se toca y se escribe; se guarda al salir del campo o con Enter. */
+function MyName({ current, userId }: { current: string | null; userId: string }) {
+  const t = m.settings.settings.household;
+  const [editing, setEditing] = useState(!current);
+  const [name, setName] = useState(current ?? '');
+  const save = () => {
+    const clean = name.trim();
+    if (clean && clean !== current) {
+      setMyName(userId, clean);
+      toast(t.nameSaved(clean));
+    }
+    if (clean) setEditing(false);
+  };
+  if (!editing) {
+    return (
+      <button className="flex min-h-tap flex-1 items-center gap-2 text-left" onClick={() => setEditing(true)} aria-label={t.editName}>
+        <span>
+          {current}
+          <span className="text-muted">{t.you}</span>
+        </span>
+        <Icon name="edit" size={15} className="text-muted" />
+      </button>
+    );
+  }
+  return (
+    <span className="flex-1 space-y-1 py-1">
+      <input
+        className="field min-h-[44px]"
+        value={name}
+        placeholder={t.yourName}
+        aria-label={t.yourName}
+        maxLength={40}
+        autoFocus={Boolean(current)}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      />
+      {!current && <span className="block text-xs text-muted">{t.setNameHint}</span>}
+    </span>
   );
 }

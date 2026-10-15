@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: '. Stoka s’ouvre alors comme une app et fonctionne hors connexion.',
     },
     household: {
+      editName: 'Changer mon nom',
+      yourName: 'Votre nom',
+      setNameHint: 'Ajoutez votre nom pour que chacun sache qui est qui.',
+      nameSaved: (name) => `C’est fait, vous êtes maintenant ${name}.`,
       title: 'Foyer',
       nameLabel: 'Nom du foyer',
       inviteCode: 'Code d’invitation',

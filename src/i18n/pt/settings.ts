@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: '. Assim ele abre como app e funciona sem conexão.',
     },
     household: {
+      editName: 'Mudar meu nome',
+      yourName: 'Seu nome',
+      setNameHint: 'Coloque seu nome para que todos saibam quem é quem.',
+      nameSaved: (name) => `Pronto, agora você é ${name}.`,
       title: 'Casa',
       nameLabel: 'Nome da casa',
       inviteCode: 'Código de convite',

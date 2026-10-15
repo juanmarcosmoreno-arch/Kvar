@@ -14,6 +14,10 @@ export const settings: Messages['settings'] = {
       after: '. Så åbner den som en app og virker uden forbindelse.',
     },
     household: {
+      editName: 'Skift mit navn',
+      yourName: 'Dit navn',
+      setNameHint: 'Tilføj dit navn, så alle ved, hvem der er hvem.',
+      nameSaved: (name) => `Færdig, nu hedder du ${name}.`,
       title: 'Husstand',
       nameLabel: 'Husstandens navn',
       inviteCode: 'Invitationskode',

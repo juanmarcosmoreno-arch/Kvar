@@ -247,6 +247,15 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
       check(res);
       return;
     }
+    case 'set_member_name':
+      check(
+        await supabase
+          .from('household_members')
+          .update({ display_name: op.name })
+          .eq('household_id', householdId)
+          .eq('user_id', op.userId),
+      );
+      return;
     case 'remove_alias':
       check(await supabase.from('product_aliases').delete().eq('id', op.aliasId));
       return;
