@@ -58,7 +58,7 @@ export function ShoppingList() {
         <SyncBadge />
         {groups.length > 0 && (
           <button className="btn-ghost w-full" onClick={() => ui.openScan('bought')}>
-            <Icon name="barcode" size={20} /> Volví del súper: escaneá lo que compraste
+            <Icon name="barcode" size={20} /> Volví del súper
           </button>
         )}
         <form onSubmit={add} className="space-y-2">

@@ -62,7 +62,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           />
           <button type="button" className="btn-ghost w-full" onClick={() => { onClose(); ui.openScan('link', product.id); }}>
             <Icon name="barcode" size={20} />
-            {barcodes.length ? `${barcodes.length === 1 ? '1 código' : `${barcodes.length} códigos`} · vincular otro` : 'Vincular código'}
+            {barcodes.length ? 'Otro código' : 'Vincular código'}
           </button>
         </div>
       </div>
