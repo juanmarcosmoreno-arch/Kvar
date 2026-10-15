@@ -219,6 +219,31 @@ El código está en `ios/StokaWatch/`. El *target* del reloj se crea una vez en 
 5. Abrí Stoka en el iPhone (así le pasa el hogar al reloj). Después, arriba, elegí el esquema
    **StokaWatch Watch App** y tu Apple Watch, y ▶︎.
 
+## Siri y widget
+
+**Siri** ya viene en la app (no hay que configurar nada): decí «Oye Siri, **se terminó algo en Stoka**»,
+«**Anotá algo en la lista de Stoka**» o «**¿Qué falta en Stoka?**». También aparecen en la app Atajos y funcionan
+en CarPlay. Sin conexión, Siri lo anota y la app lo pasa la próxima vez que la abrís.
+
+**Widget** (la lista y lo que se está terminando en la pantalla de inicio), una sola vez en Xcode:
+
+1. Target **App** → **Signing & Capabilities** → **+ Capability** → **App Groups** → **+** →
+   `group.` + tu Bundle Identifier (por ejemplo `group.uy.juanmarcos.stoka`).
+2. **File → New → Target…** → **iOS** → **Widget Extension** → Product Name `StokaWidget`; destildá
+   «Include Live Activity» y «Include Configuration App Intent» → **Finish** (si pregunta «Activate», **Activate**).
+3. En la Terminal, dentro de `~/kvar`:
+   ```bash
+   cd ios/App/StokaWidget
+   rm -f *.swift
+   cp ../../StokaWidget/*.swift .
+   cd ~/kvar
+   ```
+   Si los archivos no aparecen en Xcode: clic derecho en la carpeta StokaWidget → **Add Files…** → target
+   **StokaWidgetExtension**.
+4. Target **StokaWidgetExtension** → **Signing & Capabilities**: el mismo **Team**, **+ Capability** →
+   **App Groups** → tildá el mismo grupo del paso 1.
+5. Elegí el esquema **App**, ▶︎, y en el iPhone mantené apretada la pantalla de inicio → **+** → **Stoka**.
+
 ## Idiomas
 
 Stoka está en español, inglés, portugués, francés, italiano, sueco, danés, chino simplificado y japonés

@@ -263,7 +263,7 @@ function ImportBox({ onImport }: { onImport: (r: ImportedRecipe) => void }) {
       {status && (
         <p
           role={status.tone === 'error' ? 'alert' : 'status'}
-          className={`text-sm ${status.tone === 'error' ? 'text-danger' : status.tone === 'ok' ? 'text-primary' : 'text-muted'}`}
+          className={`text-sm ${status.tone === 'error' ? 'text-[#B53A2A] dark:text-out' : status.tone === 'ok' ? 'text-primary' : 'text-muted'}`}
         >
           {status.text}
         </p>

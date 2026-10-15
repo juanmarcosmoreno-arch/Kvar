@@ -510,3 +510,14 @@ export function addPlanMissingToList(items: { productId: string | null; name: st
   }
   return n;
 }
+
+/** Lo que se dijo a Siri sin conexión: «se terminó la leche», «anotá yerba». */
+export function applyShortcutActions(actions: { productId?: string; name?: string; status?: 'out' | 'low'; list?: boolean }[]) {
+  const view = getView();
+  if (!view || !actions.length) return;
+  for (const a of actions) {
+    const product = a.productId ? view.products.find((p) => p.id === a.productId) : undefined;
+    if (a.status && product) dispatch({ kind: 'set_status', ...base(), productId: product.id, status: a.status, source: 'voice' });
+    else if (a.list) addListItem(product ? { productId: product.id } : { name: a.name ?? '' });
+  }
+}

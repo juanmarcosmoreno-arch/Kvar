@@ -286,6 +286,14 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   compras, sin repetir ni el mismo tipo de plato dos días seguidos; se puede cambiar cada día, guardar (lo ve
   toda la casa, `save_meal_plan`) y pasar lo que falta a la lista con cantidades sumadas.
 
+### Siri, widget, importar recetas y vencimiento (implementados)
+- **Siri / Atajos** (App Intents en `KvarWatchPlugin.swift`): «Se terminó algo», «Agregar a la lista», «¿Qué falta?».
+  Usan la foto del hogar que la app guarda en el App Group y el token vigente (nunca lo renuevan); si no se puede,
+  queda en cola y la app lo aplica al abrirse.
+- **Widget** (`ios/StokaWidget/`): chico (lista) y mediano (falta comprar / se está terminando), claro y oscuro.
+- **Importar receta desde un link** (editor de recetas): JSON-LD schema.org Recipe, microdatos o texto pegado.
+- **Vencimiento** en la ficha del producto: a mano o leyendo la fecha de una foto del envase (Vision, en el iPhone).
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

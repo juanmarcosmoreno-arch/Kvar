@@ -4,6 +4,7 @@ import type { Product } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
 import { addListItem, deleteProduct, removeAlias, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
 import { useUI } from '../store/ui';
+import { ExpiryField } from './ExpiryField';
 import { MergeSheet } from './MergeSheet';
 import { ProductStats } from './ProductStats';
 import { isNative } from '../lib/platform';
@@ -75,6 +76,8 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
       </div>
 
       <StatusPicker value={product.status} onChange={(s) => setStatus(product, s, 'manual', false)} />
+
+      <ExpiryField product={product} />
 
       {product.track_quantity && (
         <div className="card flex items-center justify-between p-2">

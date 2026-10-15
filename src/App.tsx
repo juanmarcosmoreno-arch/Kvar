@@ -21,7 +21,8 @@ import { Settings } from './screens/Settings';
 import { SetupMissing } from './screens/SetupMissing';
 import { UpdateRequired } from './screens/UpdateRequired';
 import { ShoppingList } from './screens/ShoppingList';
-import { localizeNewHousehold } from './store/actions';
+import { applyShortcutActions, localizeNewHousehold } from './store/actions';
+import { shareWithWidget, takePendingShortcutActions } from './lib/watch';
 import { closeHousehold, openHousehold, useStore, useView } from './store/store';
 import { toast } from './store/toast';
 import { m } from './i18n';
@@ -144,6 +145,18 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
     if (view) localizeNewHousehold();
   }, [view?.household.id, view?.categories.length]); // eslint-disable-line react-hooks/exhaustive-deps
   useHouseholdAlerts(view, userId);
+  // Widget y Siri: la foto del hogar, y lo que Siri anotó sin conexión
+  useEffect(() => {
+    if (view) shareWithWidget(view);
+  }, [view]);
+  useEffect(() => {
+    if (!view) return;
+    const apply = () => void takePendingShortcutActions().then((actions) => applyShortcutActions(actions));
+    apply();
+    const onVisible = () => document.visibilityState === 'visible' && apply();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [view?.household.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const myName = view?.members.find((x) => x.user_id === userId)?.display_name ?? '';
   useEffect(() => {
     if (view) startPresence(view.household.id, { id: userId, name: myName || m.alerts.others.someone });
