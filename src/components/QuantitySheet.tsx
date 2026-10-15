@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { clampAmount, initialAmount, nextQuantity, QUICK_AMOUNTS, type QuantityMode } from '../domain/quantity';
 import { openItemFor } from '../domain/shoppingList';
+import { formatQuantity, unitLabel } from '../domain/units';
 import { applyQuantity, setQuantity, unpurchaseItem } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -45,7 +46,6 @@ export function QuantitySheet({
 
   if (!product) return <Sheet open={false} onClose={onClose}>{null}</Sheet>;
 
-  const unit = product.unit ?? 'unidades';
   const tracks = product.track_quantity;
   const after = nextQuantity(product.quantity, mode, amount);
 
@@ -62,7 +62,7 @@ export function QuantitySheet({
           : setQuantity(product, prevQuantity),
     };
     if (mode === 'list') toast(`${product.name}: comprar ${value}.`);
-    else if (tracks) toast(`${product.name}: quedan ${nextQuantity(product.quantity, mode, value)} ${unit}.`, undo);
+    else if (tracks) toast(`${product.name}: quedan ${formatQuantity(nextQuantity(product.quantity, mode, value), product.unit)}.`, undo);
     else toast(`${product.name}: Hay.`);
     onClose();
   };
@@ -76,7 +76,7 @@ export function QuantitySheet({
           {product.name}
           {tracks && mode !== 'list' && (
             <>
-              {' · '}hay {product.quantity ?? 0} {unit}
+              {' · '}hay {formatQuantity(product.quantity, product.unit)}
             </>
           )}
         </p>
@@ -134,7 +134,7 @@ export function QuantitySheet({
 
         {tracks && mode !== 'list' && (
           <p className="text-center text-sm text-muted tabular-nums">
-            {product.quantity ?? 0} → <span className="font-medium text-ink">{after}</span> {unit}
+            {product.quantity ?? 0} → <span className="font-medium text-ink">{after}</span> {unitLabel(after, product.unit)}
           </p>
         )}
 

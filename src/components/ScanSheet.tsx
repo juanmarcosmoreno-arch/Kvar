@@ -4,6 +4,7 @@ import { guessCategory, guessLocation } from '../domain/openFoodFacts';
 import type { Product } from '../domain/types';
 import { STATUS_LABEL } from '../domain/types';
 import { lookupBarcode } from '../lib/openFoodFacts';
+import { formatQuantity } from '../domain/units';
 import { learnBarcode, markBought, setStatus } from '../store/actions';
 import { getView, useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -109,7 +110,7 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
           <div className="min-w-0">
             <p className="truncate text-xl font-semibold">{current.name}</p>
             <p className="text-muted">
-              {current.track_quantity ? `${current.quantity ?? 0} ${current.unit ?? 'unidades'} · ` : ''}
+              {current.track_quantity ? `${formatQuantity(current.quantity, current.unit)} · ` : ''}
               {STATUS_LABEL[current.status]}
             </p>
           </div>

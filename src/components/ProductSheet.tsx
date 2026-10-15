@@ -6,6 +6,8 @@ import { addListItem, deleteProduct, setProductPhoto, setQuantity, setStatus, up
 import { useUI } from '../store/ui';
 import { isNative } from '../lib/platform';
 import { PhotoButton } from './PhotoButton';
+import { UnitPicker } from './UnitPicker';
+import { suggestUnit, unitLabel } from '../domain/units';
 import { ProductThumb } from './ProductThumb';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -77,7 +79,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           </button>
           <button className="min-h-[56px] flex-1 text-center" onClick={() => ui.openQuantity(product.id, 'add')}>
             <div className="text-3xl font-semibold tabular-nums">{product.quantity ?? 0}</div>
-            <div className="text-xs text-muted">{product.unit ?? 'unidades'} · tocá para sumar o restar varios</div>
+            <div className="text-xs text-muted">{unitLabel(product.quantity, product.unit)} · tocá para sumar o restar varios</div>
           </button>
           <button className="btn-ghost min-w-[56px]" aria-label="Sumar uno" onClick={() => setQuantity(product, (product.quantity ?? 0) + 1)}>
             <Icon name="plus" />
@@ -135,6 +137,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           onChange={(v) =>
             updateProduct(product.id, {
               track_quantity: v,
+              unit: v && !product.unit ? suggestUnit(product.name, categoryName) : product.unit,
               quantity: v ? (product.status === 'out' ? 0 : product.status === 'low' ? product.low_threshold || 1 : product.low_threshold + 2) : null,
             })
           }
@@ -142,8 +145,14 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
           hint="Para pañales, latas o lo del freezer."
         />
         {product.track_quantity && (
+          <div className="space-y-2 py-3">
+            <span className="block font-medium">Unidad</span>
+            <UnitPicker value={product.unit} onChange={(unit) => updateProduct(product.id, { unit })} />
+          </div>
+        )}
+        {product.track_quantity && (
           <div className="flex min-h-[56px] items-center gap-3">
-            <span className="flex-1 font-medium">Avisame cuando queden</span>
+            <span className="min-w-0 flex-1 whitespace-nowrap font-medium">«Queda poco» con</span>
             <button className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label="Menos"
               onClick={() => updateProduct(product.id, { low_threshold: Math.max(0, product.low_threshold - 1) })}>
               <Icon name="minus" size={20} />
@@ -153,6 +162,7 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
               onClick={() => updateProduct(product.id, { low_threshold: product.low_threshold + 1 })}>
               <Icon name="plus" size={20} />
             </button>
+            <span className="min-w-[3.5rem] text-sm text-muted">{unitLabel(product.low_threshold, product.unit)}</span>
           </div>
         )}
       </section>

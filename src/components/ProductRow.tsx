@@ -3,6 +3,7 @@ import { cycleStatus, worseStatus } from '../domain/status';
 import type { Product } from '../domain/types';
 import { setQuantity, setStatus } from '../store/actions';
 import { useUI } from '../store/ui';
+import { findUnit, formatQuantity } from '../domain/units';
 import { useLongPress } from '../lib/useLongPress';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
@@ -80,7 +81,7 @@ export function ProductRow({
             </span>
             <span className="block truncate text-sm text-muted">
               {subtitle ??
-                (product.track_quantity ? `${product.quantity ?? 0} ${product.unit ?? 'unidades'}` : categoryName ?? '')}
+                (product.track_quantity ? formatQuantity(product.quantity, product.unit) : categoryName ?? '')}
               {product.unidentified && ' · Sin identificar'}
             </span>
           </span>
@@ -95,7 +96,7 @@ export function ProductRow({
               <Icon name="minus" size={20} />
             </button>
             <button
-              aria-label={`Elegir cuántos ${product.unit ?? 'unidades'} de ${product.name}`}
+              aria-label={`Elegir cuántos ${findUnit(product.unit).plural} de ${product.name}`}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => ui.openQuantity(product.id, 'add')}
               className={`inline-flex min-h-[32px] min-w-[2.5rem] items-center justify-center rounded-full border border-current px-2 text-sm tabular-nums ${STATUS_TEXT[product.status]}`}
