@@ -1,5 +1,5 @@
 /**
- * Leer el texto de una foto de ticket.
+ * Leer el texto de una foto (ticket o fecha de vencimiento).
  * App de iPhone: Vision de Apple (plugin KvarOCR), en el dispositivo y gratis.
  * Web: no hay lector de fotos (todavía); se puede pegar el texto del e-Ticket.
  */
@@ -31,11 +31,10 @@ function loadImage(file: Blob): Promise<HTMLImageElement> {
   });
 }
 
-/** Devuelve el texto del ticket, un renglón por línea. */
-export async function readReceiptPhoto(file: Blob): Promise<string> {
+/** Reduce la foto (lado mayor hasta `max` px), la pasa por Vision y arma los renglones. */
+async function recognizeLines(file: Blob, max: number): Promise<string> {
   const img = await loadImage(file);
-  // Tickets largos: se conserva resolución para la letra chica (lado mayor hasta 3000 px)
-  const scale = Math.min(1, 3000 / Math.max(img.naturalWidth, img.naturalHeight));
+  const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(img.naturalWidth * scale);
   canvas.height = Math.round(img.naturalHeight * scale);
@@ -43,4 +42,15 @@ export async function readReceiptPhoto(file: Blob): Promise<string> {
   const jpeg = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
   const res = await KvarOCR.recognize({ image: jpeg });
   return groupIntoLines(res.boxes, res.height / res.width).join('\n');
+}
+
+/** Devuelve el texto del ticket, un renglón por línea. */
+export function readReceiptPhoto(file: Blob): Promise<string> {
+  // Tickets largos: se conserva resolución para la letra chica (lado mayor hasta 3000 px)
+  return recognizeLines(file, 3000);
+}
+
+/** Texto de una foto chica (por ejemplo, la fecha de vencimiento impresa en el envase). */
+export function readTextFromPhoto(file: Blob): Promise<string> {
+  return recognizeLines(file, 2000);
 }

@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   amountLabel, capitalize, ingredientLine, parseIngredientLine,
   isHouseRecipe,
 } from '../domain/recipes';
+import { parseRecipeText, type ImportedRecipe } from '../domain/recipeImport';
 import type { MealType, Recipe, RecipeConstraint } from '../domain/types';
 import { m } from '../i18n';
 import { nowIso, uuid } from '../lib/id';
+import { importRecipeFromUrl, RecipeImportError } from '../lib/recipeImport';
 import { saveRecipe } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -44,6 +46,17 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
     base ? [...base.ingredients].sort((a, b) => a.sort_order - b.sort_order).map(ingredientLine).join('\n') : '',
   );
   const [steps, setSteps] = useState(base?.steps ?? '');
+  /** Si se importó: de dónde (null si fue texto pegado) */
+  const [imported, setImported] = useState<{ url: string | null } | null>(null);
+
+  const applyImport = (r: ImportedRecipe) => {
+    if (r.title) setTitle(r.title);
+    if (r.servings) setServings(Math.min(50, Math.max(1, r.servings)));
+    if (r.totalMinutes) setMinutes(String(Math.min(9999, r.totalMinutes)));
+    setIngredientsText(r.ingredients.join('\n'));
+    if (r.steps.length) setSteps(r.steps.join('\n'));
+    setImported({ url: r.sourceUrl });
+  };
 
   const parsed = useMemo(
     () => ingredientsText.split('\n').map(parseIngredientLine).filter((x): x is NonNullable<typeof x> => Boolean(x)),
@@ -62,8 +75,8 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
       id,
       household_id: hh,
       title: capitalize(title.trim()),
-      source: editing?.source ?? (base?.source === 'ai' ? 'ai' : 'own'),
-      source_url: editing?.source_url ?? null,
+      source: editing?.source ?? (imported ? 'imported' : base?.source === 'ai' ? 'ai' : 'own'),
+      source_url: editing?.source_url ?? imported?.url ?? null,
       servings,
       total_minutes: Number(minutes) > 0 ? Math.round(Number(minutes)) : null,
       meal_types: meals,
@@ -85,6 +98,8 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
 
   return (
     <div className="space-y-5 pb-2">
+      {!base && <ImportBox onImport={applyImport} />}
+
       <input
         className="field text-lg"
         placeholder={t.namePlaceholder}
@@ -163,6 +178,118 @@ function Form({ base, onClose, onSaved }: { base: Recipe | null; onClose: () => 
         {t.save}
       </button>
     </div>
+  );
+}
+
+type Status = { tone: 'busy' | 'ok' | 'error'; text: string } | null;
+
+/** «Importar desde un link» (o pegar el texto), arriba de una receta nueva. */
+function ImportBox({ onImport }: { onImport: (r: ImportedRecipe) => void }) {
+  const t = m.importer;
+  const [url, setUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<Status>(null);
+  const [pasting, setPasting] = useState(false);
+  const [text, setText] = useState('');
+  const pasteRef = useRef<HTMLTextAreaElement>(null);
+
+  const openPaste = () => {
+    setPasting(true);
+    requestAnimationFrame(() => pasteRef.current?.focus());
+  };
+
+  const fromUrl = async () => {
+    if (!url.trim() || busy) return;
+    setBusy(true);
+    setStatus({ tone: 'busy', text: t.reading });
+    try {
+      onImport(await importRecipeFromUrl(url));
+      setStatus({ tone: 'ok', text: t.done });
+    } catch (e) {
+      const kind = e instanceof RecipeImportError ? e.kind : 'network';
+      console.warn('No se pudo importar la receta', e);
+      const text = {
+        'invalid-url': t.errors.invalidUrl,
+        'web-blocked': t.errors.webBlocked,
+        network: t.errors.network,
+        http: t.errors.http,
+        'not-recipe': t.errors.notRecipe,
+      }[kind];
+      setStatus({ tone: 'error', text });
+      if (kind === 'web-blocked' || kind === 'not-recipe') openPaste();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const fromText = () => {
+    const r = parseRecipeText(text);
+    if (!r) {
+      setStatus({ tone: 'error', text: t.errors.textNotRecipe });
+      return;
+    }
+    onImport(r);
+    setStatus({ tone: 'ok', text: t.done });
+  };
+
+  return (
+    <section className="card space-y-3 p-4">
+      <label className="section-title" htmlFor="importar-link">{t.title}</label>
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void fromUrl();
+        }}
+      >
+        <input
+          id="importar-link"
+          className="field min-w-0 flex-1"
+          type="url"
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder={t.urlPlaceholder}
+          aria-label={t.urlLabel}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+        <button type="submit" className="btn-ghost shrink-0 px-4" disabled={busy || !url.trim()}>
+          {t.import}
+        </button>
+      </form>
+
+      {status && (
+        <p
+          role={status.tone === 'error' ? 'alert' : 'status'}
+          className={`text-sm ${status.tone === 'error' ? 'text-danger' : status.tone === 'ok' ? 'text-primary' : 'text-muted'}`}
+        >
+          {status.text}
+        </p>
+      )}
+
+      {pasting ? (
+        <div className="space-y-2">
+          <label className="section-title" htmlFor="pegar-receta">{t.pasteLabel}</label>
+          <textarea
+            id="pegar-receta"
+            ref={pasteRef}
+            className="field min-h-[8rem] py-3 leading-relaxed"
+            placeholder={t.pastePlaceholder}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button type="button" className="btn-ghost w-full" disabled={!text.trim()} onClick={fromText}>
+            {t.useText}
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="min-h-tap text-sm font-medium text-primary" onClick={openPaste}>
+          {t.pasteToggle}
+        </button>
+      )}
+    </section>
   );
 }
 
