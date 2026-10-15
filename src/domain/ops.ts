@@ -6,6 +6,7 @@
  *     estado del servidor  +  operaciones pendientes  =  lo que ve el usuario
  */
 import { applyStatusToList } from './shoppingList';
+import type { MealPlan } from './mealPlan';
 import type { PurchaseLine } from './spending';
 import { resolveStock } from './status';
 import type {
@@ -37,6 +38,7 @@ export type Op =
   | { kind: 'merge_products'; id: string; at: string; sourceId: string; targetId: string }
   | { kind: 'remove_alias'; id: string; at: string; aliasId: string }
   /** Cada uno pone o cambia su nombre en el hogar */
+  | { kind: 'save_meal_plan'; id: string; at: string; plan: MealPlan }
   | { kind: 'set_member_name'; id: string; at: string; userId: string; name: string | null }
   /** Precios de un ticket (para Gastos). No cambian lo que se ve en el stock. */
   | { kind: 'record_purchases'; id: string; at: string; lines: PurchaseLine[] }
@@ -217,6 +219,11 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       return mergeProducts(s, op.sourceId, op.targetId);
     case 'record_purchases':
       return s;
+    case 'save_meal_plan':
+      return {
+        ...s,
+        plans: [...(s.plans ?? []).filter((p) => p.week_start !== op.plan.week_start), op.plan],
+      };
     case 'set_member_name':
       return { ...s, members: s.members.map((x) => (x.user_id === op.userId ? { ...x, display_name: op.name } : x)) };
     case 'remove_alias':

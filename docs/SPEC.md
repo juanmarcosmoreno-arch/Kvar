@@ -270,6 +270,22 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   mejor estado de los dos y, si los dos se cuentan, se suman las unidades. La ficha lista los códigos de barras y
   deja quitar uno.
 
+### Gastos, avisos, súper y menú (implementados)
+- **Gastos** (Estadísticas → Gastos): cada línea de ticket se guarda con su precio (`purchase_lines`, id estable
+  por ticket y línea: el mismo ticket no se duplica). Total, por mes, por compra, por producto, por categoría y
+  cambios de precio; último precio en la ficha del producto. Moneda en Ajustes.
+- **Avisos** (Ajustes → Avisos): notificaciones locales del iPhone (`@capacitor/local-notifications`, sin
+  servidor): «Probablemente se termine el café» la tarde anterior a la fecha estimada y «El queso vence en 2 días».
+  En la app: «Sofía compró la leche».
+- **Cantidad sugerida** en la lista («× 2?»): lo que se suele comprar (paquete de siempre; con conteo, lo que hace
+  falta para dos semanas).
+- **Estoy en el súper**: Realtime Presence; los demás ven «Sofía está en el súper» y a quien está comprando le
+  avisa lo que le agregan.
+- **Compartir la lista** (WhatsApp o lo que tenga el teléfono), agrupada por categoría.
+- **Menú de la semana** («¿Qué cocino?»): días, comida y personas; elige primero lo que vence y lo que no necesita
+  compras, sin repetir ni el mismo tipo de plato dos días seguidos; se puede cambiar cada día, guardar (lo ve
+  toda la casa, `save_meal_plan`) y pasar lo que falta a la lista con cantidades sumadas.
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

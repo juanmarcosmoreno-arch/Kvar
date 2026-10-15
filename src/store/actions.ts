@@ -13,6 +13,7 @@ import { isHouseRecipe, missingForList, type Suggestion } from '../domain/recipe
 import { nowIso, uuid } from '../lib/id';
 import { imagePath, imageStore } from '../lib/images';
 import { localizedSeeds } from '../domain/seeds';
+import { isoDay, mondayOf, type PlanEntry } from '../domain/mealPlan';
 import { receiptKey, stableLineId, type PurchaseLine } from '../domain/spending';
 import { dispatch, getView } from './store';
 import { toast } from './toast';
@@ -90,6 +91,10 @@ export function deleteProduct(product: Product) {
   toast(m.store.toasts.deleted(product.name));
 }
 
+/** Ítems que agregué desde este teléfono (para avisar solo lo que agregan los demás) */
+const addedHere = new Set<string>();
+export const wasAddedHere = (itemId: string) => addedHere.has(itemId);
+
 export function addListItem(input: {
   productId?: string; name?: string; quantity?: number | null; note?: string | null; reason?: ListReason;
 }) {
@@ -107,6 +112,7 @@ export function addListItem(input: {
     checked_by: null,
     created_at: nowIso(),
   };
+  addedHere.add(item.id);
   dispatch({ kind: 'add_item', ...base(), item });
 }
 
@@ -468,4 +474,39 @@ function recordReceiptPrices(
 export function setMyName(userId: string, name: string) {
   const clean = name.trim().slice(0, 40);
   dispatch({ kind: 'set_member_name', ...base(), userId, name: clean || null });
+}
+
+/** Guarda el menú de la semana (reemplaza el de esa semana). */
+export function saveMealPlan(entries: PlanEntry[]) {
+  const view = getView();
+  if (!view || !entries.length) return;
+  const week = isoDay(mondayOf(new Date(`${entries[0].day}T12:00:00`)));
+  const existing = view.plans?.find((p) => p.week_start === week);
+  dispatch({
+    kind: 'save_meal_plan',
+    ...base(),
+    plan: { id: existing?.id ?? uuid(), household_id: view.household.id, week_start: week, entries },
+  });
+}
+
+/** Lo que falta para todo el menú, a la lista. Devuelve cuántas cosas agregó. */
+export function addPlanMissingToList(items: { productId: string | null; name: string; quantity: number | null }[], note: string): number {
+  const view = getView();
+  if (!view) return 0;
+  let n = 0;
+  for (const it of items) {
+    if (it.productId) {
+      const open = openItemFor(view.list, it.productId);
+      if (open) {
+        if (it.quantity && (open.quantity ?? 0) < it.quantity) setItemQuantity(open, it.quantity);
+        continue;
+      }
+      addListItem({ productId: it.productId, quantity: it.quantity, note, reason: 'plan' });
+    } else {
+      if (view.list.some((i) => !i.checked_at && !i.product_id && normalizeAlias(i.name ?? '') === normalizeAlias(it.name))) continue;
+      addListItem({ name: it.name, quantity: it.quantity, note, reason: 'plan' });
+    }
+    n++;
+  }
+  return n;
 }

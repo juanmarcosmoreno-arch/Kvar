@@ -107,6 +107,8 @@ export interface Snapshot {
   recipes?: Recipe[];
   /** «No me tienta», «La hice»: para aprender qué proponer */
   feedback?: RecipeFeedback[];
+  /** Menú de esta semana y la que viene */
+  plans?: import('./mealPlan').MealPlan[];
 }
 
 export interface ProductAlias {

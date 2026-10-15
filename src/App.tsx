@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import mark from './assets/brand/stoka-icon-160.webp';
 import { Shell } from './components/Shell';
@@ -25,6 +25,10 @@ import { localizeNewHousehold } from './store/actions';
 import { closeHousehold, openHousehold, useStore, useView } from './store/store';
 import { toast } from './store/toast';
 import { m } from './i18n';
+import { alertPrefs, scheduleAlerts } from './lib/alerts';
+import { startPresence, stopPresence } from './lib/presence';
+import { request as requestEvents } from './lib/stats';
+import type { Snapshot } from './domain/types';
 
 export default function App() {
   useEffect(() => applyTheme(), []);
@@ -139,6 +143,12 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
   useEffect(() => {
     if (view) localizeNewHousehold();
   }, [view?.household.id, view?.categories.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  useHouseholdAlerts(view, userId);
+  const myName = view?.members.find((x) => x.user_id === userId)?.display_name ?? '';
+  useEffect(() => {
+    if (view) startPresence(view.household.id, { id: userId, name: myName || m.alerts.others.someone });
+  }, [view?.household.id, myName, userId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => stopPresence(), []);
   const loaded = useStore((s) => s.loaded);
   const online = useStore((s) => s.online);
   if (!view) {
@@ -166,4 +176,36 @@ function Splash({ message }: { message?: string }) {
       {message && <p className="text-muted">{message}</p>}
     </div>
   );
+}
+
+/**
+ * Avisos: reprograma las notificaciones del iPhone cuando cambia el stock, y muestra en la app
+ * lo que compran los demás («Sofía compró la leche»).
+ */
+function useHouseholdAlerts(view: Snapshot | null, userId: string) {
+  const prevList = useRef<Snapshot['list'] | null>(null);
+  useEffect(() => {
+    if (!view || !alertPrefs().enabled) return;
+    const t = setTimeout(() => {
+      requestEvents(view.household.id)
+        .then((r) => scheduleAlerts(view, r.events))
+        .catch(() => void scheduleAlerts(view, []));
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [view?.products, view?.list]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!view) return;
+    const before = prevList.current;
+    prevList.current = view.list;
+    if (!before || !alertPrefs().others) return;
+    const was = new Map(before.map((i) => [i.id, i]));
+    for (const item of view.list) {
+      const old = was.get(item.id);
+      if (!old || old.checked_at || !item.checked_at || !item.checked_by || item.checked_by === userId) continue;
+      const who = view.members.find((x) => x.user_id === item.checked_by)?.display_name ?? m.alerts.others.someone;
+      const what = item.product_id ? view.products.find((p) => p.id === item.product_id)?.name : item.name;
+      if (what) toast(m.alerts.others.bought(who, what.toLowerCase()));
+    }
+  }, [view?.list]); // eslint-disable-line react-hooks/exhaustive-deps
 }

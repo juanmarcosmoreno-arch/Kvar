@@ -60,6 +60,10 @@ Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden
    si ya tenías la base andando, alcanza con pegar solo esta)
 4. [`20261018000000_unir_productos.sql`](supabase/migrations/20261018000000_unir_productos.sql) («Unir con otro
    producto»)
+5. [`20261019000000_gastos.sql`](supabase/migrations/20261019000000_gastos.sql) (Gastos: precios de los tickets)
+6. [`20261020000000_plan_semanal.sql`](supabase/migrations/20261020000000_plan_semanal.sql) (Menú de la semana)
+
+Se pueden volver a correr sin problema: ninguna borra ni duplica nada.
 
 Cuando aparezcan migraciones nuevas (fases siguientes), se corre solo la nueva.
 

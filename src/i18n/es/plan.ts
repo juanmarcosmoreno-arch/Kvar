@@ -1,2 +1,22 @@
 /** Textos de: plan semanal de comidas. */
-export const plan = {};
+export const plan = {
+  title: 'Menú de la semana',
+  make: 'Armame el menú de la semana',
+  hint: 'Con lo que hay: primero lo que vence y lo que no necesita compras.',
+  days: 'Días',
+  meal: 'Comida',
+  build: 'Armar el menú',
+  rebuild: 'Armar de nuevo',
+  swap: (title: string) => `Cambiar ${title} por otra receta`,
+  save: 'Guardar el menú',
+  saved: 'Guardé el menú. Lo ve toda la casa.',
+  edit: 'Cambiar el menú',
+  addMissing: (n: number) => `Agregar lo que falta a la lista (${n})`,
+  added: (n: number) => (n === 1 ? 'Agregué 1 cosa a la lista.' : `Agregué ${n} cosas a la lista.`),
+  allInList: 'Lo que falta ya estaba en la lista.',
+  nothingMissing: 'Para este menú tenés todo.',
+  missingNote: 'Para el menú de la semana',
+  empty: 'No encontré recetas para esos días. Probá con otra comida o cargá recetas de la casa.',
+  today: 'Hoy',
+  deleted: '(ya no está)',
+};

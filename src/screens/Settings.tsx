@@ -1,3 +1,4 @@
+import { alertPrefs, canNotify, clearAlerts, requestAlertPermission, saveAlertPrefs, type AlertPrefs } from '../lib/alerts';
 import { CURRENCIES, currency, currencyName, setCurrency } from '../lib/currency';
 import { replayIntro } from '../components/IntroSplash';
 import { peopleLabel, Stepper } from '../components/Stepper';
@@ -194,6 +195,10 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             onMove={(c, dir) => moveCategory(c.id, dir)}
             placeholder={t.categories.placeholder}
           />
+        </Section>
+
+        <Section title={m.alerts.settings.title} hint={m.alerts.settings.hint}>
+          <AlertsSettings />
         </Section>
 
         <Section title={m.money.settings.title} hint={m.money.settings.hint}>
@@ -417,5 +422,42 @@ function MyName({ current, userId }: { current: string | null; userId: string })
       />
       {!current && <span className="block text-xs text-muted">{t.setNameHint}</span>}
     </span>
+  );
+}
+
+function AlertsSettings() {
+  const t = m.alerts.settings;
+  const [prefs, setPrefs] = useState(alertPrefs());
+  const [denied, setDenied] = useState(false);
+  const update = (p: AlertPrefs) => {
+    setPrefs(p);
+    saveAlertPrefs(p);
+    if (!p.enabled) void clearAlerts();
+  };
+  const toggleAll = async (on: boolean) => {
+    if (on && canNotify) {
+      const ok = await requestAlertPermission();
+      setDenied(!ok);
+      if (!ok) return;
+    }
+    update({ ...prefs, enabled: on });
+  };
+  return (
+    <div className="card divide-y divide-line px-4">
+      <Toggle checked={prefs.enabled} onChange={(v) => void toggleAll(v)} label={prefs.enabled ? t.enabled : t.enable} />
+      {denied && <p className="py-3 text-sm text-[#B53A2A] dark:text-out">{t.denied}</p>}
+      {prefs.enabled && (
+        <>
+          {canNotify && (
+            <>
+              <Toggle checked={prefs.predicted} onChange={(v) => update({ ...prefs, predicted: v })} label={t.predicted} hint={t.predictedHint} />
+              <Toggle checked={prefs.expiry} onChange={(v) => update({ ...prefs, expiry: v })} label={t.expiry} hint={t.expiryHint} />
+            </>
+          )}
+          <Toggle checked={prefs.others} onChange={(v) => update({ ...prefs, others: v })} label={t.others} hint={t.othersHint} />
+          {!canNotify && <p className="py-3 text-sm text-muted">{t.webNote}</p>}
+        </>
+      )}
+    </div>
   );
 }

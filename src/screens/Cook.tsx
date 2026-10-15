@@ -3,6 +3,8 @@ import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { RecipeEditor } from '../components/RecipeEditor';
 import { RecipeSheet } from '../components/RecipeSheet';
+import { PlanSheet, weekdayName } from '../components/PlanSheet';
+import { defaultDays, isoDay, mondayOf, type MealPlan, type PlanEntry } from '../domain/mealPlan';
 import { peopleLabel, Stepper } from '../components/Stepper';
 import { recipeCatalog } from '../domain/recipeCatalog';
 import {
@@ -35,6 +37,12 @@ export function Cook() {
   const [open, setOpen] = useState<Recipe | null>(null);
   const [editing, setEditing] = useState<{ base: Recipe | null } | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const [planning, setPlanning] = useState<PlanEntry[] | null | false>(false);
+  const plan = currentPlan(view.plans ?? []);
+  const openByKey = (key: string) => {
+    const r = [...(view.recipes ?? []), ...recipeCatalog()].find((x) => x.id === key);
+    if (r) setOpen(r);
+  };
 
   const own = view.recipes ?? [];
   const filters: CookFilters = {
@@ -94,6 +102,8 @@ export function Cook() {
             );
           })}
         </div>
+
+        <WeekPlan plan={plan} onOpen={openByKey} onPlan={() => setPlanning(plan?.entries ?? null)} />
 
         <Group
           title={t.expiring}
@@ -170,6 +180,12 @@ export function Cook() {
           setOpen(null);
           setEditing({ base: r });
         }}
+      />
+      <PlanSheet
+        open={planning !== false}
+        initial={planning || null}
+        onClose={() => setPlanning(false)}
+        onOpenRecipe={openByKey}
       />
       <RecipeEditor
         open={Boolean(editing)}
@@ -265,5 +281,53 @@ function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void
         </button>
       )}
     </div>
+  );
+}
+
+/** El menú guardado que corresponde ahora (esta semana o, el fin de semana, la que viene). */
+function currentPlan(plans: MealPlan[]): MealPlan | null {
+  const first = defaultDays(new Date())[0] ?? new Date();
+  const week = isoDay(mondayOf(first));
+  const thisWeek = isoDay(mondayOf(new Date()));
+  return plans.find((p) => p.week_start === week) ?? plans.find((p) => p.week_start === thisWeek) ?? null;
+}
+
+function WeekPlan({ plan, onOpen, onPlan }: { plan: MealPlan | null; onOpen: (key: string) => void; onPlan: () => void }) {
+  const t = m.plan;
+  const today = isoDay(new Date());
+  const upcoming = plan?.entries.filter((e) => e.day >= today) ?? [];
+  if (!upcoming.length) {
+    return (
+      <button className="card flex w-full items-center gap-3 p-4 text-left" onClick={onPlan}>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Icon name="pot" size={22} />
+        </span>
+        <span>
+          <span className="block font-medium">{t.make}</span>
+          <span className="text-sm text-muted">{t.hint}</span>
+        </span>
+      </button>
+    );
+  }
+  return (
+    <section className="space-y-2">
+      <div className="flex items-center justify-between">
+        <h2 className="section-title">{t.title}</h2>
+        <button className="min-h-tap px-1 text-sm font-medium text-primary" onClick={onPlan}>{t.edit}</button>
+      </div>
+      <ul className="card divide-y divide-line">
+        {upcoming.map((e) => (
+          <li key={e.day}>
+            <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => onOpen(e.recipe_key)}>
+              <span className={`w-20 shrink-0 text-sm first-letter:uppercase ${e.day === today ? 'font-semibold text-primary' : 'text-muted'}`}>
+                {e.day === today ? t.today : weekdayName(e.day)}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium">{e.title}</span>
+              <Icon name="chevron" size={16} className="text-muted" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

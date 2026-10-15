@@ -204,7 +204,7 @@ function subscribeRealtime(hh: string) {
     void sync();
   });
   // Recetas: llegan con sus ingredientes en tablas separadas; se vuelve a leer todo (pasa poco)
-  for (const table of ['recipes', 'recipe_ingredients', 'recipe_feedback']) {
+  for (const table of ['recipes', 'recipe_ingredients', 'recipe_feedback', 'meal_plans', 'meal_plan_entries']) {
     ch = ch.on('postgres_changes', { event: '*', schema: 'public', table, filter }, () => syncSoon());
   }
   channel = ch.subscribe((status) => {

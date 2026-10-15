@@ -54,7 +54,7 @@ type State = { status: 'loading' } | { status: 'ready'; events: StockEvent[]; ca
 const memo = new Map<string, { at: number; promise: Promise<EventsResult> }>();
 const FRESH = 60_000;
 
-function request(householdId: string, force = false): Promise<EventsResult> {
+export function request(householdId: string, force = false): Promise<EventsResult> {
   const hit = memo.get(householdId);
   if (hit && !force && Date.now() - hit.at < FRESH) return hit.promise;
   const promise = loadEvents(householdId);

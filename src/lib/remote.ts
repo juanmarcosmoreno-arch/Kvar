@@ -1,5 +1,6 @@
 /** Todo lo que habla con Supabase: lectura del hogar y envío de operaciones. */
 import type { Op } from '../domain/ops';
+import type { MealPlan } from '../domain/mealPlan';
 import type { Household, Member, Recipe, RecipeFeedback, Snapshot } from '../domain/types';
 import { removeImage, UploadError, uploadImage } from './images';
 import { demoServer, isDemo } from './demo';
@@ -41,7 +42,9 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
   if (isDemo) return demoServer.snapshot();
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
   const eventsSince = new Date(Date.now() - 120 * 86_400_000).toISOString();
-  const [household, members, locations, categories, products, list, outs, aliases, recipes, feedback] = await Promise.all([
+  const monday = new Date();
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) - 7);
+  const [household, members, locations, categories, products, list, outs, aliases, recipes, feedback, plans] = await Promise.all([
     supabase.from('households').select('id,name,invite_code,list_on_low,default_servings,created_at').eq('id', householdId).single(),
     supabase.from('household_members').select('*').eq('household_id', householdId),
     supabase.from('locations').select('id,household_id,name,icon,sort_order').eq('household_id', householdId).order('sort_order'),
@@ -74,6 +77,11 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
       .eq('household_id', householdId)
       .gt('created_at', eventsSince)
       .limit(1000),
+    supabase
+      .from('meal_plans')
+      .select('id,household_id,week_start,entries:meal_plan_entries(day,meal,recipe_key,servings,title)')
+      .eq('household_id', householdId)
+      .gte('week_start', monday.toISOString().slice(0, 10)),
   ]);
   const outCounts: Record<string, number> = {};
   for (const e of check(outs) as { product_id: string | null }[]) {
@@ -94,6 +102,11 @@ export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
       ingredients: [...(r.ingredients ?? [])].sort((a, b) => a.sort_order - b.sort_order),
     })),
     feedback: feedback.error ? [] : (feedback.data as RecipeFeedback[]),
+    // Sin la migración del menú semanal: no hay menús todavía
+    plans: plans.error ? [] : ((plans.data ?? []) as MealPlan[]).map((p) => ({
+      ...p,
+      entries: [...(p.entries ?? [])].sort((a, b) => a.day.localeCompare(b.day)),
+    })),
   };
 }
 
@@ -245,6 +258,11 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
       // Sin la migración de gastos los precios se pierden, pero no traban la cola
       if (res.error && /purchase_lines|PGRST205|42P01/.test(`${res.error.code} ${res.error.message}`)) return;
       check(res);
+      return;
+    }
+    case 'save_meal_plan': {
+      const { entries, ...plan } = op.plan;
+      check(await supabase.rpc('save_meal_plan', { p_plan: plan, p_entries: entries }));
       return;
     }
     case 'set_member_name':

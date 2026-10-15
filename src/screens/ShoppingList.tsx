@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchProducts } from '../domain/aliases';
 import { groupListByCategory, itemName, recentlyChecked } from '../domain/shoppingList';
 import type { ShoppingItem } from '../domain/types';
@@ -6,7 +6,11 @@ import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { SyncBadge } from '../components/SyncBadge';
 import { categoryIcon } from '../lib/categoryIcon';
-import { addListItem, clearChecked, purchaseItem, removeItem, unpurchaseItem } from '../store/actions';
+import { addListItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
+import { suggestedQuantities } from '../domain/suggestQuantity';
+import { useEvents, usePurchases } from '../lib/stats';
+import { setShopping, usePresence } from '../lib/presence';
+import { formatList } from '../i18n';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { EmptyCard } from './Home';
@@ -37,6 +41,55 @@ export function ShoppingList() {
     ? searchProducts(text, view.products).filter((p) => !view.list.some((i) => i.product_id === p.id && !i.checked_at)).slice(0, 4)
     : [];
 
+  // Cantidad sugerida: lo que se suele llevar (según el historial y los tickets)
+  const events = useEvents(view.household.id);
+  const purchases = usePurchases(view.household.id);
+  const suggested = useMemo(
+    () => suggestedQuantities(
+      view.products,
+      events.status === 'ready' ? events.events : [],
+      purchases.status === 'ready' ? purchases.lines : [],
+    ),
+    [view.products, events, purchases],
+  );
+
+  // «Estoy en el súper»
+  const presence = usePresence();
+  const seen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const open = view.list.filter((i) => !i.checked_at);
+    const prev = seen.current;
+    seen.current = new Set(open.map((i) => i.id));
+    if (!prev || !presence.me) return;
+    const fresh = open.filter((i) => !prev.has(i.id) && i.reason === 'manual' && !wasAddedHere(i.id));
+    if (fresh.length) toast(m.shopping.addedByOthers(formatList(fresh.map((i) => itemName(i, byId).toLowerCase()))));
+  }, [view.list]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const shareList = async () => {
+    const lines = [m.shopping.share.title(view.household.name), ''];
+    for (const g of groups) {
+      lines.push(g.title);
+      for (const i of g.items) lines.push(`• ${itemName(i, byId)}${i.quantity && i.quantity > 1 ? ` × ${i.quantity}` : ''}`);
+      lines.push('');
+    }
+    lines.push(m.shopping.share.footer);
+    const text = lines.join('\n');
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(m.shopping.share.copied, { label: m.shopping.share.whatsapp, run: () => window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank') });
+    } catch {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
+
   const add = (e: React.FormEvent) => {
     e.preventDefault();
     const t = text.trim();
@@ -63,9 +116,37 @@ export function ShoppingList() {
 
   return (
     <>
-      <Header title={m.stock.list.title} />
+      <Header
+        title={m.stock.list.title}
+        right={
+          groups.length > 0 && (
+            <button className="-mr-2 flex min-h-tap min-w-tap items-center justify-center rounded-full text-primary" onClick={() => void shareList()} aria-label={m.shopping.share.label}>
+              <Icon name="share" />
+            </button>
+          )
+        }
+      />
       <div className="space-y-6 px-5 pt-1">
         <SyncBadge />
+        {presence.shoppers.length > 0 && (
+          <div className="card flex items-center gap-3 border-primary/30 bg-primary/5 p-3 text-sm" role="status">
+            <Icon name="cart" size={20} className="shrink-0 text-primary" />
+            <span>
+              {presence.shoppers.length === 1
+                ? m.shopping.othersShopping(presence.shoppers[0])
+                : m.shopping.othersShoppingMany(formatList(presence.shoppers))}
+            </span>
+          </div>
+        )}
+        <button
+          className={`btn w-full ${presence.me ? 'bg-primary/10 text-primary' : 'btn-ghost'}`}
+          aria-pressed={presence.me}
+          onClick={() => setShopping(!presence.me)}
+        >
+          <Icon name={presence.me ? 'check' : 'cart'} size={20} />
+          {presence.me ? m.shopping.stopShopping : m.shopping.imShopping}
+        </button>
+        {presence.me && <p className="-mt-4 text-center text-sm text-muted">{m.shopping.meShoppingBanner}</p>}
         {groups.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
             <button className="btn-ghost" onClick={() => ui.openScan('bought')}>
@@ -129,7 +210,15 @@ export function ShoppingList() {
                       )}
                     </span>
                   </button>
-                  {item.product_id && (
+                  {item.product_id && !item.quantity && suggested.get(item.product_id) ? (
+                    <button
+                      className="chip min-h-[36px] border-dashed border-primary/50 tabular-nums text-primary"
+                      aria-label={m.shopping.useSuggested(suggested.get(item.product_id)!, itemName(item, byId))}
+                      onClick={() => setItemQuantity(item, suggested.get(item.product_id!)!)}
+                    >
+                      {m.shopping.suggested(suggested.get(item.product_id)!)}
+                    </button>
+                  ) : item.product_id && (
                     <button
                       className={`chip min-h-[36px] tabular-nums ${item.quantity ? 'border-primary/40 text-ink' : 'text-muted'}`}
                       aria-label={m.stock.list.howMany(itemName(item, byId))}

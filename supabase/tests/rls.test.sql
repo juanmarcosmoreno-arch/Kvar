@@ -203,6 +203,22 @@ do $$ begin
   assert (select count(*) from public.purchase_lines) = 1, 'una sola línea';
 end $$;
 
+-- Menú de la semana: guardar dos veces la misma semana la reemplaza
+select 1 as x from public.save_meal_plan(
+  jsonb_build_object('household_id', current_setting('kvar.hh'), 'week_start', '2026-10-12'),
+  jsonb_build_array(
+    jsonb_build_object('day', '2026-10-12', 'meal', 'cena', 'recipe_key', 'catalog:fideos-con-tuco', 'servings', 2, 'title', 'Fideos con tuco'),
+    jsonb_build_object('day', '2026-10-13', 'meal', 'cena', 'recipe_key', '20000000-0000-0000-0000-000000000001', 'servings', 3, 'title', 'Tuco de la abuela'))) \gset ignored_
+select 1 as x from public.save_meal_plan(
+  jsonb_build_object('household_id', current_setting('kvar.hh'), 'week_start', '2026-10-12'),
+  jsonb_build_array(
+    jsonb_build_object('day', '2026-10-13', 'meal', 'cena', 'recipe_key', '20000000-0000-0000-0000-000000000001', 'servings', 3, 'title', 'Tuco de la abuela'))) \gset ignored_
+do $$ begin
+  assert (select count(*) from public.meal_plans) = 1, 'un menú por semana';
+  assert (select count(*) from public.meal_plan_entries) = 1, 'reemplazado';
+  assert (select recipe_id from public.meal_plan_entries) = '20000000-0000-0000-0000-000000000001', 'receta de la casa vinculada';
+end $$;
+
 insert into public.recipe_feedback (household_id, catalog_key, recipe_title, action)
 values (current_setting('kvar.hh')::uuid, 'catalog:fideos-con-tuco', 'Fideos con tuco', 'cooked');
 reset role;
