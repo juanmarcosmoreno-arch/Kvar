@@ -1,6 +1,7 @@
 // Genera los íconos de la PWA y de iOS a partir de public/brand/stoka-icon.png (ícono de la app,
 // fondo crema de borde a borde) y stoka-icon-maskable.png (con más margen, para Android/PWA).
-// Para usar el ícono de la casa: npm run icons -- --casa
+// Ícono actual: la casa con estantes (de la animación de bienvenida). El anterior, la «S», quedó en
+// stoka-icon-s.png. Para usar la casa vieja: npm run icons -- --casa
 import { chromium } from 'playwright';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
