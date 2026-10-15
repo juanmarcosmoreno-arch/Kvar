@@ -31,7 +31,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,mp4,webm}'],
         navigateFallback: '/index.html',
         // Supabase nunca se cachea en el service worker: los datos offline viven en IndexedDB.
         navigateFallbackDenylist: [/^\/auth\//],

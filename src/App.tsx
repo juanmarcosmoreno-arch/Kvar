@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { Shell } from './components/Shell';
+import { IntroSplash, introSeen } from './components/IntroSplash';
 import { pendingInvite, useSession } from './lib/auth';
 import { persist } from './lib/persist';
 import { fetchMemberships, fetchMinVersion, joinHousehold } from './lib/remote';
@@ -24,12 +25,15 @@ export default function App() {
   useEffect(() => applyTheme(), []);
   const { session, loading } = useSession();
   const minVersion = useMinVersion();
+  const [intro, setIntro] = useState(() => !introSeen());
 
   if (isConfigured && minVersion && mustUpdate(APP_VERSION, minVersion)) {
     return <UpdateRequired minimum={minVersion} />;
   }
 
   return (
+    <>
+    {intro && <IntroSplash onDone={() => setIntro(false)} />}
     <Routes>
       <Route path="/unirse/:code" element={<JoinLink signedIn={Boolean(session)} />} />
       <Route
@@ -39,6 +43,7 @@ export default function App() {
         }
       />
     </Routes>
+    </>
   );
 }
 

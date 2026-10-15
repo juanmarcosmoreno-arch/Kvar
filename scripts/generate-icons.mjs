@@ -34,7 +34,7 @@ for (const j of jobs) {
   console.log('✓', j.name);
 }
 
-// iOS nativo (Capacitor): ícono 1024 sin transparencia y pantalla de arranque crema con el ícono al centro.
+// iOS nativo (Capacitor): ícono 1024 sin transparencia y pantalla de arranque lisa, color crema.
 const iosAssets = resolve(root, 'ios/App/App/Assets.xcassets');
 if (existsSync(iosAssets)) {
   await page.setViewportSize({ width: 1024, height: 1024 });
@@ -51,7 +51,8 @@ if (existsSync(iosAssets)) {
 
   await page.setViewportSize({ width: 2732, height: 2732 });
   await page.setContent(
-    `<html><body style="margin:0;background:#F5F3EE;display:flex;align-items:center;justify-content:center;height:2732px"><img src="${src('kvar-mark.svg')}" style="width:360px;height:360px;border-radius:80px"></body></html>`,
+    // Solo el fondo crema: así la bienvenida animada (o la app) aparece sin saltos, como recomienda Apple
+    `<html><body style="margin:0;background:#F5F3EE;height:2732px"></body></html>`,
   );
   await page.waitForLoadState('networkidle');
   for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
