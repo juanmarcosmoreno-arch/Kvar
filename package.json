@@ -14,7 +14,8 @@
     "icons": "node scripts/generate-icons.mjs",
     "ios": "npm run build && node scripts/sync-ios-version.mjs && cap sync ios && cap open ios",
     "ios:sync": "npm run build && node scripts/sync-ios-version.mjs && cap sync ios",
-    "ios:release": "npm run build && node scripts/sync-ios-version.mjs --bump && cap sync ios && cap open ios"
+    "ios:release": "npm run build && node scripts/sync-ios-version.mjs --bump && cap sync ios && cap open ios",
+    "build:demo": "VITE_DEMO=1 vite build && node scripts/build-demo.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.2",
@@ -46,6 +47,7 @@
     "typescript": "5.6",
     "vite": "^5.4.21",
     "vite-plugin-pwa": "^2.0.0",
+    "vite-plugin-singlefile": "^2.0.3",
     "vitest": "^2.1.9"
   }
 }

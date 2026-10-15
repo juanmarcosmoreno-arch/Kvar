@@ -15,6 +15,7 @@ import { applyOps, compactOps, type Op } from '../domain/ops';
 import type { Snapshot } from '../domain/types';
 import { persist } from '../lib/persist';
 import { fetchSnapshot, PermanentError, sendOp } from '../lib/remote';
+import { isDemo } from '../lib/demo';
 import { supabase } from '../lib/supabase';
 import { toast } from './toast';
 
@@ -177,6 +178,7 @@ const TABLE_KEY = {
 } as const;
 
 function subscribeRealtime(hh: string) {
+  if (isDemo) return; // la demo no tiene servidor de tiempo real (ver «Sofía marca algo»)
   const filter = `household_id=eq.${hh}`;
   let ch = supabase.channel(`hh:${hh}`);
   for (const table of Object.keys(TABLE_KEY) as (keyof typeof TABLE_KEY)[]) {

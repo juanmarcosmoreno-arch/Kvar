@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import finalFrame from '../assets/brand/kvar-intro-final.webp';
 import { supabase } from '../lib/supabase';
 
 /**
@@ -93,7 +94,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       <div className="mb-8 flex flex-col items-center text-center">
         {/* Último cuadro de la animación de bienvenida: la casa con la despensa y «Kvar» */}
         <div className="dark:overflow-hidden dark:rounded-[2rem] dark:bg-white">
-          <img src="/brand/kvar-intro-final.webp" alt="Kvar" className="h-48 w-48 mix-blend-multiply dark:mix-blend-normal" />
+          <img src={finalFrame} alt="Kvar" className="h-48 w-48 mix-blend-multiply dark:mix-blend-normal" />
         </div>
         <span className="mt-2 text-[11px] uppercase tracking-[0.32em] text-muted">Tu hogar siempre provisto</span>
       </div>

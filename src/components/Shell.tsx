@@ -4,6 +4,8 @@ import { openCount } from '../domain/shoppingList';
 import { useView } from '../store/store';
 import { UIContext, type AddDefaults, type ScanMode } from '../store/ui';
 import { ScanSheet } from './ScanSheet';
+import { DemoBar } from './DemoBar';
+import { isDemo } from '../lib/demo';
 import { AddProductSheet } from './AddProductSheet';
 import { Icon, type IconName } from './Icon';
 import { ProductSheet } from './ProductSheet';
@@ -35,6 +37,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <UIContext.Provider value={ui}>
       <div className="mx-auto flex min-h-full max-w-lg flex-col pb-[calc(env(safe-area-inset-bottom)+88px)] pt-[env(safe-area-inset-top)]">
+        {isDemo && <DemoBar />}
         {children}
       </div>
       <TabBar onFab={() => setActions(true)} />

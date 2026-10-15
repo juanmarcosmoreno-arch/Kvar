@@ -7,6 +7,7 @@ import type { Category, Location } from '../domain/types';
 import { isStandalone } from '../lib/auth';
 import { APP_VERSION, isNative, PUBLIC_URL } from '../lib/platform';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
+import { isDemo } from '../lib/demo';
 import { deleteMyAccount, regenerateInviteCode } from '../lib/remote';
 import { supabase } from '../lib/supabase';
 import { getTheme, setTheme, type Theme } from '../lib/theme';
@@ -27,6 +28,10 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
   const link = `${PUBLIC_URL}/unirse/${view.household.invite_code}`;
 
   const share = async () => {
+    if (isDemo) {
+      toast(`En la app real esto comparte el link de invitación. Código: ${view.household.invite_code}`);
+      return;
+    }
     const text = `Sumate a «${view.household.name}» en Kvar: ${link}  (código ${view.household.invite_code})`;
     if (navigator.share) {
       try {
@@ -179,7 +184,7 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
         <Section title="Cuenta">
           <div className="grid gap-2">
             <button className="btn-ghost w-full" onClick={onSwitchHousehold}>Crear otro hogar o sumarme a uno</button>
-            <button className="btn w-full text-out" onClick={signOut}>Cerrar sesión</button>
+            {!isDemo && <button className="btn w-full text-out" onClick={signOut}>Cerrar sesión</button>}
           </div>
           {deleting === 'idle' ? (
             <button className="btn w-full text-sm text-muted" onClick={() => setDeleting('confirm')}>

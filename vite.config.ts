@@ -3,8 +3,33 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' with { type: 'json' };
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
-export default defineConfig({
+const isDemo = process.env.VITE_DEMO === '1';
+
+// Demo: un solo HTML autocontenido (sin service worker ni Supabase), salvo los videos, que van aparte.
+const demoConfig = defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
+  base: './',
+  plugins: [
+    react(),
+    viteSingleFile({ useRecommendedBuildConfig: false, removeViteModuleLoader: true }),
+    // En la demo no hay service worker: el import de la PWA se resuelve a un módulo vacío
+    {
+      name: 'kvar-demo-sin-pwa',
+      resolveId: (id: string) => (id === 'virtual:pwa-register' ? '\0pwa-stub' : null),
+      load: (id: string) => (id === '\0pwa-stub' ? 'export function registerSW() {}' : null),
+    },
+  ],
+  build: {
+    outDir: 'dist-demo',
+    assetsInlineLimit: (file: string) => !/\.(mp4|webm)$/.test(file),
+    cssCodeSplit: false,
+    rollupOptions: { output: { inlineDynamicImports: true } },
+  },
+});
+
+export default isDemo ? demoConfig : defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },

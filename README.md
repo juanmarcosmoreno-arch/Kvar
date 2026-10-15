@@ -174,6 +174,13 @@ versiones viejas:
 `npm run icons` genera también el ícono de iOS (1024 px, sin transparencia, como exige Apple) y la pantalla de
 arranque, a partir de `public/brand/`.
 
+## Demo sin servidor
+
+`npm run build:demo` arma una versión de prueba que funciona sola, sin Supabase ni cuentas: un hogar de ejemplo,
+cambios guardados en el navegador, «Sofía marca algo» para simular a otro miembro y códigos de barras de ejemplo en
+lugar de la cámara. Sale en `dist-demo/kvar-demo.html` (más los dos videos de bienvenida) y se puede publicar como
+página estática.
+
 ## Scripts
 
 | Comando | Qué hace |
@@ -184,6 +191,7 @@ arranque, a partir de `public/brand/`.
 | `npm test` | Tests unitarios (estados, lista de compras, equivalencias, operaciones offline) |
 | `npm run test:db` | Levanta un Postgres efímero, aplica la migración y prueba RLS y la lógica SQL |
 | `npm run icons` | Regenera los íconos de la PWA y de iOS desde `public/brand/*.svg` |
+| `npm run build:demo` | Demo autocontenida con datos de ejemplo (`dist-demo/`) |
 | `npm run ios` | Build + sincroniza el proyecto de Xcode + lo abre |
 | `npm run ios:release` | Lo mismo, subiendo el número de build para TestFlight |
 

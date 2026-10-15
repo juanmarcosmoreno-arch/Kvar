@@ -8,17 +8,26 @@ function db(): UseStore {
   return store;
 }
 
+/** IndexedDB puede no estar disponible (modo privado, marcos restringidos): la app sigue igual. */
+async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch {
+    return fallback;
+  }
+}
+
 export const persist = {
-  loadSnapshot: (hh: string) => get<Snapshot>(`snap:${hh}`, db()),
-  saveSnapshot: (s: Snapshot) => set(`snap:${s.household.id}`, s, db()),
-  loadOutbox: async () => (await get<Op[]>('outbox', db())) ?? [],
-  saveOutbox: (ops: Op[]) => set('outbox', ops, db()),
-  loadHousehold: () => get<string>('household', db()),
-  saveHousehold: (id: string) => set('household', id, db()),
-  async clear() {
+  loadSnapshot: (hh: string) => safe(() => get<Snapshot>(`snap:${hh}`, db()), undefined),
+  saveSnapshot: (s: Snapshot) => safe(() => set(`snap:${s.household.id}`, s, db()), undefined),
+  loadOutbox: () => safe(async () => (await get<Op[]>('outbox', db())) ?? [], [] as Op[]),
+  saveOutbox: (ops: Op[]) => safe(() => set('outbox', ops, db()), undefined),
+  loadHousehold: () => safe(() => get<string>('household', db()), undefined),
+  saveHousehold: (id: string) => safe(() => set('household', id, db()), undefined),
+  clear: () => safe(async () => {
     const hh = await get<string>('household', db());
     if (hh) await del(`snap:${hh}`, db());
     await del('outbox', db());
     await del('household', db());
-  },
+  }, undefined),
 };

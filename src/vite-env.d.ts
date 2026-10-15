@@ -9,3 +9,6 @@ declare const __APP_VERSION__: string;
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+interface ImportMetaEnv {
+  readonly VITE_DEMO?: string;
+}

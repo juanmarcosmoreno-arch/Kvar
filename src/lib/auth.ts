@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { DEMO_USER, isDemo } from './demo';
 import { supabase } from './supabase';
 
+const DEMO_SESSION = { user: { id: DEMO_USER, email: 'demo@kvar' } } as unknown as Session;
+
 export function useSession(): { session: Session | null; loading: boolean } {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(isDemo ? DEMO_SESSION : null);
+  const [loading, setLoading] = useState(!isDemo);
   useEffect(() => {
+    if (isDemo) return;
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);

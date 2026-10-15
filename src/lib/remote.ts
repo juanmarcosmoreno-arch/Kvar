@@ -2,6 +2,7 @@
 import type { Op } from '../domain/ops';
 import type { Household, Member, Snapshot } from '../domain/types';
 import { removeImage, UploadError, uploadImage } from './images';
+import { demoServer, isDemo } from './demo';
 import { supabase } from './supabase';
 
 const PRODUCT_COLS =
@@ -22,6 +23,10 @@ function check<T>(res: { data: T; error: { message: string; code?: string } | nu
 }
 
 export async function fetchMemberships(userId: string): Promise<(Member & { household: Household })[]> {
+  if (isDemo) {
+    const s = demoServer.snapshot();
+    return s.members.filter((m) => m.user_id === userId).map((m) => ({ ...m, household: s.household }));
+  }
   const data = check(
     await supabase
       .from('household_members')
@@ -33,6 +38,7 @@ export async function fetchMemberships(userId: string): Promise<(Member & { hous
 }
 
 export async function fetchSnapshot(householdId: string): Promise<Snapshot> {
+  if (isDemo) return demoServer.snapshot();
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
   const eventsSince = new Date(Date.now() - 120 * 86_400_000).toISOString();
   const [household, members, locations, categories, products, list, outs, aliases] = await Promise.all([
@@ -90,6 +96,10 @@ async function realItemId(itemId: string): Promise<string | null> {
 }
 
 export async function sendOp(op: Op, householdId: string): Promise<void> {
+  if (isDemo) {
+    demoServer.apply(op);
+    return;
+  }
   switch (op.kind) {
     case 'set_status': {
       check(
@@ -219,23 +229,27 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
 }
 
 export async function createHousehold(name: string, displayName: string | null): Promise<Household> {
+  if (isDemo) return demoServer.household();
   return check(
     await supabase.rpc('create_household', { p_name: name, p_display_name: displayName }).single(),
   ) as Household;
 }
 
 export async function joinHousehold(code: string, displayName: string | null): Promise<Household> {
+  if (isDemo) return demoServer.household();
   return check(
     await supabase.rpc('join_household', { p_code: code, p_display_name: displayName }).single(),
   ) as Household;
 }
 
 export async function regenerateInviteCode(householdId: string): Promise<string> {
+  if (isDemo) return demoServer.household().invite_code;
   return check(await supabase.rpc('regenerate_invite_code', { p_household_id: householdId })) as string;
 }
 
 /** Versión mínima de la app que la base acepta (null si no se pudo leer, p. ej. sin conexión). */
 export async function fetchMinVersion(): Promise<string | null> {
+  if (isDemo) return null;
   const { data, error } = await supabase.from('app_config').select('value').eq('key', 'min_client_version').maybeSingle();
   if (error) return null;
   return (data as { value: string } | null)?.value ?? null;
@@ -243,5 +257,9 @@ export async function fetchMinVersion(): Promise<string | null> {
 
 /** Borra la cuenta del usuario actual (y los hogares donde era el único miembro). */
 export async function deleteMyAccount(): Promise<void> {
+  if (isDemo) {
+    demoServer.reset();
+    return;
+  }
   check(await supabase.rpc('delete_my_account'));
 }

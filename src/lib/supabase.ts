@@ -1,11 +1,12 @@
 import { createClient, type SupabaseClient, type SupportedStorage } from '@supabase/supabase-js';
 import { Preferences } from '@capacitor/preferences';
+import { isDemo } from './demo';
 import { isNative } from './platform';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-export const isConfigured = Boolean(url && anonKey);
+export const isConfigured = isDemo || Boolean(url && anonKey);
 
 // En la app nativa la sesión va al almacenamiento de iOS (no se borra como el de WebKit).
 const nativeStorage: SupportedStorage = {

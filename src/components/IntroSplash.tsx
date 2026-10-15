@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import finalFrame from '../assets/brand/kvar-intro-final.webp';
+import introMp4 from '../assets/brand/kvar-intro.mp4';
+import introWebm from '../assets/brand/kvar-intro.webm';
 
 const SEEN_KEY = 'kvar:intro-visto';
 
@@ -54,10 +57,10 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
     >
       <div className="dark:overflow-hidden dark:rounded-[2.5rem] dark:bg-white">
         {reduced ? (
-          <img src="/brand/kvar-intro-final.webp" alt="Kvar" className="h-72 w-72 mix-blend-multiply dark:mix-blend-normal" />
+          <img src={finalFrame} alt="Kvar" className="h-72 w-72 mix-blend-multiply dark:mix-blend-normal" />
         ) : (
           <video
-            poster="/brand/kvar-intro-final.webp"
+            poster={finalFrame}
             className="h-72 w-72 mix-blend-multiply dark:mix-blend-normal"
             autoPlay
             muted
@@ -67,8 +70,8 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
             aria-label="Kvar"
           >
             {/* MP4 (H.264) para Safari y la app de iPhone; WebM para navegadores sin H.264 */}
-            <source src="/brand/kvar-intro.mp4" type="video/mp4" />
-            <source src="/brand/kvar-intro.webm" type="video/webm" onError={finish} />
+            <source src={introMp4} type="video/mp4" />
+            <source src={introWebm} type="video/webm" onError={finish} />
           </video>
         )}
       </div>

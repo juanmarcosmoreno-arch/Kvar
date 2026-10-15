@@ -13,8 +13,15 @@ export function getTheme(): Theme {
   }
 }
 
+/** Tema elegido por la página que contiene a la app (data-theme), si lo hay. */
+function hostTheme(): 'light' | 'dark' | null {
+  const v = document.documentElement.getAttribute('data-theme');
+  return v === 'light' || v === 'dark' ? v : null;
+}
+
 export function applyTheme(t: Theme = getTheme()) {
-  const dark = t === 'dark' || (t === 'system' && media().matches);
+  const host = t === 'system' ? hostTheme() : null;
+  const dark = t === 'dark' || (t === 'system' && (host ? host === 'dark' : media().matches));
   document.documentElement.classList.toggle('dark', dark);
   document
     .querySelectorAll('meta[name="theme-color"]')
@@ -38,4 +45,5 @@ export function setTheme(t: Theme) {
 
 if (typeof window !== 'undefined') {
   media().addEventListener?.('change', () => applyTheme());
+  new MutationObserver(() => applyTheme()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 }

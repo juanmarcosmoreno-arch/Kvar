@@ -20,7 +20,9 @@
       (function () {
         try {
           var t = localStorage.getItem('kvar:theme') || 'system';
-          var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          var host = document.documentElement.getAttribute('data-theme');
+          var sys = host === 'dark' || host === 'light' ? host === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+          var dark = t === 'dark' || (t === 'system' && sys);
           if (dark) document.documentElement.classList.add('dark');
         } catch (e) {}
       })();

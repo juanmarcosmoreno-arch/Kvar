@@ -9,6 +9,7 @@ import { getView, useView } from '../store/store';
 import { toast } from '../store/toast';
 import { useUI, type ScanMode } from '../store/ui';
 import { BarcodeScanner } from './BarcodeScanner';
+import { DEMO_CODES, isDemo } from '../lib/demo';
 import { Icon } from './Icon';
 import { ProductThumb } from './ProductThumb';
 import { Sheet } from './Sheet';
@@ -137,7 +138,22 @@ function Body({ mode, productId, onClose }: { mode: ScanMode; productId?: string
 
   return (
     <div className="space-y-4 pb-4">
-      <BarcodeScanner onDetect={(c) => void handle(c)} paused={looking} />
+      {isDemo ? (
+        <div className="space-y-3 rounded-card border border-dashed border-line p-4">
+          <p className="text-sm text-muted">
+            En esta demo no hay cámara. Tocá un código de ejemplo o escribí uno abajo, como si lo hubieras escaneado.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {DEMO_CODES.map((c) => (
+              <button key={c.code} type="button" className="chip min-h-tap bg-surface" onClick={() => void handle(c.code)}>
+                <Icon name="barcode" size={15} className="text-muted" /> {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <BarcodeScanner onDetect={(c) => void handle(c)} paused={looking} />
+      )}
       <p className="text-center text-sm text-muted">{looking ? 'Buscando el producto…' : HINT[mode]}</p>
 
       {mode === 'bought' && session.length > 0 && (

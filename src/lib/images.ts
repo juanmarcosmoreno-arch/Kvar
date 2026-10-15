@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from 'react';
 import { createStore, get, set, type UseStore } from 'idb-keyval';
+import { isDemo } from './demo';
 import { supabase } from './supabase';
 
 export const BUCKET = 'product-images';
@@ -11,10 +12,24 @@ export const BUCKET = 'product-images';
 let store: UseStore | undefined;
 const db = () => (store ??= createStore('kvar-img', 'blobs'));
 const urls = new Map<string, string>();
+const memory = new Map<string, Blob>(); // respaldo si IndexedDB no está disponible
 
 export const imageStore = {
-  get: (path: string) => get<Blob>(path, db()),
-  put: (path: string, blob: Blob) => set(path, blob, db()),
+  get: async (path: string) => {
+    try {
+      return (await get<Blob>(path, db())) ?? memory.get(path);
+    } catch {
+      return memory.get(path);
+    }
+  },
+  put: async (path: string, blob: Blob) => {
+    memory.set(path, blob);
+    try {
+      await set(path, blob, db());
+    } catch {
+      /* queda en memoria */
+    }
+  },
 };
 
 export function imagePath(householdId: string, productId: string, mime: string): string {
@@ -66,6 +81,7 @@ export class UploadError extends Error {
 
 /** Sube la foto guardada localmente. Devuelve false si el archivo local ya no existe. */
 export async function uploadImage(path: string): Promise<boolean> {
+  if (isDemo) return true; // en la demo la foto queda solo en este navegador
   const blob = await imageStore.get(path);
   if (!blob) return false;
   const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
@@ -81,5 +97,6 @@ export async function uploadImage(path: string): Promise<boolean> {
 }
 
 export async function removeImage(path: string): Promise<void> {
+  if (isDemo) return;
   await supabase.storage.from(BUCKET).remove([path]);
 }

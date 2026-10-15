@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import mark from './assets/brand/kvar-mark.svg';
 import { Shell } from './components/Shell';
 import { IntroSplash, introSeen } from './components/IntroSplash';
 import { pendingInvite, useSession } from './lib/auth';
@@ -148,7 +149,7 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
 function Splash({ message }: { message?: string }) {
   return (
     <div className="flex min-h-full flex-col items-center justify-center gap-4 p-8 text-center">
-      <img src="/brand/kvar-mark.svg" alt="" className="h-14 w-14 animate-pulse rounded-2xl" />
+      <img src={mark} alt="" className="h-14 w-14 animate-pulse rounded-2xl" />
       {message && <p className="text-muted">{message}</p>}
     </div>
   );
