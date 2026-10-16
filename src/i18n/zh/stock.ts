@@ -27,6 +27,8 @@ export const stock: Messages['stock'] = {
   },
 
   inventory: {
+    viewList: '列表',
+    viewHouse: '房子',
     title: '商品',
     addProduct: '添加商品',
     searchPlaceholder: '搜索…',
@@ -176,5 +178,10 @@ export const stock: Messages['stock'] = {
       `${duplicate}将被删除并合并为${keep}：包括条码、历史记录、清单和菜谱。`,
     confirm: '合并',
     done: (duplicate, keep) => `完成：${duplicate}现在是${keep}。`,
+  },
+  house: {
+    noPlace: '未指定位置',
+    low: (n) => `${n} 快用完`,
+    out: (n) => `${n} 没有了`,
   },
 };

@@ -27,6 +27,8 @@ export const stock: Messages['stock'] = {
   },
 
   inventory: {
+    viewList: 'リスト',
+    viewHouse: 'おうち',
     title: '商品',
     addProduct: '商品を追加',
     searchPlaceholder: '検索…',
@@ -176,5 +178,10 @@ export const stock: Messages['stock'] = {
       `${duplicate}は削除され、${keep}になります。バーコード、履歴、リスト、レシピも移ります。`,
     confirm: 'まとめる',
     done: (duplicate, keep) => `完了：${duplicate}は${keep}になりました。`,
+  },
+  house: {
+    noPlace: '場所なし',
+    low: (n) => `残り少ない ${n}`,
+    out: (n) => `なし ${n}`,
   },
 };

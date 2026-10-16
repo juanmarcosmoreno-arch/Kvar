@@ -28,6 +28,8 @@ export const stock: Messages['stock'] = {
   },
 
   inventory: {
+    viewList: 'Lista',
+    viewHouse: 'Casa',
     title: 'Produtos',
     addProduct: 'Adicionar produto',
     searchPlaceholder: 'Buscar…',
@@ -177,5 +179,10 @@ export const stock: Messages['stock'] = {
       `${duplicate} é apagado e passa a ser ${keep}: os códigos de barras, o histórico, a lista e as receitas.`,
     confirm: 'Juntar',
     done: (duplicate, keep) => `Pronto: ${duplicate} agora é ${keep}.`,
+  },
+  house: {
+    noPlace: 'Sem lugar',
+    low: (n) => `${n} acabando`,
+    out: (n) => `${n} acabou`,
   },
 };

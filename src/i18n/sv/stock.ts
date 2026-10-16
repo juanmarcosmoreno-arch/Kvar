@@ -28,6 +28,8 @@ export const stock: Messages['stock'] = {
   },
 
   inventory: {
+    viewList: 'Lista',
+    viewHouse: 'Huset',
     title: 'Produkter',
     addProduct: 'Lägg till produkt',
     searchPlaceholder: 'Sök…',
@@ -177,5 +179,10 @@ export const stock: Messages['stock'] = {
       `${duplicate} tas bort och blir ${keep}: streckkoder, historik, listan och recepten.`,
     confirm: 'Slå ihop',
     done: (duplicate, keep) => `Klart: ${duplicate} är nu ${keep}.`,
+  },
+  house: {
+    noPlace: 'Ingen plats',
+    low: (n) => `${n} snart slut`,
+    out: (n) => `${n} slut`,
   },
 };

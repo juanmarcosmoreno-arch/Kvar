@@ -4,6 +4,7 @@ import { severity } from '../domain/status';
 import type { StockStatus } from '../domain/types';
 import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
+import { HouseView } from '../components/HouseView';
 import { ProductRow } from '../components/ProductRow';
 import { StatusDot } from '../components/Status';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
@@ -22,6 +23,17 @@ function filterLabel(f: StatusFilter): string {
   return m.common.status[f];
 }
 
+type ViewMode = 'list' | 'house';
+const VIEW_KEY = 'stoka:vista-productos';
+
+function savedMode(): ViewMode {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'house' ? 'house' : 'list';
+  } catch {
+    return 'list';
+  }
+}
+
 export function Inventory() {
   const view = useView()!;
   const ui = useUI();
@@ -29,6 +41,15 @@ export function Inventory() {
   const [status, setStatusFilter] = useState<StatusFilter>('all');
   const [location, setLocation] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
+  const [mode, setModeState] = useState<ViewMode>(savedMode);
+  const setMode = (next: ViewMode) => {
+    setModeState(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      /* sin almacenamiento */
+    }
+  };
   const cat = new Map(view.categories.map((c) => [c.id, c.name]));
   const locations = [...view.locations].sort((a, b) => a.sort_order - b.sort_order);
   const categories = [...view.categories].sort((a, b) => a.sort_order - b.sort_order);
@@ -60,6 +81,20 @@ export function Inventory() {
         }
       />
       <div className="sticky top-0 z-10 space-y-3 bg-bg/95 px-5 pb-3 pt-1 backdrop-blur">
+        {/* Lista o la casa con sus estantes */}
+        <div className="flex rounded-full bg-sunken p-1 text-sm" role="group" aria-label={m.stock.inventory.title}>
+          {(['list', 'house'] as const).map((v) => (
+            <button
+              key={v}
+              className={`flex min-h-[38px] flex-1 items-center justify-center gap-1.5 rounded-full font-medium ${mode === v ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
+              aria-pressed={mode === v}
+              onClick={() => setMode(v)}
+            >
+              <Icon name={v === 'list' ? 'box' : 'home'} size={17} />
+              {v === 'list' ? m.stock.inventory.viewList : m.stock.inventory.viewHouse}
+            </button>
+          ))}
+        </div>
         <label className="relative block">
           <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
           <input className="field rounded-full pl-12" placeholder={m.stock.inventory.searchPlaceholder} value={q} onChange={(e) => setQ(e.target.value)} type="search" />
@@ -76,7 +111,7 @@ export function Inventory() {
             </button>
           ))}
         </div>
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
+        {mode === 'list' && <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
           {locations.map((l) => (
             <button
               key={l.id}
@@ -87,7 +122,7 @@ export function Inventory() {
               {l.name}
             </button>
           ))}
-        </div>
+        </div>}
         <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
           {categories.map((c) => (
             <button
@@ -102,6 +137,11 @@ export function Inventory() {
         </div>
       </div>
 
+      {mode === 'house' ? (
+        <div className="px-4 pb-6 pt-2">
+          <HouseView products={products} locations={view.locations} categories={view.categories} onOpen={ui.openProduct} />
+        </div>
+      ) : (
       <div className="space-y-2 px-5 pt-1">
         {products.map((p) => (
           <ProductRow key={p.id} product={p} categoryName={cat.get(p.category_id ?? '')} onOpen={() => ui.openProduct(p.id)} />
@@ -118,6 +158,7 @@ export function Inventory() {
           <p className="pt-3 text-center text-xs text-muted">{m.stock.inventory.swipeHint}</p>
         )}
       </div>
+      )}
     </>
   );
 }

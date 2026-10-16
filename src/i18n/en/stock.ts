@@ -28,6 +28,8 @@ export const stock: Messages['stock'] = {
   },
 
   inventory: {
+    viewList: 'List',
+    viewHouse: 'House',
     title: 'Products',
     addProduct: 'Add product',
     searchPlaceholder: 'Search…',
@@ -177,5 +179,10 @@ export const stock: Messages['stock'] = {
       `${duplicate} will be deleted and become ${keep}: its barcodes, history, list item and recipes.`,
     confirm: 'Merge',
     done: (duplicate, keep) => `Done: ${duplicate} is now ${keep}.`,
+  },
+  house: {
+    noPlace: 'No place',
+    low: (n) => `${n} low`,
+    out: (n) => `${n} out`,
   },
 };

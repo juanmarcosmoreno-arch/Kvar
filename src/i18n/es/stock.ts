@@ -27,6 +27,8 @@ export const stock = {
   },
 
   inventory: {
+    viewList: 'Lista',
+    viewHouse: 'Casa',
     title: 'Productos',
     addProduct: 'Agregar producto',
     searchPlaceholder: 'Buscar…',
@@ -177,5 +179,10 @@ export const stock = {
       `${duplicate} se borra y pasa a ser ${keep}: sus códigos de barras, su historial, la lista y las recetas.`,
     confirm: 'Unir',
     done: (duplicate: string, keep: string) => `Listo: ${duplicate} ahora es ${keep}.`,
+  },
+  house: {
+    noPlace: 'Sin lugar',
+    low: (n: number) => `${n} poco`,
+    out: (n: number) => `${n} no hay`,
   },
 };
