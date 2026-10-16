@@ -28,6 +28,7 @@ import { toast } from './store/toast';
 import { m } from './i18n';
 import { alertPrefs, scheduleAlerts } from './lib/alerts';
 import { startPresence, stopPresence } from './lib/presence';
+import { setMe } from './lib/me';
 import { ListActivitySync } from './components/ListActivitySync';
 import { WatchExtrasSync } from './components/WatchExtrasSync';
 import { request as requestEvents } from './lib/stats';
@@ -152,6 +153,7 @@ function HouseholdGate({ userId }: { userId: string }) {
 
 function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold: () => void }) {
   const view = useView();
+  useEffect(() => setMe(userId), [userId]);
   // Apple Watch: se le pasa el hogar actual (solo si cambió)
   useEffect(() => {
     if (view) void syncWatch(view, userId);

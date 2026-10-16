@@ -62,6 +62,8 @@ Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden
    producto»)
 5. [`20261019000000_gastos.sql`](supabase/migrations/20261019000000_gastos.sql) (Gastos: precios de los tickets)
 6. [`20261020000000_plan_semanal.sql`](supabase/migrations/20261020000000_plan_semanal.sql) (Menú de la semana)
+7. [`20261021000000_dividir_gastos.sql`](supabase/migrations/20261021000000_dividir_gastos.sql) (Cuentas: quién
+   pagó, cómo se divide y «Saldar»)
 
 Se pueden volver a correr sin problema: ninguna borra ni duplica nada.
 

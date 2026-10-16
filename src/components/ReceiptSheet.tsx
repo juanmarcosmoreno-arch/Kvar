@@ -5,6 +5,8 @@ import sampleTicket from '../assets/demo/ticket-macromercado.txt?raw';
 import { isDemo } from '../lib/demo';
 import { canReadPhotos, readReceiptPhoto } from '../lib/ocr';
 import { applyReceipt } from '../store/actions';
+import { getMe } from '../lib/me';
+import { PayerPicker } from './SplitCard';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
@@ -65,9 +67,10 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
   };
 
   const [pricesOnly, setPricesOnly] = useState(false);
+  const [paidBy, setPaidBy] = useState<string | null>(null);
   const confirm = () => {
     const ticket = { date: parsed?.date, total: parsed?.total };
-    const { updated, created } = applyReceipt(review, parsed?.store ?? null, ticket, { pricesOnly });
+    const { updated, created } = applyReceipt(review, parsed?.store ?? null, ticket, { pricesOnly, paidBy: paidBy ?? getMe() });
     toast(pricesOnly ? m.capture.receipt.appliedPrices(review.filter((r) => r.include).length) : m.capture.receipt.applied(updated, created));
     close();
   };
@@ -137,6 +140,8 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
           setEditing={setEditing}
           pricesOnly={pricesOnly}
           setPricesOnly={setPricesOnly}
+          paidBy={paidBy}
+          setPaidBy={setPaidBy}
           onConfirm={confirm}
         />
       )}
@@ -145,8 +150,10 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
 }
 
 function ReviewList({
-  parsed, review, setReview, editing, setEditing, pricesOnly, setPricesOnly, onConfirm,
+  parsed, review, setReview, editing, setEditing, pricesOnly, setPricesOnly, paidBy, setPaidBy, onConfirm,
 }: {
+  paidBy: string | null;
+  setPaidBy: (id: string) => void;
   pricesOnly: boolean;
   setPricesOnly: (v: boolean) => void;
   parsed: ParsedReceipt;
@@ -199,6 +206,9 @@ function ReviewList({
         </div>
         <p className="text-sm text-muted">{pricesOnly ? m.capture.receipt.mode.pricesHint : m.capture.receipt.mode.stockHint}</p>
       </div>
+
+      {/* Quién pagó (para «Cuentas» en Gastos) */}
+      <PayerPicker view={view} value={paidBy} onChange={setPaidBy} />
 
       {included.length - known > 0 || review.some((r) => !r.include && !r.productId) ? (
         <div className="flex flex-wrap gap-2">

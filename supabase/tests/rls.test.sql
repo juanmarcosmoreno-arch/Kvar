@@ -203,6 +203,21 @@ do $$ begin
   assert (select count(*) from public.purchase_lines) = 1, 'una sola línea';
 end $$;
 
+-- Dividir gastos: quién pagó (por defecto, quien cargó), el reparto y «Saldar»
+do $$ begin
+  assert (select paid_by from public.purchase_lines limit 1) is not distinct from null
+      or (select paid_by from public.purchase_lines limit 1) is not null, 'la columna existe';
+end $$;
+update public.purchase_lines set paid_by = auth.uid() where household_id = current_setting('kvar.hh')::uuid;
+update public.households set expense_split = jsonb_build_object(auth.uid()::text, 60) where id = current_setting('kvar.hh')::uuid;
+insert into public.expense_settlements (household_id, balances)
+values (current_setting('kvar.hh')::uuid, jsonb_build_object(auth.uid()::text, 0));
+do $$ begin
+  assert (select count(*) from public.expense_settlements) = 1, 'el miembro salda';
+  assert (select settled_by from public.expense_settlements) = auth.uid(), 'queda quién saldó';
+  assert (select (expense_split ->> auth.uid()::text)::int from public.households where id = current_setting('kvar.hh')::uuid) = 60, 'el reparto se guarda';
+end $$;
+
 -- Menú de la semana: guardar dos veces la misma semana la reemplaza
 select 1 as x from public.save_meal_plan(
   jsonb_build_object('household_id', current_setting('kvar.hh'), 'week_start', '2026-10-12'),

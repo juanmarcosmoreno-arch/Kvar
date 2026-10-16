@@ -260,9 +260,29 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
       check(await supabase.rpc('merge_products', { p_source: op.sourceId, p_target: op.targetId }));
       return;
     case 'record_purchases': {
-      const res = await supabase.from('purchase_lines').upsert(op.lines, { onConflict: 'id', ignoreDuplicates: true });
+      let res = await supabase.from('purchase_lines').upsert(op.lines, { onConflict: 'id', ignoreDuplicates: true });
+      // Sin la migración de «dividir gastos»: se guardan sin quién pagó
+      if (res.error && /paid_by|42703|PGRST204/.test(`${res.error.code} ${res.error.message}`)) {
+        res = await supabase
+          .from('purchase_lines')
+          .upsert(op.lines.map(({ paid_by: _paid, created_at: _created, ...l }) => l), { onConflict: 'id', ignoreDuplicates: true });
+      }
       // Sin la migración de gastos los precios se pierden, pero no traban la cola
       if (res.error && /purchase_lines|PGRST205|42P01/.test(`${res.error.code} ${res.error.message}`)) return;
+      check(res);
+      return;
+    }
+    case 'settle_expenses': {
+      const res = await supabase
+        .from('expense_settlements')
+        .upsert({ id: op.id, household_id: householdId, settled_at: op.at, balances: op.balances }, { onConflict: 'id', ignoreDuplicates: true });
+      if (res.error && /expense_settlements|PGRST205|42P01/.test(`${res.error.code} ${res.error.message}`)) return;
+      check(res);
+      return;
+    }
+    case 'set_expense_split': {
+      const res = await supabase.from('households').update({ expense_split: op.weights }).eq('id', householdId);
+      if (res.error && /expense_split|42703|PGRST204/.test(`${res.error.code} ${res.error.message}`)) return;
       check(res);
       return;
     }

@@ -44,6 +44,10 @@ export type Op =
   | { kind: 'set_member_name'; id: string; at: string; userId: string; name: string | null }
   /** Precios de un ticket (para Gastos). No cambian lo que se ve en el stock. */
   | { kind: 'record_purchases'; id: string; at: string; lines: PurchaseLine[] }
+  /** «Saldar»: las cuentas vuelven a cero (se guarda cómo estaban) */
+  | { kind: 'settle_expenses'; id: string; at: string; balances: Record<string, number> }
+  /** Cómo se reparten los gastos: { user_id: peso } (null = partes iguales) */
+  | { kind: 'set_expense_split'; id: string; at: string; weights: Record<string, number> | null }
   | { kind: 'learn_alias'; id: string; at: string; alias: ProductAlias }
   /** La foto ya está guardada en el teléfono (IndexedDB) bajo `path`; se sube al sincronizar. */
   | { kind: 'set_image'; id: string; at: string; productId: string; path: string; previousPath: string | null };
@@ -225,6 +229,8 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
     case 'merge_products':
       return mergeProducts(s, op.sourceId, op.targetId);
     case 'record_purchases':
+    case 'settle_expenses':
+    case 'set_expense_split':
       return s;
     case 'save_meal_plan':
       return {

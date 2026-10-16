@@ -80,6 +80,7 @@ export function useEvents(householdId: string | undefined): State {
 }
 
 // --- Gastos: líneas de tickets con precio ---------------------------------------------------------------
+const BASE_COLS = 'id,household_id,product_id,name,quantity,unit_price,total,store,bought_at,receipt_key';
 export async function loadPurchases(householdId: string): Promise<{ lines: PurchaseLine[]; cached: boolean }> {
   if (isDemo) return { lines: demoPurchases(), cached: false };
   const since = new Date();
@@ -88,19 +89,23 @@ export async function loadPurchases(householdId: string): Promise<{ lines: Purch
   try {
     const lines: PurchaseLine[] = [];
     for (let from = 0; from < MAX; from += PAGE) {
-      const { data, error } = await supabase
-        .from('purchase_lines')
-        .select('id,household_id,product_id,name,quantity,unit_price,total,store,bought_at,receipt_key')
-        .eq('household_id', householdId)
-        .gte('bought_at', since.toISOString())
-        .order('bought_at', { ascending: true })
-        .range(from, from + PAGE - 1);
+      const query = (cols: string) =>
+        supabase
+          .from('purchase_lines')
+          .select(cols)
+          .eq('household_id', householdId)
+          .gte('bought_at', since.toISOString())
+          .order('bought_at', { ascending: true })
+          .range(from, from + PAGE - 1);
+      let { data, error } = await query(`${BASE_COLS},paid_by,created_at`);
+      // Sin la migración de «dividir gastos» todavía: sin quién pagó
+      if (error && /paid_by|42703|PGRST204/.test(`${error.code} ${error.message}`)) ({ data, error } = await query(BASE_COLS));
       if (error) {
         // Sin la migración de gastos: no hay precios todavía
         if (/purchase_lines|PGRST205|42P01/.test(`${error.code} ${error.message}`)) return { lines: [], cached: false };
         throw new Error(error.message);
       }
-      for (const r of (data ?? []) as PurchaseLine[]) lines.push({ ...r, quantity: Number(r.quantity), total: Number(r.total), unit_price: r.unit_price == null ? null : Number(r.unit_price) });
+      for (const r of (data ?? []) as unknown as PurchaseLine[]) lines.push({ ...r, quantity: Number(r.quantity), total: Number(r.total), unit_price: r.unit_price == null ? null : Number(r.unit_price) });
       if (!data || data.length < PAGE) break;
     }
     void set(key, lines).catch(() => {});
@@ -112,11 +117,37 @@ export async function loadPurchases(householdId: string): Promise<{ lines: Purch
   }
 }
 
+/**
+ * Lo cargado en esta sesión (tickets, gastos a mano) se ve enseguida en Gastos y en las cuentas, aunque todavía
+ * no haya llegado al servidor (o no haya conexión).
+ */
+let pendingLines: PurchaseLine[] = [];
+const purchaseListeners = new Set<() => void>();
+
+export function addPendingPurchases(lines: PurchaseLine[]) {
+  const ids = new Set(lines.map((l) => l.id));
+  pendingLines = [...pendingLines.filter((l) => !ids.has(l.id)), ...lines];
+  purchasesMemo.clear();
+  purchaseListeners.forEach((l) => l());
+}
+
+function withPending(lines: PurchaseLine[]): PurchaseLine[] {
+  if (!pendingLines.length) return lines;
+  const ids = new Set(lines.map((l) => l.id));
+  return [...lines, ...pendingLines.filter((l) => !ids.has(l.id))];
+}
+
 type PurchasesState = { status: 'loading' } | { status: 'ready'; lines: PurchaseLine[]; cached: boolean } | { status: 'error' };
 const purchasesMemo = new Map<string, { at: number; promise: Promise<{ lines: PurchaseLine[]; cached: boolean }> }>();
 
 export function usePurchases(householdId: string | undefined): PurchasesState {
   const [state, setState] = useState<PurchasesState>({ status: 'loading' });
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const bump = () => setVersion((v) => v + 1);
+    purchaseListeners.add(bump);
+    return () => void purchaseListeners.delete(bump);
+  }, []);
   useEffect(() => {
     if (!householdId) return;
     let alive = true;
@@ -127,12 +158,12 @@ export function usePurchases(householdId: string | undefined): PurchasesState {
       hit.promise.catch(() => purchasesMemo.delete(householdId));
     }
     hit.promise.then(
-      (r) => alive && setState({ status: 'ready', lines: r.lines, cached: r.cached }),
-      () => alive && setState({ status: 'error' }),
+      (r) => alive && setState({ status: 'ready', lines: withPending(r.lines), cached: r.cached }),
+      () => alive && setState(pendingLines.length ? { status: 'ready', lines: withPending([]), cached: true } : { status: 'error' }),
     );
     return () => {
       alive = false;
     };
-  }, [householdId]);
+  }, [householdId, version]);
   return state;
 }

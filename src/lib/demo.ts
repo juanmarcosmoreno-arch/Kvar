@@ -240,6 +240,9 @@ export function demoPurchases(now = Date.now()): import('../domain/spending').Pu
       store,
       bought_at: new Date(week * 7 * day + 5 * day + 11 * 3_600_000).toISOString(),
       receipt_key: `demo-${week}`,
+      // Las compras se las van turnando (Juan un poco más seguido)
+      paid_by: week % 5 < 3 ? DEMO_USER : 'demo-sofia',
+      created_at: new Date(week * 7 * day + 5 * day + 11 * 3_600_000).toISOString(),
     });
   }
   return lines;

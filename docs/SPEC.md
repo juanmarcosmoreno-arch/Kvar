@@ -326,6 +326,15 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Al tachar** (Ajustes del iPhone, vale para el teléfono y el reloj): «Sumar al stock» (como siempre) o «Solo
   tachar» (op `check_item`: solo `checked_at`; el stock se carga después con el ticket o el escáner).
 
+### Dividir gastos («Cuentas», implementado)
+- Cada línea de ticket guarda **quién pagó** (`purchase_lines.paid_by`; al cargar el ticket se elige, por defecto
+  uno mismo). **Gasto sin ticket** (feria, carnicería): monto, qué fue y quién pagó; entra como una línea más.
+- **Cuentas** (Estadísticas → Gastos, `domain/split.ts`): cuánto puso cada uno desde el último «Saldar», cuánto le
+  tocaba (partes iguales o porcentajes, `households.expense_split`; los relojes no participan) y las menos
+  transferencias posibles («María le debe $3.150 a Juan»).
+- **Saldar** (`expense_settlements`): las cuentas vuelven a cero; cuenta lo cargado después (`created_at`).
+- Sin la migración `20261021000000_dividir_gastos.sql` todo sigue andando (sin quién pagó).
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

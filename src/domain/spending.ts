@@ -19,6 +19,10 @@ export interface PurchaseLine {
   bought_at: string;
   /** Mismo valor para todas las líneas de un ticket (para el promedio por compra) */
   receipt_key: string | null;
+  /** Quién pagó (para dividir gastos) */
+  paid_by?: string | null;
+  /** Cuándo se cargó (un ticket viejo cargado después de «Saldar» cuenta para la próxima) */
+  created_at?: string;
 }
 
 export const unitPrice = (l: PurchaseLine) => l.unit_price ?? (l.quantity > 0 ? l.total / l.quantity : l.total);

@@ -9,6 +9,7 @@ import { useUI } from '../store/ui';
 import { MonthColumns } from './charts/MonthColumns';
 import { RankBars, StatTile } from './charts/RankBars';
 import { Icon } from './Icon';
+import { SplitCard } from './SplitCard';
 
 const pct = (x: number) => `${formatDecimal(Math.abs(x) * 100, 0)} %`;
 
@@ -26,7 +27,14 @@ export function SpendingView({ months }: { months: number }) {
 
   if (data.status === 'loading') return <p className="text-muted">{t.loading}</p>;
   if (data.status === 'error') return <p className="card p-4 text-muted">{m.stats.error}</p>;
-  if (!s || s.total === 0) return <p className="card p-5 text-muted">{t.empty}</p>;
+  if (!s || s.total === 0) {
+    return (
+      <>
+        <p className="card p-5 text-muted">{t.empty}</p>
+        {data.status === 'ready' && <SplitCard view={view} lines={data.lines} />}
+      </>
+    );
+  }
 
   return (
     <>
@@ -36,6 +44,8 @@ export function SpendingView({ months }: { months: number }) {
         <StatTile label={t.kpi.perMonth} value={formatCurrencyCompact(s.perMonth)} hint={t.kpi.average} />
         <StatTile label={t.kpi.perTrip} value={s.perTrip == null ? '—' : formatCurrencyCompact(s.perTrip)} hint={t.kpi.trips(s.trips)} />
       </div>
+
+      <SplitCard view={view} lines={data.lines} />
 
       <section className="card space-y-3 p-4">
         <h2 className="font-semibold">{t.monthly.title}</h2>

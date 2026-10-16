@@ -15,6 +15,9 @@ import { imagePath, imageStore } from '../lib/images';
 import { localizedSeeds } from '../domain/seeds';
 import { isoDay, mondayOf, type PlanEntry } from '../domain/mealPlan';
 import { receiptKey, stableLineId, type PurchaseLine } from '../domain/spending';
+import { addPendingPurchases } from '../lib/stats';
+import { getMe } from '../lib/me';
+import { setLocalSplit } from '../lib/split';
 import { dispatch, getView } from './store';
 import { toast } from './toast';
 import { m } from '../i18n';
@@ -264,7 +267,7 @@ export function applyReceipt(
   review: ReviewLine[],
   store: string | null,
   ticket: { date?: string | null; total?: number | null } = {},
-  opts: { pricesOnly?: boolean } = {},
+  opts: { pricesOnly?: boolean; paidBy?: string | null } = {},
 ): { updated: number; created: number } {
   const view = getView();
   if (!view) return { updated: 0, created: 0 };
@@ -272,7 +275,7 @@ export function applyReceipt(
   // Solo precios: el stock no cambia ni se crean productos (lo nuevo queda en Gastos con su nombre del ticket)
   if (opts.pricesOnly) {
     for (const l of plan.learn) if (l.productId) learnAlias(l.productId, 'receipt', l.text);
-    recordReceiptPrices(review, store, ticket, new Map());
+    recordReceiptPrices(review, store, ticket, new Map(), opts.paidBy);
     return { updated: 0, created: 0 };
   }
   let updated = 0;
@@ -300,7 +303,7 @@ export function applyReceipt(
     const productId = l.productId ?? (l.newName ? createdIds.get(l.newName) : undefined);
     if (productId) learnAlias(productId, 'receipt', l.text);
   }
-  recordReceiptPrices(review, store, ticket, createdIds);
+  recordReceiptPrices(review, store, ticket, createdIds, opts.paidBy);
   return { updated, created: createdIds.size };
 }
 
@@ -460,10 +463,12 @@ function recordReceiptPrices(
   store: string | null,
   ticket: { date?: string | null; total?: number | null },
   createdIds: Map<string, string>,
+  paidBy: string | null = getMe(),
 ) {
   const view = getView();
   if (!view) return;
   const included = review.filter((r) => r.include && r.line.amount > 0);
+  const createdAt = nowIso();
   if (!included.length) return;
   const key = receiptKey(store, ticket.date ?? null, ticket.total ?? null, included.length);
   // Fecha del ticket (al mediodía, para que no cambie de día por la zona horaria); si no, ahora
@@ -479,8 +484,51 @@ function recordReceiptPrices(
     store,
     bought_at: boughtAt,
     receipt_key: key,
+    paid_by: paidBy,
+    created_at: createdAt,
   }));
   dispatch({ kind: 'record_purchases', ...base(), lines });
+  addPendingPurchases(lines);
+}
+
+/** Un gasto sin ticket (la feria, la carnicería): entra en Gastos y en las cuentas. */
+export function addExpense(input: { amount: number; description: string; paidBy: string | null; date?: string | null }) {
+  const view = getView();
+  if (!view || !(input.amount > 0)) return;
+  const at = nowIso();
+  const line: PurchaseLine = {
+    id: uuid(),
+    household_id: view.household.id,
+    product_id: null,
+    name: input.description.trim() || m.money.split.expenseDefault,
+    quantity: 1,
+    unit_price: input.amount,
+    total: input.amount,
+    store: null,
+    bought_at: input.date ? new Date(`${input.date}T12:00:00`).toISOString() : at,
+    receipt_key: null,
+    paid_by: input.paidBy,
+    created_at: at,
+  };
+  dispatch({ kind: 'record_purchases', ...base(), lines: [line] });
+  addPendingPurchases([line]);
+}
+
+/** «Saldar»: desde ahora las cuentas empiezan de cero. */
+export function settleExpenses(balances: Record<string, number>) {
+  const view = getView();
+  if (!view) return;
+  const op = { kind: 'settle_expenses' as const, ...base(), balances };
+  dispatch(op);
+  setLocalSplit(view.household.id, { settledAt: op.at });
+}
+
+/** Cómo se reparten los gastos ({ user_id: peso }; null = partes iguales). */
+export function setExpenseSplit(weights: Record<string, number> | null) {
+  const view = getView();
+  if (!view) return;
+  dispatch({ kind: 'set_expense_split', ...base(), weights });
+  setLocalSplit(view.household.id, { weights });
 }
 
 /** Mi nombre en el hogar (lo ven los demás: «Sofía compró la leche»). */
