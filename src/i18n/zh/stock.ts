@@ -180,6 +180,8 @@ export const stock: Messages['stock'] = {
     done: (duplicate, keep) => `完成：${duplicate}现在是${keep}。`,
   },
   house: {
+    more: (n) => `再看 ${n} 个`,
+    less: '收起',
     noPlace: '未指定位置',
     low: (n) => `${n} 快用完`,
     out: (n) => `${n} 没有了`,

@@ -181,6 +181,8 @@ export const stock: Messages['stock'] = {
     done: (duplicate, keep) => `Done: ${duplicate} is now ${keep}.`,
   },
   house: {
+    more: (n) => `Show ${n} more`,
+    less: 'Show less',
     noPlace: 'No place',
     low: (n) => `${n} low`,
     out: (n) => `${n} out`,

@@ -181,6 +181,8 @@ export const stock = {
     done: (duplicate: string, keep: string) => `Listo: ${duplicate} ahora es ${keep}.`,
   },
   house: {
+    more: (n: number) => `Ver ${n} más`,
+    less: 'Ver menos',
     noPlace: 'Sin lugar',
     low: (n: number) => `${n} poco`,
     out: (n: number) => `${n} no hay`,

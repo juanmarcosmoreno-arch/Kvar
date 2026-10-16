@@ -180,6 +180,8 @@ export const stock: Messages['stock'] = {
     done: (duplicate, keep) => `完了：${duplicate}は${keep}になりました。`,
   },
   house: {
+    more: (n) => `あと${n}件を表示`,
+    less: '閉じる',
     noPlace: '場所なし',
     low: (n) => `残り少ない ${n}`,
     out: (n) => `なし ${n}`,

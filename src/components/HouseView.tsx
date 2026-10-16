@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { severity } from '../domain/status';
 import type { Category, Location, Product } from '../domain/types';
 import { compareText, m } from '../i18n';
 import { locationIcon } from '../lib/categoryIcon';
@@ -25,7 +27,11 @@ export function HouseView({
     { id: 'none', name: m.stock.house.noPlace, icon: null as string | null, items: byLocation.get('none') ?? [] },
   ]
     .filter((s) => s.items.length > 0)
-    .map((s) => ({ ...s, items: s.items.sort((a, b) => order(a) - order(b) || compareText(a.name, b.name)) }));
+    // Primero lo que no hay y lo que queda poco: es lo que se mira de un vistazo
+    .map((s) => ({
+      ...s,
+      items: s.items.sort((a, b) => severity(b.status) - severity(a.status) || order(a) - order(b) || compareText(a.name, b.name)),
+    }));
 
   return (
     <div className="mx-auto max-w-lg">
@@ -67,10 +73,13 @@ function Roof() {
 }
 
 const COLD = new Set(['fridge', 'snow']);
+/** Productos por estante antes de «Ver más» (dos filas) */
+const COLLAPSED = 8;
 
 function Shelf({
   name, icon, items, catName, onOpen,
 }: { name: string; icon: string | null; items: Product[]; catName: Map<string, string>; onOpen: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
   const low = items.filter((p) => p.status === 'low').length;
   const out = items.filter((p) => p.status === 'out').length;
   const cold = icon !== null && COLD.has(icon);
@@ -86,12 +95,23 @@ function Shelf({
       )}
     </div>
   );
+  // Con muchos productos, cada estante muestra dos filas (lo que falta primero) y se abre con un toque
+  const many = items.length > COLLAPSED + 2;
+  const shown = many && !open ? items.slice(0, COLLAPSED) : items;
   const tiles = (
-    <div className="grid grid-cols-4 gap-x-1 gap-y-3 sm:grid-cols-5">
-      {items.map((p) => (
-        <Tile key={p.id} product={p} categoryName={catName.get(p.category_id ?? '')} onOpen={() => onOpen(p.id)} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-4 gap-x-1 gap-y-3 sm:grid-cols-5">
+        {shown.map((p) => (
+          <Tile key={p.id} product={p} categoryName={catName.get(p.category_id ?? '')} onOpen={() => onOpen(p.id)} />
+        ))}
+      </div>
+      {many && (
+        <button className="mt-2 flex min-h-tap w-full items-center justify-center gap-1 text-sm font-medium text-primary" onClick={() => setOpen(!open)}>
+          {open ? m.stock.house.less : m.stock.house.more(items.length - COLLAPSED)}
+          <Icon name={open ? 'up' : 'down'} size={16} />
+        </button>
+      )}
+    </>
   );
 
   // Heladera y freezer: una caja fría; lo demás, un estante de madera
