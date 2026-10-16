@@ -16,6 +16,7 @@ public class KvarVoicePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "interpret", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "inventRecipe", returnType: CAPPluginReturnPromise),
     ]
 
     private let audioEngine = AVAudioEngine()
@@ -185,6 +186,66 @@ public class KvarVoicePlugin: CAPPlugin, CAPBridgedPlugin {
         #endif
         call.unavailable("Apple Intelligence no está disponible")
     }
+    // MARK: - Recetas inventadas con lo que hay
+
+    /// «Inventame algo con lo que hay»: una receta nueva con el stock (en el teléfono, con Apple Intelligence).
+    @objc func inventRecipe(_ call: CAPPluginCall) {
+        let have = (call.getArray("have") as? [String]) ?? []
+        let expiring = (call.getArray("expiring") as? [String]) ?? []
+        let avoid = (call.getArray("avoid") as? [String]) ?? []
+        let servings = call.getInt("servings") ?? 2
+        let gourmet = call.getBool("gourmet") ?? false
+        let meal = call.getString("meal") ?? ""
+        let language = call.getString("language") ?? "español rioplatense"
+        guard !have.isEmpty else {
+            call.reject("No hay productos", "NO_STOCK")
+            return
+        }
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) {
+            guard case .available = SystemLanguageModel.default.availability else {
+                call.unavailable("Apple Intelligence no está disponible")
+                return
+            }
+            let style = gourmet
+                ? "gourmet, de restaurante: con alguna técnica de chef (sellar, reducir una salsa, glasear, gratinar, emplatar con cuidado) y combinaciones de sabores interesantes, pero posible en una cocina de casa"
+                : "casera, rica y sin complicaciones"
+            var prompt = "Tengo en casa: \(have.joined(separator: ", ")).\n"
+            if !expiring.isEmpty { prompt += "Se vence pronto (usalo si podés): \(expiring.joined(separator: ", ")).\n" }
+            prompt += "Es para \(servings) personas. Estilo: \(style).\n"
+            if !meal.isEmpty { prompt += "Es para: \(meal).\n" }
+            if !avoid.isEmpty { prompt += "No repitas estas recetas: \(avoid.joined(separator: "; ")).\n" }
+            prompt += "Proponé UNA receta."
+            let instructions = """
+            Sos un chef creativo que ayuda a cocinar con lo que hay en casa.
+            Usá sobre todo los ingredientes que la persona tiene. Podés sumar como mucho 3 que no tenga,
+            además de básicos como sal, pimienta, aceite y agua.
+            Escribí todo (nombre, ingredientes, pasos y el truco) en \(language).
+            Ingredientes con cantidades métricas: gramos, ml, cucharadas, tazas o unidades.
+            """
+            Task {
+                do {
+                    // Todo en el pedido (con un String armado acá no hace falta el tipo Instructions)
+                    let session = LanguageModelSession()
+                    let response = try await session.respond(
+                        to: instructions + "\n" + prompt, generating: StokaRecipeIdea.self, options: GenerationOptions(temperature: 0.9))
+                    let idea = response.content
+                    call.resolve([
+                        "title": idea.title,
+                        "minutes": max(5, idea.minutes),
+                        "ingredients": idea.ingredients,
+                        "steps": idea.steps,
+                        "tip": idea.tip,
+                    ])
+                } catch {
+                    call.reject(error.localizedDescription, "MODEL_ERROR", error)
+                }
+            }
+            return
+        }
+        #endif
+        call.unavailable("Apple Intelligence no está disponible")
+    }
 }
 
 #if canImport(FoundationModels)
@@ -204,5 +265,22 @@ struct StokaVoiceAction {
     var product: String
     @Guide(description: "Cantidad que dijo; 1 si no dijo ninguna")
     var quantity: Int
+}
+#endif
+
+#if canImport(FoundationModels)
+@available(iOS 26.0, *)
+@Generable
+struct StokaRecipeIdea {
+    @Guide(description: "Nombre del plato, concreto y apetitoso")
+    var title: String
+    @Guide(description: "Minutos que lleva en total")
+    var minutes: Int
+    @Guide(description: "Ingredientes con su cantidad, uno por elemento. Ejemplos: «200 g de arroz», «2 dientes de ajo», «sal a gusto»")
+    var ingredients: [String]
+    @Guide(description: "Pasos claros y en orden, uno por elemento")
+    var steps: [String]
+    @Guide(description: "Un truco de chef para que salga mejor")
+    var tip: String
 }
 #endif

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { RecipeEditor } from '../components/RecipeEditor';
+import { InventCard } from '../components/InventCard';
 import { RecipeSheet } from '../components/RecipeSheet';
 import { PlanSheet, weekdayName } from '../components/PlanSheet';
 import { defaultDays, isoDay, mondayOf, type MealPlan, type PlanEntry } from '../domain/mealPlan';
@@ -104,6 +105,8 @@ export function Cook() {
             );
           })}
         </div>
+
+        <InventCard view={view} servings={servings} meal={filters.meal ?? null} gourmetDefault={active.includes('gourmet')} onRecipe={setOpen} />
 
         <WeekPlan plan={plan} onOpen={openByKey} onPlan={() => setPlanning(plan?.entries ?? null)} />
 

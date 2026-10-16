@@ -335,6 +335,14 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Saldar** (`expense_settlements`): las cuentas vuelven a cero; cuenta lo cargado después (`created_at`).
 - Sin la migración `20261021000000_dividir_gastos.sql` todo sigue andando (sin quién pagó).
 
+### Recetas gourmet e «Inventame algo con lo que hay» (implementado)
+- **Gourmet**: 12 recetas más elaboradas en el catálogo (etiqueta `gourmet`) y el filtro «✨ Gourmet» en ¿Qué cocino?
+  (con el filtro se muestran todas, aunque falten cosas).
+- **Inventame algo con lo que hay** (`src/lib/aiRecipe.ts`, `KvarVoicePlugin.inventRecipe`): Apple Intelligence
+  (Foundation Models, iOS 26, en el teléfono) arma una receta nueva, casera o gourmet, con el stock (primero lo que
+  vence), en el idioma de la app; se abre como cualquier receta (con lo que falta marcado) y «Hacerla mía» la guarda.
+  Sin Apple Intelligence se explica qué hace falta; en la demo se muestra un ejemplo.
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y
