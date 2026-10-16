@@ -42,4 +42,13 @@ export const shopping = {
     left: (n: number) => (n === 0 ? 'No falta nada' : n === 1 ? 'Falta 1' : `Faltan ${n}`),
     inCart: (n: number) => (n === 1 ? '1 en el carrito' : `${n} en el carrito`),
   },
+  tick: {
+    title: 'Al tachar algo de la lista',
+    hint: 'En el teléfono y en el Apple Watch.',
+    stock: 'Sumar al stock',
+    stockHint: 'Queda comprado y pasa a «Hay».',
+    check: 'Solo tachar',
+    checkHint: 'Solo se tacha. El stock lo cargás después con el ticket o el escáner.',
+    checked: (name: string) => `${name}: tachado.`,
+  },
 };

@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Non manca niente' : n === 1 ? 'Ne manca 1' : `Ne mancano ${n}`),
     inCart: (n) => (n === 1 ? '1 nel carrello' : `${n} nel carrello`),
   },
+  tick: {
+    title: 'Quando spunti qualcosa',
+    hint: 'Sul telefono e sull’Apple Watch.',
+    stock: 'Aggiungi alla dispensa',
+    stockHint: 'Risulta comprato e passa a «C’è».',
+    check: 'Solo spuntare',
+    checkHint: 'Viene solo spuntato. La dispensa la aggiorni dopo con lo scontrino o lo scanner.',
+    checked: (name) => `${name}: spuntato.`,
+  },
 };

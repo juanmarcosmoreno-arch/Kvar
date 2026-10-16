@@ -121,6 +121,11 @@ export function purchaseItem(item: ShoppingItem) {
   dispatch({ kind: 'purchase_item', ...base(), itemId: item.id });
 }
 
+/** Tachar sin tocar el stock (o destacharlo). */
+export function checkItem(item: ShoppingItem, checked = true) {
+  dispatch({ kind: 'check_item', ...base(), itemId: item.id, checked });
+}
+
 export function unpurchaseItem(item: ShoppingItem) {
   dispatch({ kind: 'unpurchase_item', ...base(), itemId: item.id });
 }

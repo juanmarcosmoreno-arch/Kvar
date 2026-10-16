@@ -114,6 +114,18 @@ actor SupabaseREST {
         return try await send(req)
     }
 
+    /// Cambia filas de una tabla (por ejemplo, tachar un ítem: checked_at). `NSNull()` = null.
+    func patch(_ table: String, query: [URLQueryItem], body: [String: Any]) async throws -> Data {
+        var comps = URLComponents(url: base.appendingPathComponent("rest/v1/\(table)"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = query
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
+        return try await send(req)
+    }
+
     func rpc(_ name: String, _ params: [String: Any]) async throws -> Data {
         try await post("rpc/\(name)", body: params)
     }

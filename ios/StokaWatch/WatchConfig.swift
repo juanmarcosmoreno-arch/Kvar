@@ -8,6 +8,10 @@ struct WatchConfig: Codable, Equatable {
     var householdId: String
     var householdName: String
     var memberName: String
+    /// Al tachar en el súper: «stock» (pasa a «Hay») o «check» (solo se tacha). Lo elige el iPhone (Ajustes).
+    var tickMode: String?
+    /// Recorrido del súper aprendido en el iPhone: «p:<producto>» / «c:<categoría>» → posición de 0 a 1
+    var aisle: [String: Double]?
 
     init?(dict: [String: Any]) {
         guard let url = dict["supabaseUrl"] as? String, !url.isEmpty,
@@ -21,7 +25,14 @@ struct WatchConfig: Codable, Equatable {
         householdId = hh
         householdName = dict["householdName"] as? String ?? L10n.home
         memberName = dict["memberName"] as? String ?? ""
+        tickMode = dict["tickMode"] as? String
+        if let json = dict["aisle"] as? String, let data = json.data(using: .utf8) {
+            aisle = try? JSONDecoder().decode([String: Double].self, from: data)
+        }
     }
+
+    /// Lo que identifica la conexión (si cambia, hay que volver a entrar)
+    var connection: [String] { [supabaseUrl, supabaseKey, inviteCode, householdId] }
 
     static let storageKey = "stoka.watch.config"
 

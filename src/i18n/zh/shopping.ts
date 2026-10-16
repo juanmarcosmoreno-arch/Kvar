@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? '都买齐了' : `还差 ${n} 件`),
     inCart: (n) => `购物车里 ${n} 件`,
   },
+  tick: {
+    title: '勾选清单上的东西时',
+    hint: '在手机和 Apple Watch 上都适用。',
+    stock: '加入库存',
+    stockHint: '记为已购买，并变为“有”。',
+    check: '只勾选',
+    checkHint: '只勾掉。库存之后用小票或扫码再更新。',
+    checked: (name) => `${name}：已勾选。`,
+  },
 };

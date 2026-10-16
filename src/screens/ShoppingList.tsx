@@ -8,13 +8,14 @@ import { Icon } from '../components/Icon';
 import { SyncBadge } from '../components/SyncBadge';
 import { RunningOutChips } from '../components/RunningOut';
 import { categoryIcon } from '../lib/categoryIcon';
-import { addListItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
+import { addListItem, checkItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
 import { suggestedQuantities } from '../domain/suggestQuantity';
 import { useEvents, usePurchases } from '../lib/stats';
 import { setShopping, usePresence } from '../lib/presence';
 import { formatDecimal, formatList } from '../i18n';
 import { setListOrderMode, useListOrder } from '../lib/listOrder';
 import { useRunningOut } from '../lib/runningOut';
+import { useTickMode, wasOnlyChecked } from '../lib/tickMode';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { EmptyCard } from './Home';
@@ -38,6 +39,7 @@ export function ShoppingList() {
   const view = useView()!;
   const [text, setText] = useState('');
   const ui = useUI();
+  const tick = useTickMode();
   const byId = new Map(view.products.map((p) => [p.id, p]));
   // Por pasillo (aprendido de cómo se tacha en el súper) o por categoría
   const order = useListOrder(view);
@@ -114,6 +116,12 @@ export function ShoppingList() {
 
   const buy = (item: ShoppingItem) => {
     const product = item.product_id ? byId.get(item.product_id) : undefined;
+    // «Al tachar, solo tachar»: el stock se carga después (ticket, escáner)
+    if (tick === 'check') {
+      checkItem(item);
+      toast(m.shopping.tick.checked(itemName(item, byId)), { label: m.common.undo, run: () => checkItem(item, false) });
+      return;
+    }
     // Lo que lleva conteo (pañales, latas) pregunta cuántos: tocar un número ya confirma
     if (product?.track_quantity) {
       ui.openQuantity(product.id, 'bought');
@@ -286,7 +294,7 @@ export function ShoppingList() {
             <ul className="card divide-y divide-line opacity-80">
               {checked.map((item) => (
                 <li key={item.id}>
-                  <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => unpurchaseItem(item)}
+                  <button className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left" onClick={() => (wasOnlyChecked(item, item.product_id ? byId.get(item.product_id) : undefined) || !item.product_id ? checkItem(item, false) : unpurchaseItem(item))}
                     aria-label={m.stock.list.uncheck(itemName(item, byId))}>
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ok text-white">
                       <Icon name="check" size={14} strokeWidth={2.5} />

@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Inget kvar' : `${n} kvar`),
     inCart: (n) => `${n} i vagnen`,
   },
+  tick: {
+    title: 'När du bockar av något',
+    hint: 'På telefonen och på Apple Watch.',
+    stock: 'Lägg till i förrådet',
+    stockHint: 'Det blir köpt och går till ”Finns”.',
+    check: 'Bara bocka av',
+    checkHint: 'Det bockas bara av. Förrådet uppdaterar du senare med kvittot eller skannern.',
+    checked: (name) => `${name}: avbockad.`,
+  },
 };

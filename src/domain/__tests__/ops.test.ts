@@ -37,6 +37,19 @@ describe('operaciones offline', () => {
     expect(undone.list[0].checked_at).toBeNull();
   });
 
+  it('«solo tachar» tacha sin tocar el stock; destachar lo vuelve a la lista', () => {
+    const s = snapshot({
+      products: [product({ id: 'leche', status: 'out' })],
+      list: [item({ id: 'i1', product_id: 'leche', reason: 'out' })],
+    });
+    const checked = applyOp(s, { kind: 'check_item', id: 'o', at, itemId: 'i1', checked: true });
+    expect(checked.products[0].status).toBe('out');
+    expect(checked.list[0].checked_at).toBe(at);
+    const back = applyOp(checked, { kind: 'check_item', id: 'o2', at, itemId: 'i1', checked: false });
+    expect(back.list[0].checked_at).toBeNull();
+    expect(back.products[0].status).toBe('out');
+  });
+
   it('comprar un producto con conteo suma unidades', () => {
     const s = snapshot({
       products: [product({ id: 'pan', track_quantity: true, quantity: 0, low_threshold: 2, status: 'out' })],

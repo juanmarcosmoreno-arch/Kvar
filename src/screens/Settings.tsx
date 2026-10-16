@@ -1,5 +1,6 @@
 import { alertPrefs, canNotify, clearAlerts, requestAlertPermission, saveAlertPrefs, type AlertPrefs } from '../lib/alerts';
 import { CURRENCIES, currency, currencyName, setCurrency } from '../lib/currency';
+import { setTickMode, useTickMode } from '../lib/tickMode';
 import { replayIntro } from '../components/IntroSplash';
 import { peopleLabel, Stepper } from '../components/Stepper';
 import { useEffect, useState } from 'react';
@@ -195,6 +196,10 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
             onMove={(c, dir) => moveCategory(c.id, dir)}
             placeholder={t.categories.placeholder}
           />
+        </Section>
+
+        <Section title={m.shopping.tick.title} hint={m.shopping.tick.hint}>
+          <TickModePicker />
         </Section>
 
         <Section title={m.alerts.settings.title} hint={m.alerts.settings.hint}>
@@ -458,6 +463,31 @@ function AlertsSettings() {
           {!canNotify && <p className="py-3 text-sm text-muted">{t.webNote}</p>}
         </>
       )}
+    </div>
+  );
+}
+
+/** Al tachar algo de la lista (teléfono y reloj): sumar al stock o solo tachar. */
+function TickModePicker() {
+  const mode = useTickMode();
+  const t = m.shopping.tick;
+  return (
+    <div className="card divide-y divide-line" role="radiogroup" aria-label={t.title}>
+      {(['stock', 'check'] as const).map((v) => (
+        <button
+          key={v}
+          role="radio"
+          aria-checked={mode === v}
+          className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left"
+          onClick={() => setTickMode(v)}
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block font-medium">{v === 'stock' ? t.stock : t.check}</span>
+            <span className="block text-sm text-muted">{v === 'stock' ? t.stockHint : t.checkHint}</span>
+          </span>
+          {mode === v && <Icon name="check" size={20} className="shrink-0 text-primary" />}
+        </button>
+      ))}
     </div>
   );
 }

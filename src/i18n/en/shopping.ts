@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Nothing left' : n === 1 ? '1 left' : `${n} left`),
     inCart: (n) => (n === 1 ? '1 in the cart' : `${n} in the cart`),
   },
+  tick: {
+    title: 'When you tick something off',
+    hint: 'On your phone and on Apple Watch.',
+    stock: 'Add to stock',
+    stockHint: 'It’s marked as bought and goes to “In stock”.',
+    check: 'Just tick it off',
+    checkHint: 'It’s only ticked off. Add it to stock later with the receipt or the scanner.',
+    checked: (name) => `${name}: ticked off.`,
+  },
 };

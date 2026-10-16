@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Não falta nada' : n === 1 ? 'Falta 1' : `Faltam ${n}`),
     inCart: (n) => (n === 1 ? '1 no carrinho' : `${n} no carrinho`),
   },
+  tick: {
+    title: 'Ao marcar algo da lista',
+    hint: 'No celular e no Apple Watch.',
+    stock: 'Somar ao estoque',
+    stockHint: 'Fica comprado e passa para «Tem».',
+    check: 'Só marcar',
+    checkHint: 'Só marca. O estoque você atualiza depois com a nota ou o leitor.',
+    checked: (name) => `${name}: marcado.`,
+  },
 };

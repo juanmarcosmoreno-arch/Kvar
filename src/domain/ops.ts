@@ -22,6 +22,8 @@ export type Op =
   | { kind: 'add_item'; id: string; at: string; item: ShoppingItem }
   | { kind: 'purchase_item'; id: string; at: string; itemId: string }
   | { kind: 'unpurchase_item'; id: string; at: string; itemId: string }
+  /** Solo tachar (o destachar) sin tocar el stock: «al tachar, solo tachar» */
+  | { kind: 'check_item'; id: string; at: string; itemId: string; checked: boolean }
   | { kind: 'remove_item'; id: string; at: string; itemId: string }
   | { kind: 'update_item'; id: string; at: string; itemId: string; patch: Partial<Pick<ShoppingItem, 'quantity' | 'note'>> }
   | { kind: 'clear_checked'; id: string; at: string }
@@ -173,6 +175,11 @@ export function applyOp(s: Snapshot, op: Op): Snapshot {
       }
       return next;
     }
+    case 'check_item':
+      return {
+        ...s,
+        list: s.list.map((i) => (i.id === op.itemId ? { ...i, checked_at: op.checked ? op.at : null, checked_by: null } : i)),
+      };
     case 'remove_item':
       return { ...s, list: s.list.filter((i) => i.id !== op.itemId) };
     case 'update_item':

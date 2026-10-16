@@ -1,6 +1,8 @@
 import Combine
 import SwiftUI
 
+private let brandGreen = Color(red: 0.36, green: 0.73, blue: 0.48)
+
 struct RootView: View {
     @EnvironmentObject var store: WatchStore
 
@@ -16,11 +18,7 @@ struct RootView: View {
                 Button(L10n.retry) { Task { await store.connect() } }
             }
         case .ready:
-            TabView {
-                ShoppingListView()
-                RanOutView()
-            }
-            .tabViewStyle(.verticalPage)
+            HomeView()
         }
     }
 }
@@ -37,25 +35,146 @@ struct Message: View {
     }
 }
 
-/// La lista de compras: tocar = comprado (pasa a «Hay»).
-struct ShoppingListView: View {
+/// Inicio: «Decime» (voz), «En el súper» (la lista para ir tachando) y «¿Se terminó?».
+struct HomeView: View {
     @EnvironmentObject var store: WatchStore
-    @State private var adding = false
-    @State private var newItem = ""
+    @State private var heard: [VoiceAction] = []
+    @State private var confirming = false
 
     var body: some View {
         NavigationStack {
-            List {
+            ScrollView {
+                VStack(spacing: 10) {
+                    TextFieldLink(prompt: Text(L10n.voicePrompt)) {
+                        Label(L10n.speak, systemImage: "mic.fill")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    } onSubmit: { text in
+                        heard = WatchVoice.parse(text, products: store.products)
+                        confirming = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(brandGreen)
+
+                    NavigationLink {
+                        SuperView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "cart.fill").foregroundStyle(brandGreen)
+                            Text(L10n.atStore)
+                            Spacer(minLength: 4)
+                            Text("\(store.items.count)").font(.headline).foregroundStyle(brandGreen)
+                        }
+                        .frame(minHeight: 40)
+                    }
+
+                    NavigationLink {
+                        RanOutView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "minus.circle").foregroundStyle(.orange)
+                            Text(L10n.ranOut)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(minHeight: 40)
+                    }
+                }
+            }
+            .navigationTitle(store.householdName)
+            .navigationDestination(isPresented: $confirming) {
+                VoiceConfirmView(actions: $heard)
+            }
+        }
+        .task { await store.reloadQuietly() }
+    }
+}
+
+/// Lo que entendí de lo que dijiste: se puede destildar algo y se confirma todo junto.
+struct VoiceConfirmView: View {
+    @EnvironmentObject var store: WatchStore
+    @Environment(\.dismiss) private var dismiss
+    @Binding var actions: [VoiceAction]
+    @State private var busy = false
+
+    var body: some View {
+        List {
+            if actions.isEmpty {
+                Text(L10n.didntGet).font(.footnote)
+            }
+            ForEach($actions) { $action in
+                Button {
+                    action.include.toggle()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: action.include ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(action.include ? brandGreen : .secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(action.product?.name ?? WatchVoice.niceName(action.spoken)).lineLimit(2)
+                            Text(detail(action)).font(.caption2).foregroundStyle(color(action))
+                        }
+                    }
+                }
+            }
+            if actions.contains(where: \.include) {
+                Button {
+                    busy = true
+                    Task {
+                        await store.apply(actions)
+                        busy = false
+                        dismiss()
+                    }
+                } label: {
+                    Text(busy ? L10n.saving : L10n.confirm).frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(brandGreen)
+                .disabled(busy)
+            }
+        }
+        .navigationTitle(L10n.heard)
+    }
+
+    private func detail(_ a: VoiceAction) -> String {
+        if a.kind == .bought && a.product == nil { return L10n.notFound }
+        var text: String
+        switch a.kind {
+        case .bought: text = L10n.kindBought
+        case .out: text = L10n.kindOut
+        case .low: text = L10n.kindLow
+        case .list: text = L10n.kindList
+        }
+        if a.quantity > 1 { text += " · ×\(a.quantity)" }
+        if a.product == nil { text += " · " + L10n.newItem }
+        return text
+    }
+
+    private func color(_ a: VoiceAction) -> Color {
+        switch a.kind {
+        case .bought: return a.product == nil ? .secondary : brandGreen
+        case .out: return .red
+        case .low: return .orange
+        case .list: return .secondary
+        }
+    }
+}
+
+/// En el súper: la lista en el orden en que se recorre; tocar = tachar (y se puede deshacer).
+struct SuperView: View {
+    @EnvironmentObject var store: WatchStore
+
+    var body: some View {
+        List {
+            Section {
                 if store.items.isEmpty {
-                    Text(L10n.nothingMissing).foregroundStyle(.secondary)
+                    Label(L10n.allDone, systemImage: "checkmark.seal.fill").foregroundStyle(brandGreen)
                 }
                 ForEach(store.items) { item in
                     Button {
-                        Task { await store.buy(item) }
+                        Task { await store.tick(item) }
                     } label: {
-                        HStack {
-                            Image(systemName: "circle")
-                            VStack(alignment: .leading) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "circle").font(.title3).foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 1) {
                                 Text(item.title).lineLimit(2)
                                 if item.reason == "out" {
                                     Text(L10n.out).font(.caption2).foregroundStyle(.red)
@@ -63,22 +182,53 @@ struct ShoppingListView: View {
                                     Text(L10n.low).font(.caption2).foregroundStyle(.orange)
                                 }
                             }
-                            Spacer()
-                            if let q = item.quantity, q > 1 { Text("×\(q)").foregroundStyle(.secondary) }
+                            Spacer(minLength: 0)
+                            if let q = item.quantity, q > 1 {
+                                Text("×\(q)").foregroundStyle(.secondary)
+                            }
                         }
+                        .padding(.vertical, 4)
                     }
                 }
-                TextField(L10n.addPlaceholder, text: $newItem)
-                    .onSubmit {
-                        let text = newItem
-                        newItem = ""
-                        Task { await store.add(text) }
-                    }
+                TextFieldLink(prompt: Text(L10n.addPlaceholder)) {
+                    Label(L10n.addPlaceholder, systemImage: "plus")
+                } onSubmit: { text in
+                    Task { await store.add(text) }
+                }
+            } header: {
+                Text(L10n.left(store.items.count))
+            } footer: {
+                Text(store.onlyCheck ? L10n.tickCheckHint : L10n.tickStockHint)
             }
-            .navigationTitle(L10n.list)
-            .refreshable { await store.reload() }
+
+            if !store.cart.isEmpty {
+                Section {
+                    ForEach(store.cart) { entry in
+                        Button {
+                            Task { await store.untick(entry) }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(brandGreen)
+                                Text(entry.item.title).strikethrough().foregroundStyle(.secondary).lineLimit(2)
+                            }
+                        }
+                    }
+                } header: {
+                    Text(L10n.inCart(store.cart.count))
+                } footer: {
+                    Text(L10n.tapToUndo)
+                }
+            }
         }
-        .task { await store.reload() }
+        .navigationTitle(L10n.atStore)
+        .refreshable { await store.reloadQuietly() }
+        .task {
+            // Lo que agregan los demás mientras estás en el súper
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 20_000_000_000)
+                await store.reloadQuietly()
+            }
+        }
     }
 }
 
@@ -93,22 +243,20 @@ struct RanOutView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List(candidates) { product in
-                Button {
-                    Task { await store.ranOut(product) }
-                } label: {
-                    HStack {
-                        Text(product.name).lineLimit(2)
-                        Spacer()
-                        if product.status == "low" {
-                            Circle().fill(.orange).frame(width: 8, height: 8)
-                        }
+        List(candidates) { product in
+            Button {
+                Task { await store.ranOut(product) }
+            } label: {
+                HStack {
+                    Text(product.name).lineLimit(2)
+                    Spacer()
+                    if product.status == "low" {
+                        Circle().fill(.orange).frame(width: 8, height: 8)
                     }
                 }
             }
-            .navigationTitle(L10n.ranOut)
-            .refreshable { await store.reload() }
         }
+        .navigationTitle(L10n.ranOut)
+        .refreshable { await store.reloadQuietly() }
     }
 }

@@ -193,6 +193,13 @@ arranque, a partir de `public/brand/`.
 
 ## App para Apple Watch
 
+En el reloj: **Decime** (tocás y hablás: «compré leche», «se gastó el café», «queda poco aceite», «anotá yerba»;
+confirmás lo que entendió), **En el súper** (la lista en el orden en que recorrés el súper, tocás para tachar y
+con otro toque se deshace) y **¿Se terminó?**. Qué hace el tachado lo elegís en el iPhone: **Ajustes → Al tachar
+algo de la lista** («Sumar al stock» o «Solo tachar» y cargar el stock después con el ticket).
+
+Si ya tenías el reloj andando y cambia el código, volvé a copiar los archivos (paso 2) y compilá de nuevo.
+
 En el reloj: **la lista de compras** (tocar = comprado), **«¿Se terminó?»** (un toque y va a la lista) y **agregar a
 la lista** dictando. El iPhone le pasa al reloj el hogar y su código; el reloj entra como un miembro más
 («Reloj de Juan») y habla directo con Supabase, así funciona aunque el iPhone esté en el bolsillo.

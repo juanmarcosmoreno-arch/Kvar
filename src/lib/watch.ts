@@ -39,8 +39,23 @@ export interface PendingShortcutAction {
 const KvarWatch = registerPlugin<KvarWatchPlugin>('KvarWatch');
 
 let last = '';
+let lastArgs: { view: Snapshot; userId: string } | null = null;
+
+/**
+ * Lo que el reloj usa en el súper, además de la conexión: qué hacer al tachar («stock» o «check») y el
+ * recorrido del súper aprendido («p:<producto>» / «c:<categoría>» → posición de 0 a 1).
+ */
+let extras: { tickMode: string; aisle: string } = { tickMode: 'stock', aisle: '{}' };
+
+export function setWatchExtras(next: { tickMode: string; aisle: Record<string, number> }) {
+  const aisle = JSON.stringify(next.aisle);
+  if (next.tickMode === extras.tickMode && aisle === extras.aisle) return;
+  extras = { tickMode: next.tickMode, aisle };
+  if (lastArgs) void syncWatch(lastArgs.view, lastArgs.userId);
+}
 
 export async function syncWatch(view: Snapshot, userId: string): Promise<void> {
+  lastArgs = { view, userId };
   if (!isNative || isDemo || !supabaseConfig.url) return;
   const me = view.members.find((m) => m.user_id === userId);
   const payload = {
@@ -50,6 +65,7 @@ export async function syncWatch(view: Snapshot, userId: string): Promise<void> {
     householdId: view.household.id,
     householdName: view.household.name,
     memberName: me?.display_name ?? '',
+    ...extras,
   };
   const key = JSON.stringify(payload);
   if (key === last) return;

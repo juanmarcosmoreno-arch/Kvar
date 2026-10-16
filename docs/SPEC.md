@@ -317,6 +317,15 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   pantalla bloqueada y en la Dynamic Island (lo próximo a agarrar y cuántas cosas faltan). Se actualiza mientras la
   app está abierta; se cierra con «Ya salí del súper». Necesita el target del widget.
 
+### Apple Watch pensado para el súper (implementado)
+- **Decime** (`TextFieldLink` + `ios/StokaWatch/WatchVoice.swift`): mismas reglas que la voz del iPhone, en español
+  e inglés («compré», «se terminó / se gastó», «queda poco», «anotá»; sin verbo va a la lista). Se confirma lo
+  entendido; «compré X» de algo que no está en el stock queda destildado.
+- **En el súper**: la lista en el orden del recorrido aprendido en el iPhone (se lo pasa por WatchConnectivity
+  junto con el modo de tachar), tachar con un toque y deshacer desde «En el carrito»; se refresca cada 20 s.
+- **Al tachar** (Ajustes del iPhone, vale para el teléfono y el reloj): «Sumar al stock» (como siempre) o «Solo
+  tachar» (op `check_item`: solo `checked_at`; el stock se carga después con el ticket o el escáner).
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

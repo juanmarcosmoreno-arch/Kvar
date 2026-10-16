@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? '全部そろいました' : `残り${n}件`),
     inCart: (n) => `カートに${n}件`,
   },
+  tick: {
+    title: 'リストでチェックしたとき',
+    hint: 'iPhone と Apple Watch の両方に適用されます。',
+    stock: '在庫に追加',
+    stockHint: '購入済みになり「ある」に変わります。',
+    check: 'チェックだけ',
+    checkHint: 'チェックするだけです。在庫はあとでレシートやスキャナーで反映します。',
+    checked: (name) => `${name}：チェックしました。`,
+  },
 };

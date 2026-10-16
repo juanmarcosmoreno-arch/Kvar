@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Intet mangler' : `${n} mangler`),
     inCart: (n) => `${n} i kurven`,
   },
+  tick: {
+    title: 'Når du krydser noget af',
+    hint: 'På telefonen og på Apple Watch.',
+    stock: 'Læg til lageret',
+    stockHint: 'Det bliver købt og går til ”Der er”.',
+    check: 'Kun kryds af',
+    checkHint: 'Det krydses kun af. Lageret opdaterer du senere med kvitteringen eller scanneren.',
+    checked: (name) => `${name}: krydset af.`,
+  },
 };

@@ -43,4 +43,13 @@ export const shopping: Messages['shopping'] = {
     left: (n) => (n === 0 ? 'Plus rien à prendre' : n === 1 ? 'Encore 1' : `Encore ${n}`),
     inCart: (n) => (n === 1 ? '1 dans le chariot' : `${n} dans le chariot`),
   },
+  tick: {
+    title: 'Quand vous cochez un article',
+    hint: 'Sur le téléphone et sur l’Apple Watch.',
+    stock: 'Ajouter au stock',
+    stockHint: 'Il est acheté et passe à « En stock ».',
+    check: 'Seulement cocher',
+    checkHint: 'Il est seulement coché. Le stock se met à jour plus tard avec le ticket ou le scanner.',
+    checked: (name) => `${name} : coché.`,
+  },
 };

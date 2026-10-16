@@ -33,7 +33,7 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
             return
         }
         var context: [String: Any] = [:]
-        for key in ["supabaseUrl", "supabaseKey", "inviteCode", "householdId", "householdName", "memberName"] {
+        for key in ["supabaseUrl", "supabaseKey", "inviteCode", "householdId", "householdName", "memberName", "tickMode", "aisle"] {
             context[key] = call.getString(key) ?? ""
         }
         pending = context

@@ -62,7 +62,7 @@ function fold(s: string): string {
 
 const VERBS: [string, VoiceKind][] = [
   ['compre|compramos|compro|compraron|traje|trajimos', 'bought'],
-  ['se termino|se terminaron|se acabo|se acabaron|no hay mas|no queda|no quedan', 'out'],
+  ['se termino|se terminaron|se acabo|se acabaron|se gasto|se gastaron|gaste|gastamos|no hay mas|no queda|no quedan', 'out'],
   ['queda poco|quedan pocos|quedan pocas|se esta terminando|se estan terminando|casi no hay', 'low'],
   ['agrega|agregar|agregame|anota|anotame|pone|poneme|hay que comprar|faltan|falta', 'list'],
 ];
