@@ -65,6 +65,15 @@ export const capture: Messages['capture'] = {
     searchLabel: '商品を検索',
     newNameLabel: '新しい商品の名前',
     newButton: '新規',
+    mode: {
+      label: 'レシートの扱い',
+      stock: '在庫に追加',
+      prices: '価格だけ',
+      stockHint: '買ったものを「ある」にして、価格を支出用に保存します。',
+      pricesHint: '価格だけを支出用に保存します。在庫は変わりません。',
+    },
+    confirmPrices: (n) => `${n}件の価格を保存`,
+    appliedPrices: (n) => `完了：${n}件の価格を保存しました。在庫は変わっていません。`,
   },
 
   voice: {

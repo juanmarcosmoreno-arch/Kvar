@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Search product',
     newNameLabel: 'New product name',
     newButton: 'New',
+    mode: {
+      label: 'What to do with the receipt',
+      stock: 'Add to stock',
+      prices: 'Prices only',
+      stockHint: 'I mark what you bought as “In stock” and save the prices for Spending.',
+      pricesHint: 'I only save the prices for Spending. Your stock doesn’t change.',
+    },
+    confirmPrices: (n) => `Save ${n} ${n === 1 ? 'price' : 'prices'}`,
+    appliedPrices: (n) => `Done: saved ${n} ${n === 1 ? 'price' : 'prices'}. Your stock didn’t change.`,
   },
 
   voice: {

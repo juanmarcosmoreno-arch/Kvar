@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Søg produkt',
     newNameLabel: 'Navn på nyt produkt',
     newButton: 'Ny',
+    mode: {
+      label: 'Hvad skal jeg gøre med kvitteringen',
+      stock: 'Læg til lageret',
+      prices: 'Kun priser',
+      stockHint: 'Jeg markerer det købte som ”Der er” og gemmer priserne til Udgifter.',
+      pricesHint: 'Jeg gemmer kun priserne til Udgifter. Lageret ændres ikke.',
+    },
+    confirmPrices: (n) => `Gem ${n} ${n === 1 ? 'pris' : 'priser'}`,
+    appliedPrices: (n) => `Færdig: ${n} ${n === 1 ? 'pris gemt' : 'priser gemt'}. Lageret blev ikke ændret.`,
   },
 
   voice: {

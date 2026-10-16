@@ -64,9 +64,11 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
     }
   };
 
+  const [pricesOnly, setPricesOnly] = useState(false);
   const confirm = () => {
-    const { updated, created } = applyReceipt(review, parsed?.store ?? null, { date: parsed?.date, total: parsed?.total });
-    toast(m.capture.receipt.applied(updated, created));
+    const ticket = { date: parsed?.date, total: parsed?.total };
+    const { updated, created } = applyReceipt(review, parsed?.store ?? null, ticket, { pricesOnly });
+    toast(pricesOnly ? m.capture.receipt.appliedPrices(review.filter((r) => r.include).length) : m.capture.receipt.applied(updated, created));
     close();
   };
 
@@ -133,6 +135,8 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
           setReview={setReview}
           editing={editing}
           setEditing={setEditing}
+          pricesOnly={pricesOnly}
+          setPricesOnly={setPricesOnly}
           onConfirm={confirm}
         />
       )}
@@ -141,8 +145,10 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
 }
 
 function ReviewList({
-  parsed, review, setReview, editing, setEditing, onConfirm,
+  parsed, review, setReview, editing, setEditing, pricesOnly, setPricesOnly, onConfirm,
 }: {
+  pricesOnly: boolean;
+  setPricesOnly: (v: boolean) => void;
   parsed: ParsedReceipt;
   review: ReviewLine[];
   setReview: (r: ReviewLine[]) => void;
@@ -175,6 +181,23 @@ function ReviewList({
             {m.capture.receipt.sumMismatch(formatMoney(Math.abs(parsed.difference)))}
           </p>
         )}
+      </div>
+
+      {/* Sumar al stock, o solo guardar los precios (para Gastos) */}
+      <div className="space-y-1.5">
+        <div className="flex rounded-full bg-sunken p-1 text-sm" role="group" aria-label={m.capture.receipt.mode.label}>
+          {([false, true] as const).map((v) => (
+            <button
+              key={String(v)}
+              className={`min-h-[40px] flex-1 rounded-full px-3 font-medium ${pricesOnly === v ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
+              aria-pressed={pricesOnly === v}
+              onClick={() => setPricesOnly(v)}
+            >
+              {v ? m.capture.receipt.mode.prices : m.capture.receipt.mode.stock}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-muted">{pricesOnly ? m.capture.receipt.mode.pricesHint : m.capture.receipt.mode.stockHint}</p>
       </div>
 
       {included.length - known > 0 || review.some((r) => !r.include && !r.productId) ? (
@@ -239,7 +262,7 @@ function ReviewList({
 
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg bg-bg/95 px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
         <button className="btn-primary w-full" disabled={!included.length} onClick={onConfirm}>
-          {m.capture.receipt.confirm(included.length)}
+          {pricesOnly ? m.capture.receipt.confirmPrices(included.length) : m.capture.receipt.confirm(included.length)}
         </button>
       </div>
     </div>

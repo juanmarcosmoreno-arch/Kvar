@@ -65,6 +65,15 @@ export const capture: Messages['capture'] = {
     searchLabel: '搜索商品',
     newNameLabel: '新商品名称',
     newButton: '新建',
+    mode: {
+      label: '小票怎么处理',
+      stock: '加入库存',
+      prices: '只记价格',
+      stockHint: '把买到的标记为“有”，并为“开销”保存价格。',
+      pricesHint: '只为“开销”保存价格，库存不变。',
+    },
+    confirmPrices: (n) => `保存 ${n} 个价格`,
+    appliedPrices: (n) => `完成：已保存 ${n} 个价格，库存没有变化。`,
   },
 
   voice: {

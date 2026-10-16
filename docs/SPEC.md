@@ -307,6 +307,8 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Se termina pronto** (`domain/runningOut.ts`): lo que al ritmo de siempre se termina en 5 días (con conteo: según
   las unidades que quedan y el uso de los últimos 60 días). En Inicio, con «A la lista» y «Todavía hay» (no pregunta
   por 3 días); en la lista, como chips para sumarlo de un toque.
+- **Ticket «Solo precios»**: al revisar un ticket se puede elegir guardar solo los precios (Gastos, ¿dónde conviene?)
+  sin tocar el stock ni crear productos; lo que ya se reconoce igual se aprende para la próxima.
 - **Live Activity** (`ios/StokaWidget/StokaListActivity.swift`): con «Estoy en el súper», la lista queda en la
   pantalla bloqueada y en la Dynamic Island (lo próximo a agarrar y cuántas cosas faltan). Se actualiza mientras la
   app está abierta; se cierra con «Ya salí del súper». Necesita el target del widget.

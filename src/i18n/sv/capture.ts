@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Sök produkt',
     newNameLabel: 'Namn på ny produkt',
     newButton: 'Ny',
+    mode: {
+      label: 'Vad ska jag göra med kvittot',
+      stock: 'Lägg till i förrådet',
+      prices: 'Bara priser',
+      stockHint: 'Jag markerar det köpta som ”Finns” och sparar priserna för Utgifter.',
+      pricesHint: 'Jag sparar bara priserna för Utgifter. Förrådet ändras inte.',
+    },
+    confirmPrices: (n) => `Spara ${n} ${n === 1 ? 'pris' : 'priser'}`,
+    appliedPrices: (n) => `Klart: ${n} ${n === 1 ? 'pris sparat' : 'priser sparade'}. Förrådet ändrades inte.`,
   },
 
   voice: {

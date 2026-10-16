@@ -68,6 +68,15 @@ export const capture = {
     searchLabel: 'Buscar producto',
     newNameLabel: 'Nombre del producto nuevo',
     newButton: 'Nuevo',
+    mode: {
+      label: 'Qué hago con el ticket',
+      stock: 'Sumar al stock',
+      prices: 'Solo precios',
+      stockHint: 'Marco lo comprado como «Hay» y guardo los precios para Gastos.',
+      pricesHint: 'Guardo solo los precios para Gastos. El stock no cambia.',
+    },
+    confirmPrices: (n: number) => `Guardar ${n} ${n === 1 ? 'precio' : 'precios'}`,
+    appliedPrices: (n: number) => `Listo: guardé ${n} ${n === 1 ? 'precio' : 'precios'}. El stock no cambió.`,
   },
 
   voice: {

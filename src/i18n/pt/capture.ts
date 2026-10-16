@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Buscar produto',
     newNameLabel: 'Nome do produto novo',
     newButton: 'Novo',
+    mode: {
+      label: 'O que fazer com a nota',
+      stock: 'Somar ao estoque',
+      prices: 'Só preços',
+      stockHint: 'Marco o que foi comprado como «Tem» e guardo os preços para Gastos.',
+      pricesHint: 'Guardo só os preços para Gastos. O estoque não muda.',
+    },
+    confirmPrices: (n) => `Salvar ${n} ${n === 1 ? 'preço' : 'preços'}`,
+    appliedPrices: (n) => `Pronto: salvei ${n} ${n === 1 ? 'preço' : 'preços'}. O estoque não mudou.`,
   },
 
   voice: {

@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Rechercher un produit',
     newNameLabel: 'Nom du nouveau produit',
     newButton: 'Nouveau',
+    mode: {
+      label: 'Que faire du ticket',
+      stock: 'Ajouter au stock',
+      prices: 'Prix seulement',
+      stockHint: 'Je marque les achats comme « En stock » et j’enregistre les prix pour les Dépenses.',
+      pricesHint: 'J’enregistre seulement les prix pour les Dépenses. Le stock ne change pas.',
+    },
+    confirmPrices: (n) => `Enregistrer ${n} prix`,
+    appliedPrices: (n) => `C’est fait : ${n} prix enregistrés. Le stock n’a pas changé.`,
   },
 
   voice: {

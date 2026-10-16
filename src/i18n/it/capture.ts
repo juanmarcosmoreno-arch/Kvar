@@ -69,6 +69,15 @@ export const capture: Messages['capture'] = {
     searchLabel: 'Cerca prodotto',
     newNameLabel: 'Nome del nuovo prodotto',
     newButton: 'Nuovo',
+    mode: {
+      label: 'Cosa fare con lo scontrino',
+      stock: 'Aggiungi alla dispensa',
+      prices: 'Solo prezzi',
+      stockHint: 'Segno gli acquisti come «C’è» e salvo i prezzi per le Spese.',
+      pricesHint: 'Salvo solo i prezzi per le Spese. La dispensa non cambia.',
+    },
+    confirmPrices: (n) => `Salva ${n} ${n === 1 ? 'prezzo' : 'prezzi'}`,
+    appliedPrices: (n) => `Fatto: ${n} ${n === 1 ? 'prezzo salvato' : 'prezzi salvati'}. La dispensa non è cambiata.`,
   },
 
   voice: {

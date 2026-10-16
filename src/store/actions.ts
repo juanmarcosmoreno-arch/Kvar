@@ -258,10 +258,17 @@ export function applyReceipt(
   review: ReviewLine[],
   store: string | null,
   ticket: { date?: string | null; total?: number | null } = {},
+  opts: { pricesOnly?: boolean } = {},
 ): { updated: number; created: number } {
   const view = getView();
   if (!view) return { updated: 0, created: 0 };
   const plan = planReceipt(review, store);
+  // Solo precios: el stock no cambia ni se crean productos (lo nuevo queda en Gastos con su nombre del ticket)
+  if (opts.pricesOnly) {
+    for (const l of plan.learn) if (l.productId) learnAlias(l.productId, 'receipt', l.text);
+    recordReceiptPrices(review, store, ticket, new Map());
+    return { updated: 0, created: 0 };
+  }
   let updated = 0;
   for (const [productId, units] of plan.existing) {
     const p = view.products.find((x) => x.id === productId);
