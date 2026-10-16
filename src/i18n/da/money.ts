@@ -28,4 +28,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Betalt ${when}`,
   },
   settings: { title: 'Valuta', hint: 'Bruges til at vise udgifterne fra dine kvitteringer.' },
+  stores: {
+    title: 'Hvor er det billigst?',
+    hint: 'De samme varer købt i forskellige butikker (seneste pris, de sidste 6 måneder).',
+    cheapest: 'Billigst',
+    over: (pct) => `${pct} dyrere`,
+    detail: (cheapest, compared) => `Billigst på ${cheapest} af ${compared}`,
+    dealsTitle: 'Hvad der kan betale sig hvor',
+    deal: (store, pct) => `I ${store}, ${pct} mindre`,
+    needMore: 'Tilføj kvitteringer fra mere end én butik for at sammenligne.',
+  },
+  byStore: 'Pris i hver butik',
 };

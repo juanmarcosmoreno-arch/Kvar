@@ -29,4 +29,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Pago em ${when}`,
   },
   settings: { title: 'Moeda', hint: 'Para mostrar os gastos dos cupons.' },
+  stores: {
+    title: 'Onde compensa?',
+    hint: 'O mesmo produto comprado em mercados diferentes (último preço dos últimos 6 meses).',
+    cheapest: 'O mais barato',
+    over: (pct) => `${pct} mais caro`,
+    detail: (cheapest, compared) => `Mais barato em ${cheapest} de ${compared}`,
+    dealsTitle: 'O que comprar onde',
+    deal: (store, pct) => `No ${store}, ${pct} a menos`,
+    needMore: 'Para comparar, adicione notas de mais de um mercado.',
+  },
+  byStore: 'Preço em cada mercado',
 };

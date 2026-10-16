@@ -146,3 +146,127 @@ export function stableLineId(householdId: string, receiptKey: string, index: num
 export function receiptKey(store: string | null, date: string | null, total: number | null, lineCount: number): string {
   return [store ?? '', date ?? '', total?.toFixed(2) ?? '', lineCount].join('|');
 }
+
+// --- ¿Dónde conviene? ---------------------------------------------------------------------------------------
+
+const KNOWN_STORES: Record<string, string> = {
+  macromercado: 'Macromercado', 'tienda-inglesa': 'Tienda Inglesa', disco: 'Disco', devoto: 'Devoto',
+  geant: 'Géant', tata: 'Ta-Ta', 'el-dorado': 'El Dorado',
+};
+
+/** «Tienda Inglesa», «tienda-inglesa», «TIENDA INGLESA » → la misma clave */
+export function storeKey(store: string | null): string | null {
+  if (!store) return null;
+  const key = store.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return key || null;
+}
+
+/** Nombre para mostrar a partir de la clave */
+export function storeLabel(key: string): string {
+  return KNOWN_STORES[key] ?? key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+export interface StorePrice {
+  store: string;
+  /** Último precio por unidad (o por kilo) en ese súper */
+  price: number;
+  at: string;
+}
+
+/** Comparar precios de hace más de 6 meses no sirve (todo subió) */
+const COMPARE_DAYS = 183;
+/** Diferencias más chicas que esto son ruido (ofertas, redondeos) */
+export const MIN_SAVING = 0.05;
+
+/** Último precio de cada súper para cada producto (del más barato al más caro). */
+function pricesByStore(lines: PurchaseLine[], now: Date): Map<string, StorePrice[]> {
+  const since = now.getTime() - COMPARE_DAYS * DAY;
+  const latest = new Map<string, Map<string, StorePrice>>();
+  for (const l of lines) {
+    const store = storeKey(l.store);
+    const t = time(l);
+    if (!l.product_id || !store || !(t >= since) || t > now.getTime()) continue;
+    const price = unitPrice(l);
+    if (!(price > 0)) continue;
+    const byStore = latest.get(l.product_id) ?? new Map<string, StorePrice>();
+    const prev = byStore.get(store);
+    if (!prev || Date.parse(prev.at) <= t) byStore.set(store, { store, price, at: l.bought_at });
+    latest.set(l.product_id, byStore);
+  }
+  const out = new Map<string, StorePrice[]>();
+  for (const [id, byStore] of latest) out.set(id, [...byStore.values()].sort((a, b) => a.price - b.price));
+  return out;
+}
+
+export interface StoreDeal {
+  productId: string;
+  name: string;
+  best: StorePrice;
+  worst: StorePrice;
+  /** 0.18 = en `best` sale 18 % menos que en `worst` */
+  saving: number;
+}
+
+export interface StoreIndex {
+  store: string;
+  /** Cuánto más caro que el más barato, en promedio (0 = siempre el más barato) */
+  overCheapest: number;
+  /** En cuántos productos es el más barato / con cuántos se comparó */
+  cheapest: number;
+  compared: number;
+}
+
+export interface WhereCheaper {
+  stores: StoreIndex[];
+  deals: StoreDeal[];
+}
+
+/**
+ * ¿Dónde conviene? Solo cuenta productos comprados en más de un súper en los últimos 6 meses, comparando el
+ * último precio de cada uno. Por súper: cuánto más caro sale en promedio que el más barato de cada producto.
+ */
+export function whereCheaper(lines: PurchaseLine[], products: Product[], now = new Date()): WhereCheaper {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const stats = new Map<string, { over: number; cheapest: number; compared: number }>();
+  const deals: StoreDeal[] = [];
+  for (const [productId, prices] of pricesByStore(lines, now)) {
+    const product = byId.get(productId);
+    if (!product || prices.length < 2) continue;
+    const best = prices[0];
+    const worst = prices[prices.length - 1];
+    for (const p of prices) {
+      const s = stats.get(p.store) ?? { over: 0, cheapest: 0, compared: 0 };
+      s.over += p.price / best.price - 1;
+      s.compared++;
+      if (p.price <= best.price) s.cheapest++;
+      stats.set(p.store, s);
+    }
+    const saving = 1 - best.price / worst.price;
+    if (saving >= MIN_SAVING) deals.push({ productId, name: product.name, best, worst, saving });
+  }
+  deals.sort((a, b) => b.saving - a.saving);
+  const stores = [...stats]
+    .map(([store, s]) => ({ store, overCheapest: s.over / s.compared, cheapest: s.cheapest, compared: s.compared }))
+    .sort((a, b) => a.overCheapest - b.overCheapest || b.compared - a.compared);
+  return { stores, deals };
+}
+
+/** Precio de un producto en cada súper (para su ficha), del más barato al más caro. */
+export function storePricesOf(lines: PurchaseLine[], productId: string, now = new Date()): StorePrice[] {
+  return pricesByStore(lines.filter((l) => l.product_id === productId), now).get(productId) ?? [];
+}
+
+/**
+ * Para la lista: en qué súper conviene cada producto (solo si la diferencia vale la pena).
+ * product_id → { store, saving }
+ */
+export function cheaperAt(lines: PurchaseLine[], now = new Date()): Map<string, { store: string; saving: number }> {
+  const out = new Map<string, { store: string; saving: number }>();
+  for (const [productId, prices] of pricesByStore(lines, now)) {
+    if (prices.length < 2) continue;
+    // Contra el segundo más barato: «conviene en X» tiene que ser cierto aunque haya un tercero carísimo
+    const saving = 1 - prices[0].price / prices[1].price;
+    if (saving >= MIN_SAVING) out.set(productId, { store: prices[0].store, saving });
+  }
+  return out;
+}

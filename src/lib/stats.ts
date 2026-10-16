@@ -27,7 +27,7 @@ export async function loadEvents(householdId: string): Promise<EventsResult> {
     for (let from = 0; from < MAX; from += PAGE) {
       const { data, error } = await supabase
         .from('product_events')
-        .select('product_id,type,from_status,to_status,from_quantity,to_quantity,client_created_at,created_at')
+        .select('product_id,type,source,user_id,from_status,to_status,from_quantity,to_quantity,client_created_at,created_at')
         .eq('household_id', householdId)
         .gte('created_at', since.toISOString())
         .order('created_at', { ascending: true })

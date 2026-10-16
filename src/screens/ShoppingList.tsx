@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchProducts } from '../domain/aliases';
-import { groupListByCategory, itemName, recentlyChecked } from '../domain/shoppingList';
+import { itemName, recentlyChecked } from '../domain/shoppingList';
+import { cheaperAt, storeLabel } from '../domain/spending';
 import type { ShoppingItem } from '../domain/types';
 import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { SyncBadge } from '../components/SyncBadge';
+import { RunningOutChips } from '../components/RunningOut';
 import { categoryIcon } from '../lib/categoryIcon';
 import { addListItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
 import { suggestedQuantities } from '../domain/suggestQuantity';
 import { useEvents, usePurchases } from '../lib/stats';
 import { setShopping, usePresence } from '../lib/presence';
-import { formatList } from '../i18n';
+import { formatDecimal, formatList } from '../i18n';
+import { setListOrderMode, useListOrder } from '../lib/listOrder';
+import { useRunningOut } from '../lib/runningOut';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 import { EmptyCard } from './Home';
@@ -35,7 +39,10 @@ export function ShoppingList() {
   const [text, setText] = useState('');
   const ui = useUI();
   const byId = new Map(view.products.map((p) => [p.id, p]));
-  const groups = groupListByCategory(view.list, view.products, view.categories);
+  // Por pasillo (aprendido de cómo se tacha en el súper) o por categoría
+  const order = useListOrder(view);
+  const groups = order.groups;
+  const runningOut = useRunningOut(view);
   const checked = recentlyChecked(view.list, 24 * 3_600_000);
   const suggestions = text.trim()
     ? searchProducts(text, view.products).filter((p) => !view.list.some((i) => i.product_id === p.id && !i.checked_at)).slice(0, 4)
@@ -52,6 +59,12 @@ export function ShoppingList() {
     ),
     [view.products, events, purchases],
   );
+  // Dónde conviene cada cosa (según los tickets)
+  const cheaper = useMemo(() => (purchases.status === 'ready' ? cheaperAt(purchases.lines) : new Map<string, { store: string; saving: number }>()), [purchases]);
+  const cheaperText = (item: ShoppingItem) => {
+    const c = item.product_id ? cheaper.get(item.product_id) : undefined;
+    return c ? m.shopping.cheaper(storeLabel(c.store), `${formatDecimal(c.saving * 100, 0)} %`) : null;
+  };
 
   // «Estoy en el súper»
   const presence = usePresence();
@@ -182,6 +195,27 @@ export function ShoppingList() {
           )}
         </form>
 
+        {groups.length > 1 && order.learned && (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted">{m.shopping.aisle.label}</span>
+            <div className="flex rounded-full bg-sunken p-1 text-sm" role="group" aria-label={m.shopping.aisle.label}>
+              {(['aisle', 'category'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  className={`min-h-[36px] rounded-full px-3 font-medium ${order.mode === mode ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
+                  aria-pressed={order.mode === mode}
+                  onClick={() => setListOrderMode(mode)}
+                >
+                  {mode === 'aisle' ? m.shopping.aisle.byAisle : m.shopping.aisle.byCategory}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {presence.me && !order.learned && groups.length > 0 && <p className="text-sm text-muted">{m.shopping.aisle.learning}</p>}
+
+        <RunningOutChips items={runningOut} />
+
         {groups.length === 0 && (
           <EmptyCard icon="cart" title={m.stock.list.emptyTitle} hint={m.stock.list.emptyHint} />
         )}
@@ -208,6 +242,7 @@ export function ShoppingList() {
                           {item.note || reasonLabel(item.reason)}
                         </span>
                       )}
+                      {cheaperText(item) && <span className="block truncate text-xs text-primary">{cheaperText(item)}</span>}
                     </span>
                   </button>
                   {item.product_id && !item.quantity && suggested.get(item.product_id) ? (

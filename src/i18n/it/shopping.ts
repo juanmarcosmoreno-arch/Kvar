@@ -19,4 +19,28 @@ export const shopping: Messages['shopping'] = {
     whatsapp: 'WhatsApp',
     copy: 'Copia',
   },
+  aisle: {
+    label: 'Ordine',
+    byAisle: 'Per corsia',
+    byCategory: 'Per categoria',
+    hint: 'Ordinata come spuntate le cose al supermercato.',
+    learning: 'Dopo un paio di spese spuntando al supermercato, la lista si ordina da sola per corsia.',
+  },
+  cheaper: (store, pct) => `Più economico da ${store} (−${pct})`,
+  soon: {
+    title: 'Sta per finire',
+    hint: 'Al ritmo solito, finisce nei prossimi giorni.',
+    when: (days) => (days < 0 ? 'già finito?' : days === 0 ? 'oggi' : days === 1 ? 'domani' : `tra ${days} giorni`),
+    add: 'In lista',
+    addAll: 'Aggiungi tutto',
+    stillHave: 'Ce n’è ancora',
+    added: (name) => `${name}: in lista.`,
+    addedMany: (n) => `${n} cose in lista.`,
+    snoozed: (name) => `Va bene, non chiedo di ${name} per qualche giorno.`,
+  },
+  live: {
+    title: (household) => `Al supermercato · ${household}`,
+    left: (n) => (n === 0 ? 'Non manca niente' : n === 1 ? 'Ne manca 1' : `Ne mancano ${n}`),
+    inCart: (n) => (n === 1 ? '1 nel carrello' : `${n} nel carrello`),
+  },
 };

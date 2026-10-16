@@ -28,4 +28,15 @@ export const money: Messages['money'] = {
     paid: (when) => `${when} に購入`,
   },
   settings: { title: '通貨', hint: 'レシートの支出を表示するために使います。' },
+  stores: {
+    title: 'どこが安い？',
+    hint: '同じ商品を別々のお店で買ったときの比較（過去6か月の最新価格）。',
+    cheapest: 'いちばん安い',
+    over: (pct) => `${pct}高い`,
+    detail: (cheapest, compared) => `${compared}品中${cheapest}品でいちばん安い`,
+    dealsTitle: 'どこで何を買うとお得か',
+    deal: (store, pct) => `${store}なら${pct}安い`,
+    needMore: '比較するには、複数のお店のレシートを追加してください。',
+  },
+  byStore: '各店の価格',
 };

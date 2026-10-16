@@ -19,4 +19,28 @@ export const shopping: Messages['shopping'] = {
     whatsapp: 'WhatsApp',
     copy: 'コピー',
   },
+  aisle: {
+    label: '並び順',
+    byAisle: '売り場順',
+    byCategory: 'カテゴリ順',
+    hint: 'お店でチェックした順番に並んでいます。',
+    learning: 'お店でチェックしながら何回か買い物すると、リストが売り場順に自動で並びます。',
+  },
+  cheaper: (store, pct) => `${store}のほうが安い（−${pct}）`,
+  soon: {
+    title: 'もうすぐなくなる',
+    hint: 'いつものペースだと、数日以内になくなります。',
+    when: (days) => (days < 0 ? 'もうない？' : days === 0 ? '今日' : days === 1 ? '明日' : `${days}日後`),
+    add: 'リストへ',
+    addAll: 'すべて追加',
+    stillHave: 'まだある',
+    added: (name) => `${name}をリストに追加しました。`,
+    addedMany: (n) => `${n}件をリストに追加しました。`,
+    snoozed: (name) => `了解です。${name}については数日聞きません。`,
+  },
+  live: {
+    title: (household) => `買い物中 · ${household}`,
+    left: (n) => (n === 0 ? '全部そろいました' : `残り${n}件`),
+    inCart: (n) => `カートに${n}件`,
+  },
 };

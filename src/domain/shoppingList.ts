@@ -1,4 +1,5 @@
 import { compareText, m } from '../i18n';
+import { aislePosition, type AisleOrder } from './aisleOrder';
 import type { Category, ListReason, Product, ShoppingItem, StockStatus } from './types';
 
 const AUTO_REASONS: ListReason[] = ['out', 'low', 'predicted'];
@@ -106,6 +107,27 @@ export function groupListByCategory(
     });
   }
   return result;
+}
+
+/**
+ * Igual que por categoría, pero en el orden en que se recorre el súper (aprendido de las compras): primero las
+ * categorías que se agarran antes y, dentro de cada una, cada producto donde se suele agarrar. Lo que todavía no
+ * tiene posición queda después, en el orden de siempre. «Sin categoría» va al final.
+ */
+export function groupListByAisle(
+  list: ShoppingItem[],
+  products: Product[],
+  categories: Category[],
+  order: AisleOrder,
+): ListGroup[] {
+  const groups = groupListByCategory(list, products, categories);
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const LAST = 2;
+  const groupPos = (g: ListGroup) => (g.key === 'none' ? LAST + 1 : order.category.get(g.key) ?? LAST);
+  const itemPos = (i: ShoppingItem) => (i.product_id ? aislePosition(order, byId.get(i.product_id)) : null) ?? LAST;
+  // sort es estable: a igual posición queda el orden por categoría
+  for (const g of groups) g.items = g.items.map((item, i) => ({ item, i })).sort((a, b) => itemPos(a.item) - itemPos(b.item) || a.i - b.i).map((x) => x.item);
+  return groups.map((g, i) => ({ g, i })).sort((a, b) => groupPos(a.g) - groupPos(b.g) || a.i - b.i).map((x) => x.g);
 }
 
 export function itemName(item: ShoppingItem, byId: Map<string, Product>): string {

@@ -294,6 +294,23 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Importar receta desde un link** (editor de recetas): JSON-LD schema.org Recipe, microdatos o texto pegado.
 - **Vencimiento** en la ficha del producto: a mano o leyendo la fecha de una foto del envase (Vision, en el iPhone).
 
+### Lista por pasillo, ¿dónde conviene?, se termina pronto y Live Activity (implementados)
+- **Lista por pasillo** (`domain/aisleOrder.ts`): aprende el recorrido de los tildes de la lista en el súper
+  (eventos `purchased` de la lista, por persona; una compra = tildes con menos de 40 min entre sí; lo tachado todo
+  junto en menos de 2 min no cuenta; las compras recientes pesan más, vida media 60 días). Con 2 compras o más, la
+  lista se ordena por categoría según el recorrido y, dentro de cada una, por producto. Se puede volver a «Por
+  categoría» (se recuerda en cada teléfono).
+- **¿Dónde conviene?** (`domain/spending.ts: whereCheaper`, `cheaperAt`): último precio por súper de cada producto
+  en los últimos 6 meses, solo productos comprados en más de un súper. En Gastos: cuánto más caro sale cada súper en
+  promedio y qué conviene comprar dónde; en la ficha del producto, el precio en cada súper; en la lista, «Más barato en
+  X» si la diferencia es de 5 % o más.
+- **Se termina pronto** (`domain/runningOut.ts`): lo que al ritmo de siempre se termina en 5 días (con conteo: según
+  las unidades que quedan y el uso de los últimos 60 días). En Inicio, con «A la lista» y «Todavía hay» (no pregunta
+  por 3 días); en la lista, como chips para sumarlo de un toque.
+- **Live Activity** (`ios/StokaWidget/StokaListActivity.swift`): con «Estoy en el súper», la lista queda en la
+  pantalla bloqueada y en la Dynamic Island (lo próximo a agarrar y cuántas cosas faltan). Se actualiza mientras la
+  app está abierta; se cierra con «Ya salí del súper». Necesita el target del widget.
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

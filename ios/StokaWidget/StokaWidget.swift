@@ -159,7 +159,17 @@ struct WidgetBackground: ViewModifier {
     }
 }
 
+/// Todo lo que muestra Stoka fuera de la app: el widget y, en el súper, la Live Activity.
 @main
+struct StokaWidgets: WidgetBundle {
+    var body: some Widget {
+        StokaWidget()
+        if #available(iOS 16.2, *) {
+            StokaListActivityWidget()
+        }
+    }
+}
+
 struct StokaWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "StokaWidget", provider: StokaProvider()) { entry in

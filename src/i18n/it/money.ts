@@ -29,4 +29,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Pagato il ${when}`,
   },
   settings: { title: 'Valuta', hint: 'Per mostrare le spese degli scontrini.' },
+  stores: {
+    title: 'Dove conviene?',
+    hint: 'Le stesse cose comprate in supermercati diversi (ultimo prezzo degli ultimi 6 mesi).',
+    cheapest: 'Il più economico',
+    over: (pct) => `${pct} più caro`,
+    detail: (cheapest, compared) => `Più economico per ${cheapest} su ${compared}`,
+    dealsTitle: 'Cosa comprare dove',
+    deal: (store, pct) => `Da ${store}, ${pct} in meno`,
+    needMore: 'Per confrontare, carica scontrini di più di un supermercato.',
+  },
+  byStore: 'Prezzo in ogni supermercato',
 };

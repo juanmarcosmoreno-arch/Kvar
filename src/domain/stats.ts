@@ -18,6 +18,9 @@ export interface StockEvent {
   to_quantity: number | null;
   /** Cuándo pasó (hora del dispositivo si la hay) */
   at: string;
+  /** Quién (para separar las compras de cada uno) y desde dónde; pueden faltar en lo guardado antes */
+  user_id?: string | null;
+  source?: string | null;
 }
 
 export interface MonthPoint {
@@ -97,7 +100,7 @@ const average = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / x
 
 export function productStats(
   events: StockEvent[],
-  opts: { now: Date; months: number; product?: Pick<Product, 'status' | 'track_quantity'> },
+  opts: { now: Date; months: number; product?: Pick<Product, 'status' | 'track_quantity'> & { quantity?: number | null } },
 ): ProductStats {
   const { now } = opts;
   const months = lastMonths(now, opts.months);
@@ -134,10 +137,17 @@ export function productStats(
   const used = months.reduce((a, m) => a + m.used, 0);
   const avgDaysLasts = average(lasts);
   const status = opts.product?.status;
+  // Con conteo: las unidades que quedan al ritmo de uso de los últimos 60 días (más preciso que los ciclos)
+  const perDay = usagePerDay(sorted, now.getTime());
+  const qty = opts.product?.quantity;
   const nextOutAt =
-    avgDaysLasts !== null && lastRestock !== null && status !== 'out'
-      ? new Date(lastRestock + avgDaysLasts * DAY).toISOString()
-      : null;
+    status === 'out'
+      ? null
+      : opts.product?.track_quantity && qty != null && qty > 0 && perDay
+        ? new Date(now.getTime() + (qty / perDay) * DAY).toISOString()
+        : avgDaysLasts !== null && lastRestock !== null
+          ? new Date(lastRestock + avgDaysLasts * DAY).toISOString()
+          : null;
 
   return {
     months,
@@ -153,6 +163,27 @@ export function productStats(
     lastRanOut: lastRanOut === null ? null : new Date(lastRanOut).toISOString(),
     nextOutAt,
   };
+}
+
+const USAGE_WINDOW_DAYS = 60;
+
+/** Unidades usadas por día (productos con conteo), o null si no hay suficiente historial. */
+function usagePerDay(sorted: StockEvent[], now: number): number | null {
+  const from = now - USAGE_WINDOW_DAYS * DAY;
+  let used = 0;
+  let first: number | null = null;
+  for (const e of sorted) {
+    const t = time(e);
+    if (t < from || t > now) continue;
+    const u = classify(e).used;
+    if (u > 0) {
+      used += u;
+      first ??= t;
+    }
+  }
+  if (first === null || used < 2) return null;
+  const days = Math.max(7, (now - first) / DAY);
+  return used / days;
 }
 
 export interface ProductRank {

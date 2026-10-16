@@ -13,6 +13,18 @@ interface KvarWatchPlugin {
   shareSnapshot(options: { json: string }): Promise<void>;
   clearSnapshot(): Promise<void>;
   takePendingShortcutActions(): Promise<{ actions: PendingShortcutAction[] }>;
+  listActivity(options: ListActivity | { active: false }): Promise<{ supported: boolean }>;
+}
+
+/** «Estoy en el súper» en la pantalla bloqueada y la Dynamic Island (Live Activity) */
+export interface ListActivity {
+  active: true;
+  title: string;
+  subtitle: string;
+  /** Lo próximo a agarrar, en el orden de la lista */
+  items: string[];
+  left: number;
+  done: number;
 }
 
 /** Lo que Siri anotó sin conexión (se aplica al abrir la app) */
@@ -123,4 +135,23 @@ export async function takePendingShortcutActions(): Promise<PendingShortcutActio
   } catch {
     return [];
   }
+}
+
+// --- Live Activity: la lista en la pantalla bloqueada mientras estás en el súper ----------------------------
+let lastActivity = '';
+let activityTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Muestra, actualiza o cierra la actividad (espera un momento para juntar cambios). No falla nunca. */
+export function showListActivity(state: ListActivity | null): void {
+  if (!isNative || isDemo) return;
+  const options: ListActivity | { active: false } = state ?? { active: false };
+  const key = JSON.stringify(options);
+  if (key === lastActivity) return;
+  clearTimeout(activityTimer);
+  activityTimer = setTimeout(() => {
+    lastActivity = key;
+    KvarWatch.listActivity(options).catch(() => {
+      lastActivity = '';
+    });
+  }, state ? 400 : 0);
 }

@@ -244,6 +244,10 @@ en CarPlay. Sin conexión, Siri lo anota y la app lo pasa la próxima vez que la
    **App Groups** → tildá el mismo grupo del paso 1.
 5. Elegí el esquema **App**, ▶︎, y en el iPhone mantené apretada la pantalla de inicio → **+** → **Stoka**.
 
+Con el widget también queda andando la **lista en la pantalla bloqueada** (Live Activity): en la lista tocá
+**Estoy en el súper** y aparece en la pantalla bloqueada y en la Dynamic Island. Si ya tenías el widget hecho, volvé a
+correr el paso 3 para copiar el archivo nuevo (`StokaListActivity.swift`).
+
 ## Idiomas
 
 Stoka está en español, inglés, portugués, francés, italiano, sueco, danés, chino simplificado y japonés

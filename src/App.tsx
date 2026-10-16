@@ -28,6 +28,7 @@ import { toast } from './store/toast';
 import { m } from './i18n';
 import { alertPrefs, scheduleAlerts } from './lib/alerts';
 import { startPresence, stopPresence } from './lib/presence';
+import { ListActivitySync } from './components/ListActivitySync';
 import { request as requestEvents } from './lib/stats';
 import type { Snapshot } from './domain/types';
 
@@ -169,6 +170,7 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
   }
   return (
     <Shell>
+      <ListActivitySync view={view} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/inventario" element={<Inventory />} />

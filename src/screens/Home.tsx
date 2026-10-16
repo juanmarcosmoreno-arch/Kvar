@@ -7,9 +7,11 @@ import { m } from '../i18n';
 import { Header } from '../components/Shell';
 import { Icon, type IconName } from '../components/Icon';
 import { ProductRow } from '../components/ProductRow';
+import { RunningOutSection } from '../components/RunningOut';
 import { SyncBadge } from '../components/SyncBadge';
 import { Wordmark } from '../components/Wordmark';
 import { categoryIcon } from '../lib/categoryIcon';
+import { useRunningOut } from '../lib/runningOut';
 import { setStatus } from '../store/actions';
 import { useView } from '../store/store';
 import { useUI } from '../store/ui';
@@ -25,6 +27,7 @@ export function Home() {
   const frequent = frequentProducts(view.products, view.outCounts, 6);
   const results = q.trim() ? searchProducts(q, view.products).slice(0, 8) : [];
   const listCount = openCount(view.list);
+  const runningOut = useRunningOut(view);
 
   return (
     <>
@@ -142,6 +145,9 @@ export function Home() {
             )}
           </section>
         )}
+
+        {/* Se termina pronto: al ritmo de siempre (historial) */}
+        {!q.trim() && <RunningOutSection items={runningOut} />}
 
         {/* Bloque 3: vence pronto (los vencimientos se cargan desde la Fase 4) */}
         {!q.trim() && expiring.length > 0 && (

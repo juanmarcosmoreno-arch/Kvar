@@ -1,3 +1,4 @@
+import ActivityKit
 import AppIntents
 import Capacitor
 import Foundation
@@ -15,6 +16,7 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
         CAPPluginMethod(name: "shareSnapshot", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearSnapshot", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "takePendingShortcutActions", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "listActivity", returnType: CAPPluginReturnPromise),
     ]
 
     private var pending: [String: Any]?
@@ -62,6 +64,30 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
     /// Lo que Siri anotó sin conexión (o con la sesión vencida). Se lee y se borra.
     @objc func takePendingShortcutActions(_ call: CAPPluginCall) {
         call.resolve(["actions": StokaPending.take()])
+    }
+
+    /// «Estoy en el súper»: la lista en la pantalla bloqueada y en la Dynamic Island (ver StokaListActivity).
+    @objc func listActivity(_ call: CAPPluginCall) {
+        guard #available(iOS 16.2, *) else {
+            call.resolve(["supported": false])
+            return
+        }
+        let active = call.getBool("active") ?? false
+        let title = call.getString("title") ?? "Stoka"
+        let state = StokaListAttributes.ContentState(
+            items: (call.getArray("items") as? [String]) ?? [],
+            left: call.getInt("left") ?? 0,
+            done: call.getInt("done") ?? 0,
+            subtitle: call.getString("subtitle") ?? ""
+        )
+        call.resolve(["supported": ActivityAuthorizationInfo().areActivitiesEnabled])
+        Task {
+            if active {
+                await StokaListActivity.show(title: title, state: state)
+            } else {
+                await StokaListActivity.end()
+            }
+        }
     }
 
     private func send() {
@@ -366,5 +392,41 @@ struct StokaShortcuts: AppShortcutsProvider {
             shortTitle: "¿Qué falta?",
             systemImageName: "list.bullet"
         )
+    }
+}
+
+// MARK: - Live Activity («Estoy en el súper»)
+//
+// La vista vive en el widget (ios/StokaWidget/StokaListActivity.swift, con una copia idéntica de
+// StokaListAttributes). La app la prende, la actualiza cuando cambia la lista y la cierra al salir del súper.
+
+@available(iOS 16.2, *)
+struct StokaListAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var items: [String]
+        var left: Int
+        var done: Int
+        var subtitle: String
+    }
+
+    var title: String
+}
+
+@available(iOS 16.2, *)
+enum StokaListActivity {
+    static func show(title: String, state: StokaListAttributes.ContentState) async {
+        let content = ActivityContent(state: state, staleDate: nil)
+        if let current = Activity<StokaListAttributes>.activities.first {
+            await current.update(content)
+            return
+        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        _ = try? Activity.request(attributes: StokaListAttributes(title: title), content: content, pushType: nil)
+    }
+
+    static func end() async {
+        for activity in Activity<StokaListAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
     }
 }

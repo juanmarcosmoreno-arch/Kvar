@@ -19,4 +19,28 @@ export const shopping: Messages['shopping'] = {
     whatsapp: 'WhatsApp',
     copy: 'Kopiér',
   },
+  aisle: {
+    label: 'Rækkefølge',
+    byAisle: 'Efter gang',
+    byCategory: 'Efter kategori',
+    hint: 'Sorteret i den rækkefølge, I krydser af i butikken.',
+    learning: 'Efter et par indkøb, hvor I krydser af i butikken, sorterer listen sig selv efter gang.',
+  },
+  cheaper: (store, pct) => `Billigere i ${store} (−${pct})`,
+  soon: {
+    title: 'Slipper snart op',
+    hint: 'I det sædvanlige tempo slipper det op inden for få dage.',
+    when: (days) => (days < 0 ? 'allerede sluppet op?' : days === 0 ? 'i dag' : days === 1 ? 'i morgen' : `om ${days} dage`),
+    add: 'På listen',
+    addAll: 'Tilføj alt',
+    stillHave: 'Der er stadig',
+    added: (name) => `${name}: på listen.`,
+    addedMany: (n) => `${n} ting på listen.`,
+    snoozed: (name) => `Okay, jeg spørger ikke om ${name} i et par dage.`,
+  },
+  live: {
+    title: (household) => `Handler ind · ${household}`,
+    left: (n) => (n === 0 ? 'Intet mangler' : `${n} mangler`),
+    inCart: (n) => `${n} i kurven`,
+  },
 };

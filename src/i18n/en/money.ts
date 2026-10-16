@@ -29,4 +29,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Paid on ${when}`,
   },
   settings: { title: 'Currency', hint: 'Used to show the spending from your receipts.' },
+  stores: {
+    title: 'Where is it cheaper?',
+    hint: 'The same items bought at different stores (latest price, last 6 months).',
+    cheapest: 'Cheapest',
+    over: (pct) => `${pct} more expensive`,
+    detail: (cheapest, compared) => `Cheapest for ${cheapest} of ${compared}`,
+    dealsTitle: 'What to buy where',
+    deal: (store, pct) => `At ${store}, ${pct} less`,
+    needMore: 'To compare, add receipts from more than one store.',
+  },
+  byStore: 'Price at each store',
 };

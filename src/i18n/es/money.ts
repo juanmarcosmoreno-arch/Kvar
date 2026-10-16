@@ -30,4 +30,15 @@ export const money = {
     title: 'Moneda',
     hint: 'Para mostrar los gastos de los tickets.',
   },
+  stores: {
+    title: '¿Dónde conviene?',
+    hint: 'Lo mismo comprado en distintos súper (último precio de los últimos 6 meses).',
+    cheapest: 'El más barato',
+    over: (pct: string) => `${pct} más caro`,
+    detail: (cheapest: number, compared: number) => `Más barato en ${cheapest} de ${compared}`,
+    dealsTitle: 'Qué conviene comprar dónde',
+    deal: (store: string, pct: string) => `En ${store}, ${pct} menos`,
+    needMore: 'Para comparar, cargá tickets de más de un súper.',
+  },
+  byStore: 'Precio en cada súper',
 };

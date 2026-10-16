@@ -4,7 +4,7 @@ import type { Product } from '../domain/types';
 import { formatDate, formatDecimal, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { useEvents, usePurchases } from '../lib/stats';
-import { priceOf } from '../domain/spending';
+import { priceOf, storeLabel, storePricesOf } from '../domain/spending';
 import { MonthColumns } from './charts/MonthColumns';
 
 const DAY = 86_400_000;
@@ -14,6 +14,7 @@ export function ProductStats({ product }: { product: Product }) {
   const data = useEvents(product.household_id);
   const purchases = usePurchases(product.household_id);
   const price = purchases.status === 'ready' ? priceOf(purchases.lines, product.id) : null;
+  const stores = purchases.status === 'ready' ? storePricesOf(purchases.lines, product.id) : [];
   const t = m.stats.product;
   const s = useMemo(() => {
     if (data.status !== 'ready') return null;
@@ -38,6 +39,22 @@ export function ProductStats({ product }: { product: Product }) {
       </div>
     </div>
   );
+  // Precio en cada súper (si se compró en más de uno)
+  const storesBlock = stores.length > 1 && (
+    <div className="space-y-1 border-t border-line pt-3">
+      <div className="text-sm text-muted">{m.money.byStore}</div>
+      <ul className="space-y-0.5 text-sm">
+        {stores.map((st, i) => (
+          <li key={st.store} className="flex justify-between gap-3">
+            <span className={i === 0 ? 'font-medium text-ink' : 'text-muted'}>{storeLabel(st.store)}</span>
+            <span className={`tabular-nums ${i === 0 ? 'font-medium text-[#2E7A4A] dark:text-ok' : 'text-muted'}`}>
+              {formatCurrency(st.price, { cents: st.price < 100 })}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
   const counted = product.track_quantity && s.usedPerMonth != null && s.used > 0;
   const enough = s.bought + s.ranOut >= 2;
 
@@ -54,7 +71,7 @@ export function ProductStats({ product }: { product: Product }) {
       {!enough ? (
         <>
           <p className="text-sm text-muted">{t.noData}</p>
-          {priceBlock && <div className="card p-4">{priceBlock}</div>}
+          {priceBlock && <div className="card space-y-3 p-4">{priceBlock}{storesBlock}</div>}
         </>
       ) : (
         <div className="card space-y-4 p-4">
@@ -77,6 +94,7 @@ export function ProductStats({ product }: { product: Product }) {
             {s.ranOut > 0 && <p>{t.ranOut}: {t.times(s.ranOut)}</p>}
           </div>
           {priceBlock}
+          {storesBlock}
         </div>
       )}
     </section>

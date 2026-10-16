@@ -28,4 +28,15 @@ export const money: Messages['money'] = {
     paid: (when) => `${when} 购买`,
   },
   settings: { title: '货币', hint: '用于显示小票上的花费。' },
+  stores: {
+    title: '哪里更划算？',
+    hint: '同样的东西在不同超市买（过去 6 个月的最新价格）。',
+    cheapest: '最便宜',
+    over: (pct) => `贵 ${pct}`,
+    detail: (cheapest, compared) => `${compared} 件中有 ${cheapest} 件最便宜`,
+    dealsTitle: '什么东西在哪里买',
+    deal: (store, pct) => `在${store}便宜 ${pct}`,
+    needMore: '要比较，请添加不止一家超市的小票。',
+  },
+  byStore: '各超市的价格',
 };

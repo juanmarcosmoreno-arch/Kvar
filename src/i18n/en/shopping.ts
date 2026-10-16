@@ -19,4 +19,28 @@ export const shopping: Messages['shopping'] = {
     whatsapp: 'WhatsApp',
     copy: 'Copy',
   },
+  aisle: {
+    label: 'Order',
+    byAisle: 'By aisle',
+    byCategory: 'By category',
+    hint: 'Sorted the way you tick things off in the store.',
+    learning: 'After a couple of trips ticking things off in the store, the list sorts itself by aisle.',
+  },
+  cheaper: (store, pct) => `Cheaper at ${store} (−${pct})`,
+  soon: {
+    title: 'Running out soon',
+    hint: 'At the usual pace, these run out in the next few days.',
+    when: (days) => (days < 0 ? 'run out already?' : days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`),
+    add: 'Add to list',
+    addAll: 'Add all',
+    stillHave: 'Still have some',
+    added: (name) => `${name} added to the list.`,
+    addedMany: (n) => `${n} items added to the list.`,
+    snoozed: (name) => `OK, I won’t ask about ${name} for a few days.`,
+  },
+  live: {
+    title: (household) => `Shopping · ${household}`,
+    left: (n) => (n === 0 ? 'Nothing left' : n === 1 ? '1 left' : `${n} left`),
+    inCart: (n) => (n === 1 ? '1 in the cart' : `${n} in the cart`),
+  },
 };

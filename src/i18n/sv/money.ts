@@ -29,4 +29,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Betalt ${when}`,
   },
   settings: { title: 'Valuta', hint: 'För att visa utgifterna från dina kvitton.' },
+  stores: {
+    title: 'Var är det billigast?',
+    hint: 'Samma varor köpta i olika butiker (senaste priset, senaste 6 månaderna).',
+    cheapest: 'Billigast',
+    over: (pct) => `${pct} dyrare`,
+    detail: (cheapest, compared) => `Billigast på ${cheapest} av ${compared}`,
+    dealsTitle: 'Vad som lönar sig var',
+    deal: (store, pct) => `På ${store}, ${pct} mindre`,
+    needMore: 'Lägg till kvitton från fler än en butik för att jämföra.',
+  },
+  byStore: 'Pris i varje butik',
 };

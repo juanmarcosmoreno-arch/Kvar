@@ -79,5 +79,7 @@
 	<string>Stoka usa el micrófono para que le digas qué compraste o qué se terminó.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 </dict>
 </plist>

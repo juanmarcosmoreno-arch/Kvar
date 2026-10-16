@@ -19,4 +19,28 @@ export const shopping: Messages['shopping'] = {
     whatsapp: 'WhatsApp',
     copy: '复制',
   },
+  aisle: {
+    label: '顺序',
+    byAisle: '按货架',
+    byCategory: '按分类',
+    hint: '按你们在超市勾选的顺序排列。',
+    learning: '在超市边买边勾选几次之后，清单会自动按货架顺序排列。',
+  },
+  cheaper: (store, pct) => `${store} 更便宜（−${pct}）`,
+  soon: {
+    title: '快用完了',
+    hint: '按平时的速度，这几天就会用完。',
+    when: (days) => (days < 0 ? '已经用完了？' : days === 0 ? '今天' : days === 1 ? '明天' : `${days} 天后`),
+    add: '加入清单',
+    addAll: '全部加入',
+    stillHave: '还有',
+    added: (name) => `${name}已加入清单。`,
+    addedMany: (n) => `已将 ${n} 件加入清单。`,
+    snoozed: (name) => `好的，这几天不再问${name}。`,
+  },
+  live: {
+    title: (household) => `在超市 · ${household}`,
+    left: (n) => (n === 0 ? '都买齐了' : `还差 ${n} 件`),
+    inCart: (n) => `购物车里 ${n} 件`,
+  },
 };

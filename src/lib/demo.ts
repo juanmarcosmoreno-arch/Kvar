@@ -189,6 +189,16 @@ export function demoEvents(now = Date.now()): import('../domain/stats').StockEve
       }
     }
   }
+  // Tres compras con la lista en el súper, siempre en el mismo recorrido (para «ordenar por pasillo»)
+  const route = ['p15', 'p17', 'p3', 'p7', 'p2', 'p4', 'p12', 'p14', 'p1', 'p9', 'p11', 'p20'];
+  for (const daysAgo of [20, 13, 6]) {
+    const t0 = now - daysAgo * day + 10 * 3_600_000;
+    route.forEach((id, i) => {
+      if (rand() < 0.25) return;
+      events.push({ product_id: id, type: 'purchased', source: 'shopping', user_id: 'demo-yo', from_status: 'low', to_status: 'ok',
+        from_quantity: null, to_quantity: null, at: new Date(t0 + i * 150_000).toISOString() });
+    });
+  }
   return events.sort((a, b) => a.at.localeCompare(b.at));
 }
 
@@ -196,6 +206,8 @@ export function demoEvents(now = Date.now()): import('../domain/stats').StockEve
  * Tickets de ejemplo para Gastos: cada compra del historial de ejemplo con su precio, agrupadas por semana
  * (un ticket por semana) y con los precios subiendo un poco mes a mes.
  */
+const STORES = ['Macromercado', 'Disco', 'Tienda Inglesa'] as const;
+
 export function demoPurchases(now = Date.now()): import('../domain/spending').PurchaseLine[] {
   const base: Record<string, number> = {
     p1: 46, p2: 245, p3: 89, p4: 62, p5: 158, p6: 520, p7: 75, p8: 139, p9: 168, p10: 72, p11: 115, p12: 310,
@@ -210,9 +222,13 @@ export function demoPurchases(now = Date.now()): import('../domain/spending').Pu
     const t = Date.parse(e.at);
     const monthsAgo = (now - t) / (30.44 * day);
     // ~2,5 % por mes de suba, con alguna oferta
-    const price = Math.round(base[e.product_id] * (1 - 0.025 * monthsAgo) * (rand() < 0.15 ? 0.85 : 1) * (0.97 + rand() * 0.06));
     const qty = e.product_id === 'p9' || e.product_id === 'p6' ? 1 : rand() < 0.25 ? 2 : 1;
     const week = Math.floor(t / (7 * day));
+    // Tres súper que se van turnando: el Macro suele ser más barato, pero algunas cosas convienen en otro lado
+    const store = STORES[week % 3];
+    const n = Number(e.product_id.slice(1));
+    const factor = store === 'Macromercado' ? 1 : store === 'Disco' ? (n % 4 === 0 ? 0.88 : 1.07) : n % 5 === 0 ? 0.92 : 1.12;
+    const price = Math.round(base[e.product_id] * factor * (1 - 0.025 * monthsAgo) * (rand() < 0.15 ? 0.85 : 1) * (0.97 + rand() * 0.06));
     lines.push({
       id: `demo-${lines.length}`,
       household_id: HH,
@@ -221,7 +237,7 @@ export function demoPurchases(now = Date.now()): import('../domain/spending').Pu
       quantity: qty,
       unit_price: price,
       total: price * qty,
-      store: 'Macromercado',
+      store,
       bought_at: new Date(week * 7 * day + 5 * day + 11 * 3_600_000).toISOString(),
       receipt_key: `demo-${week}`,
     });

@@ -29,4 +29,15 @@ export const money: Messages['money'] = {
     paid: (when) => `Payé le ${when}`,
   },
   settings: { title: 'Devise', hint: 'Pour afficher les dépenses de vos tickets.' },
+  stores: {
+    title: 'Où est-ce moins cher ?',
+    hint: 'Les mêmes produits achetés dans différents magasins (dernier prix, 6 derniers mois).',
+    cheapest: 'Le moins cher',
+    over: (pct) => `${pct} plus cher`,
+    detail: (cheapest, compared) => `Moins cher pour ${cheapest} sur ${compared}`,
+    dealsTitle: 'Quoi acheter où',
+    deal: (store, pct) => `Chez ${store}, ${pct} de moins`,
+    needMore: 'Pour comparer, ajoutez des tickets de plusieurs magasins.',
+  },
+  byStore: 'Prix dans chaque magasin',
 };

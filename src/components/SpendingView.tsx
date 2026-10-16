@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { spendingStats } from '../domain/spending';
+import { spendingStats, storeLabel, whereCheaper } from '../domain/spending';
 import { formatDecimal, m } from '../i18n';
 import { categoryIcon } from '../lib/categoryIcon';
 import { formatCurrency, formatCurrencyCompact } from '../lib/currency';
@@ -22,6 +22,7 @@ export function SpendingView({ months }: { months: number }) {
     () => (data.status === 'ready' ? spendingStats(data.lines, view.products, { now: new Date(), months }) : null),
     [data, view.products, months],
   );
+  const where = useMemo(() => (data.status === 'ready' ? whereCheaper(data.lines, view.products) : null), [data, view.products]);
 
   if (data.status === 'loading') return <p className="text-muted">{t.loading}</p>;
   if (data.status === 'error') return <p className="card p-4 text-muted">{m.stats.error}</p>;
@@ -46,6 +47,52 @@ export function SpendingView({ months }: { months: number }) {
           formatAxis={formatCurrencyCompact}
         />
       </section>
+
+      {where && where.stores.length > 1 && (
+        <section className="space-y-2">
+          <h2 className="section-title">{t.stores.title}</h2>
+          <p className="text-sm text-muted">{t.stores.hint}</p>
+          <ul className="card divide-y divide-line">
+            {where.stores.map((st, i) => (
+              <li key={st.store} className="flex min-h-[56px] items-center gap-3 px-4 py-2">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{storeLabel(st.store)}</span>
+                  <span className="text-sm text-muted">{t.stores.detail(st.cheapest, st.compared)}</span>
+                </span>
+                <span className={`shrink-0 text-sm font-medium ${i === 0 ? 'text-[#2E7A4A] dark:text-ok' : 'text-muted'}`}>
+                  {i === 0 ? t.stores.cheapest : t.stores.over(pct(st.overCheapest))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {where.deals.length > 0 && (
+            <>
+              <h3 className="section-title pt-2">{t.stores.dealsTitle}</h3>
+              <ul className="card divide-y divide-line">
+                {where.deals.slice(0, 6).map((d) => (
+                  <li key={d.productId}>
+                    <button
+                      className="flex min-h-[56px] w-full items-center gap-3 px-4 py-2 text-left"
+                      onClick={() => ui.openProduct(d.productId)}
+                      aria-label={`${d.name}: ${t.stores.deal(storeLabel(d.best.store), pct(d.saving))}`}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">{d.name}</span>
+                        <span className="block truncate text-sm tabular-nums">
+                          <span className="text-[#2E7A4A] dark:text-ok">{storeLabel(d.best.store)} {formatCurrency(d.best.price, { cents: d.best.price < 100 })}</span>
+                          <span className="text-muted"> · {storeLabel(d.worst.store)} {formatCurrency(d.worst.price, { cents: d.worst.price < 100 })}</span>
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-[#2E7A4A] dark:text-ok">−{pct(d.saving)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+      )}
+      {where && where.stores.length <= 1 && <p className="text-sm text-muted">{t.stores.needMore}</p>}
 
       {s.priceChanges.length > 0 && (
         <section className="space-y-2">
