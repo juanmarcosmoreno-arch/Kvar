@@ -98,6 +98,7 @@ export const stock: Messages['stock'] = {
   },
 
   add: {
+    howManyNow: '现在有多少',
     titleNew: '新商品',
     title: '添加商品',
     linked: (name) => `好了：下次扫描时，会识别为${name}。`,

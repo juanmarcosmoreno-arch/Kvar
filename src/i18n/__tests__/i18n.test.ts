@@ -5,7 +5,7 @@ import { amountLabel, assessRecipe, ingredientLine, nameScore, parseIngredientLi
 import { formatQuantity, findUnit } from '../../domain/units';
 import { product } from '../../domain/__tests__/fixtures';
 import { es } from '../es';
-import { detectLang, LANGUAGES, type Lang } from '../languages';
+import { detectLang, LANGUAGES, localeFor, type Lang } from '../languages';
 
 const load = async (l: Lang): Promise<Messages> =>
   l === 'es' ? es : ((await import(`../${l}/index.ts`)) as { messages: Messages }).messages;
@@ -79,5 +79,14 @@ describe('recetas en otros idiomas', () => {
     expect(parseIngredientLine('大さじ2 醤油')).toMatchObject({ name: '醤油', quantity: 2, unit: 'cda' });
     expect(parseIngredientLine('卵 2個')).toBeTruthy();
     expect(formatQuantity(3, 'latas')).toBe('3 缶');
+  });
+});
+
+describe('región del teléfono', () => {
+  it('acepta solo etiquetas que Intl entiende', () => {
+    expect(localeFor('es', ['es-UY'])).toBe('es-UY');
+    expect(localeFor('en', ['en-US@posix'])).toBe('en-US');
+    expect(localeFor('es', ['es_UY.UTF-8'])).toBe('es-UY');
+    expect(() => 'a'.localeCompare('b', localeFor('en', ['en-US@posix']))).not.toThrow();
   });
 });

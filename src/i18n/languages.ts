@@ -29,6 +29,14 @@ export function detectLang(preferred: readonly string[]): Lang {
 /** Región del teléfono si coincide con el idioma (es-AR, en-GB, pt-PT…); si no, la de por defecto. */
 export function localeFor(lang: Lang, preferred: readonly string[]): string {
   const own = preferred.find((t) => t.toLowerCase().split(/[-_]/)[0] === lang);
-  if (own && /^[a-z]{2}[-_][A-Za-z]{2,4}/.test(own) && lang !== 'zh') return own.replace('_', '-');
+  if (own && /^[a-z]{2}[-_][A-Za-z]{2,4}/.test(own) && lang !== 'zh') {
+    // «en-US@posix», «es_UY.UTF-8»…: solo lo que Intl acepta
+    try {
+      const [tag] = Intl.getCanonicalLocales(own.replace('_', '-').split(/[@.]/)[0]);
+      if (tag) return tag;
+    } catch {
+      /* etiqueta rara: la del idioma */
+    }
+  }
   return LANGUAGES.find((l) => l.code === lang)!.locale;
 }

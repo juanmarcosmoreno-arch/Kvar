@@ -32,11 +32,25 @@ import { ListActivitySync } from './components/ListActivitySync';
 import { request as requestEvents } from './lib/stats';
 import type { Snapshot } from './domain/types';
 
+/** Volver a la app después de esto (en segundo plano) muestra otra vez la bienvenida corta */
+const AWAY_FOR_INTRO = 10 * 60_000;
+
 export default function App() {
   useEffect(() => applyTheme(), []);
   const { session, loading } = useSession();
   const minVersion = useMinVersion();
-  const [intro, setIntro] = useState(() => !introSeen());
+  // La primera vez, la bienvenida entera; después, la corta cada vez que se abre la app (o se vuelve a ella
+  // después de un rato)
+  const [intro, setIntro] = useState<'full' | 'short' | null>(() => (introSeen() ? 'short' : 'full'));
+  useEffect(() => {
+    let hiddenAt: number | null = null;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') hiddenAt = Date.now();
+      else if (hiddenAt !== null && Date.now() - hiddenAt > AWAY_FOR_INTRO) setIntro((v) => v ?? 'short');
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
 
   if (isConfigured && minVersion && mustUpdate(APP_VERSION, minVersion)) {
     return <UpdateRequired minimum={minVersion} />;
@@ -44,7 +58,7 @@ export default function App() {
 
   return (
     <>
-    {intro && <IntroSplash onDone={() => setIntro(false)} />}
+    {intro && <IntroSplash key={intro} short={intro === 'short'} onDone={() => setIntro(null)} />}
     <Routes>
       <Route path="/unirse/:code" element={<JoinLink signedIn={Boolean(session)} />} />
       <Route

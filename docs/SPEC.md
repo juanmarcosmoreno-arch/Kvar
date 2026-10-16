@@ -309,6 +309,10 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   por 3 días); en la lista, como chips para sumarlo de un toque.
 - **Ticket «Solo precios»**: al revisar un ticket se puede elegir guardar solo los precios (Gastos, ¿dónde conviene?)
   sin tocar el stock ni crear productos; lo que ya se reconoce igual se aprende para la próxima.
+- **Bienvenida corta**: la primera vez, el video entero (~5 s); después, uno corto (~2 s) cada vez que se abre la
+  app o se vuelve a ella tras 10 minutos. En modo oscuro, la versión oscura (fondo negro + `mix-blend-screen`).
+- **Contar unidades al agregar**: el alta de producto permite prender «Contar unidades» con cuántos hay, la
+  unidad y con cuántos pasa a «Queda poco».
 - **Live Activity** (`ios/StokaWidget/StokaListActivity.swift`): con «Estoy en el súper», la lista queda en la
   pantalla bloqueada y en la Dynamic Island (lo próximo a agarrar y cuántas cosas faltan). Se actualiza mientras la
   app está abierta; se cierra con «Ya salí del súper». Necesita el target del widget.

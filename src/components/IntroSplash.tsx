@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import introMp4 from '../assets/brand/stoka-intro.mp4';
 import introWebm from '../assets/brand/stoka-intro.webm';
 import finalFrame from '../assets/brand/stoka-intro-final.webp';
+import introDarkMp4 from '../assets/brand/stoka-intro-dark.mp4';
+import introDarkWebm from '../assets/brand/stoka-intro-dark.webm';
+import finalFrameDark from '../assets/brand/stoka-intro-final-dark.webp';
+import shortMp4 from '../assets/brand/stoka-intro-short.mp4';
+import shortWebm from '../assets/brand/stoka-intro-short.webm';
+import shortDarkMp4 from '../assets/brand/stoka-intro-short-dark.mp4';
+import shortDarkWebm from '../assets/brand/stoka-intro-short-dark.webm';
 import { m } from '../i18n';
 
 // Clave por versión de la bienvenida: si cambia el video, cada dispositivo lo ve una vez más
@@ -33,15 +40,23 @@ function markSeen() {
   }
 }
 
+const VIDEOS = {
+  full: { light: [introMp4, introWebm, finalFrame], dark: [introDarkMp4, introDarkWebm, finalFrameDark] },
+  short: { light: [shortMp4, shortWebm, finalFrame], dark: [shortDarkMp4, shortDarkWebm, finalFrameDark] },
+} as const;
+
 /**
- * Bienvenida: la casa de Stoka se va llenando (video mudo, ~5 s). Solo la primera vez en cada
- * dispositivo; un toque la saltea. Con «reducir movimiento» se muestra el cuadro final.
+ * Bienvenida: la casa de Stoka se va llenando (video mudo). La primera vez en cada dispositivo, la versión
+ * entera (~5 s); después, cada vez que se abre la app, la corta (~2 s). En modo oscuro, la versión oscura.
+ * Un toque la saltea. Con «reducir movimiento» se muestra el cuadro final.
  */
-export function IntroSplash({ onDone }: { onDone: () => void }) {
+export function IntroSplash({ onDone, short = false }: { onDone: () => void; short?: boolean }) {
   const [leaving, setLeaving] = useState(false);
   const done = useRef(false);
   const reduced =
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const [mp4, webm, poster] = VIDEOS[short ? 'short' : 'full'][dark ? 'dark' : 'light'];
 
   const finish = () => {
     if (done.current) return;
@@ -53,7 +68,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     // Respaldo por si el video no arranca (modo ahorro de energía, formato no soportado)
-    const t = setTimeout(finish, reduced ? 1400 : 7000);
+    const t = setTimeout(finish, reduced ? (short ? 700 : 1400) : short ? 3500 : 7000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -66,23 +81,24 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
         leaving ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      {/* El fundido va en la capa animada: si va en la imagen, la animación lo aísla y se ve el blanco */}
-      <div className="animate-intro mix-blend-multiply dark:overflow-hidden dark:rounded-[2.5rem] dark:bg-white dark:p-4 dark:mix-blend-normal">
+      {/* El fundido va en la capa animada: si va en la imagen, la animación lo aísla y se ve el fondo.
+          Claro: fondo blanco + multiply. Oscuro: fondo negro + screen (el negro desaparece sobre el fondo de la app). */}
+      <div className={`animate-intro ${dark ? 'mix-blend-screen' : 'mix-blend-multiply'}`}>
         {reduced ? (
-          <img src={finalFrame} alt={m.common.appName} className="h-72 w-72" />
+          <img src={poster} alt={m.common.appName} className="h-72 w-72" />
         ) : (
           <video
-            poster={finalFrame}
+            poster={poster}
             className="h-72 w-72"
             autoPlay
             muted
             playsInline
             preload="auto"
-            onEnded={() => setTimeout(finish, 450)}
+            onEnded={() => setTimeout(finish, short ? 150 : 450)}
             aria-label={m.shell.intro.videoLabel}
           >
-            <source src={introMp4} type="video/mp4" />
-            <source src={introWebm} type="video/webm" onError={finish} />
+            <source src={mp4} type="video/mp4" />
+            <source src={webm} type="video/webm" onError={finish} />
           </video>
         )}
       </div>

@@ -98,6 +98,7 @@ export const stock = {
   },
 
   add: {
+    howManyNow: 'Cuántos hay ahora',
     titleNew: 'Producto nuevo',
     title: 'Agregar producto',
     linked: (name: string) => `Listo: la próxima vez que lo escanees, es ${name}.`,

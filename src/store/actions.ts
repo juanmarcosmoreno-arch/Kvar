@@ -48,6 +48,7 @@ export interface NewProduct {
   track_quantity?: boolean;
   quantity?: number | null;
   low_threshold?: number;
+  unit?: string | null;
   unidentified?: boolean;
   brand?: string | null;
   image_url?: string | null;
@@ -67,7 +68,7 @@ export function createProduct(input: NewProduct): Product | null {
     track_quantity: input.track_quantity ?? false,
     quantity: input.track_quantity ? input.quantity ?? 1 : null,
     low_threshold: input.low_threshold ?? 1,
-    unit: null,
+    unit: input.track_quantity ? input.unit ?? null : null,
     is_staple: input.is_staple ?? false,
     unidentified: input.unidentified ?? false,
     expires_on: null,

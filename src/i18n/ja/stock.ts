@@ -98,6 +98,7 @@ export const stock: Messages['stock'] = {
   },
 
   add: {
+    howManyNow: '今の数',
     titleNew: '新しい商品',
     title: '商品を追加',
     linked: (name) => `完了：次回スキャンすると${name}になります。`,

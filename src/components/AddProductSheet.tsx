@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { searchProducts } from '../domain/aliases';
+import { statusFromQuantity } from '../domain/status';
+import { suggestUnit, unitLabel } from '../domain/units';
 import type { Product, StockStatus } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
 import { createProduct, learnBarcode, markBought, setProductPhoto, setStatus } from '../store/actions';
@@ -11,6 +13,8 @@ import { Icon } from './Icon';
 import { PhotoButton } from './PhotoButton';
 import { Sheet } from './Sheet';
 import { StatusPicker } from './Status';
+import { Toggle } from './Toggle';
+import { UnitPicker } from './UnitPicker';
 import { m } from '../i18n';
 
 /**
@@ -28,6 +32,11 @@ export function AddProductSheet({
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [staple, setStaple] = useState(false);
   const [photo, setPhoto] = useState<{ blob: Blob; url: string } | null>(null);
+  // Contar unidades (pañales, latas…): desde el alta, sin tener que entrar después a editarlo
+  const [counted, setCounted] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [unit, setUnit] = useState<string | null>(null);
+  const [lowAt, setLowAt] = useState(1);
 
   useEffect(() => {
     if (!defaults) return;
@@ -37,6 +46,10 @@ export function AddProductSheet({
     setCategoryId(defaults.category_id ?? null);
     setStaple(false);
     setPhoto(null);
+    setCounted(false);
+    setQuantity(1);
+    setUnit(null);
+    setLowAt(1);
   }, [defaults]);
 
   useEffect(() => () => {
@@ -69,15 +82,17 @@ export function AddProductSheet({
       useExisting(exact);
       return;
     }
+    const finalStatus = counted ? statusFromQuantity(quantity, lowAt) : status;
     const p = createProduct({
-      name, status, location_id: locationId, category_id: categoryId, is_staple: staple,
+      name, status: finalStatus, location_id: locationId, category_id: categoryId, is_staple: staple,
+      ...(counted ? { track_quantity: true, quantity, unit, low_threshold: lowAt } : {}),
       brand: defaults?.brand ?? null,
       image_url: photo ? null : defaults?.image_url ?? null,
     });
     if (p) {
       if (barcode) learnBarcode(p.id, barcode);
       if (photo) void setProductPhoto(p, photo.blob);
-      toast(status === 'out' ? m.stock.add.addedToList(p.name) : m.stock.add.added(p.name));
+      toast(finalStatus === 'out' ? m.stock.add.addedToList(p.name) : m.stock.add.added(p.name));
     }
     onClose();
   };
@@ -125,7 +140,28 @@ export function AddProductSheet({
           </div>
         )}
 
-        <StatusPicker value={status} onChange={setStatusValue} />
+        {!counted && <StatusPicker value={status} onChange={setStatusValue} />}
+        <section className="card divide-y divide-line px-4">
+          <Toggle
+            checked={counted}
+            onChange={(v) => {
+              setCounted(v);
+              if (v && !unit) setUnit(suggestUnit(name, view.categories.find((c) => c.id === categoryId)?.name));
+            }}
+            label={m.stock.product.countUnits}
+            hint={m.stock.product.countUnitsHint}
+          />
+          {counted && (
+            <>
+              <Stepper label={m.stock.add.howManyNow} value={quantity} min={0} onChange={setQuantity} suffix={unitLabel(quantity, unit)} />
+              <div className="space-y-2 py-3">
+                <span className="block font-medium">{m.stock.product.unit}</span>
+                <UnitPicker value={unit} onChange={setUnit} />
+              </div>
+              <Stepper label={m.stock.product.lowAt} value={lowAt} min={0} onChange={setLowAt} suffix={unitLabel(lowAt, unit)} />
+            </>
+          )}
+        </section>
         <section className="space-y-2">
           <h3 className="text-sm text-muted">{m.stock.product.location}</h3>
           <ChipPicker items={[...view.locations].sort((a, b) => a.sort_order - b.sort_order)} value={locationId}
@@ -153,5 +189,23 @@ export function AddProductSheet({
         </button>
       </form>
     </Sheet>
+  );
+}
+
+function Stepper({ label, value, min, onChange, suffix }: { label: string; value: number; min: number; onChange: (n: number) => void; suffix: string }) {
+  return (
+    <div className="flex min-h-[56px] items-center gap-3">
+      <span className="min-w-0 flex-1 whitespace-nowrap font-medium">{label}</span>
+      <button type="button" className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.less}
+        onClick={() => onChange(Math.max(min, value - 1))}>
+        <Icon name="minus" size={20} />
+      </button>
+      <span className="w-8 text-center font-semibold tabular-nums">{value}</span>
+      <button type="button" className="flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.more}
+        onClick={() => onChange(value + 1)}>
+        <Icon name="plus" size={20} />
+      </button>
+      <span className="min-w-[3rem] text-sm text-muted">{suffix}</span>
+    </div>
   );
 }

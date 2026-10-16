@@ -99,6 +99,7 @@ export const stock: Messages['stock'] = {
   },
 
   add: {
+    howManyNow: 'Quantos tem agora',
     titleNew: 'Produto novo',
     title: 'Adicionar produto',
     linked: (name) => `Pronto: da próxima vez que você escanear, é ${name}.`,

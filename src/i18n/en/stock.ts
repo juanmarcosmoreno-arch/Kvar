@@ -99,6 +99,7 @@ export const stock: Messages['stock'] = {
   },
 
   add: {
+    howManyNow: 'How many now',
     titleNew: 'New product',
     title: 'Add product',
     linked: (name) => `Done: next time you scan it, it’ll be ${name}.`,
