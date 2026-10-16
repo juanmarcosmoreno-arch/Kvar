@@ -12,6 +12,7 @@ export const recipes: Messages['recipes'] = {
     eating: 'Nous sommes',
     filters: 'Filtres',
     quick: (min) => `Rapide (≤ ${min} min)`,
+    gourmet: 'Gastronomique',
     expiring: 'Pour utiliser ce qui périme',
     ready: 'Vous avez tout',
     oneMissing: 'Il manque 1 chose',

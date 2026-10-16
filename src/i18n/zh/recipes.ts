@@ -11,6 +11,7 @@ export const recipes: Messages['recipes'] = {
     eating: '用餐',
     filters: '筛选',
     quick: (min) => `快手（≤ ${min} 分钟）`,
+    gourmet: '精致料理',
     expiring: '用掉快过期的',
     ready: '材料齐全',
     oneMissing: '还缺 1 样',

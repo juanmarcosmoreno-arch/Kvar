@@ -218,3 +218,15 @@ describe('recetas de la casa', () => {
     expect(isHouseRecipe({ id: 'catalog:x', source: 'catalog' })).toBe(false);
   });
 });
+
+describe('recetas gourmet', () => {
+  it('el catálogo trae recetas gourmet y el filtro deja solo esas', async () => {
+    const { recipeCatalog } = await import('../recipeCatalog');
+    const { matchesFilters } = await import('../recipes');
+    const all = recipeCatalog();
+    const gourmet = all.filter((r) => matchesFilters(r, { gourmet: true }));
+    expect(gourmet.length).toBeGreaterThanOrEqual(12);
+    expect(gourmet.every((r) => r.tags.includes('gourmet'))).toBe(true);
+    expect(all.length).toBeGreaterThan(gourmet.length);
+  });
+});

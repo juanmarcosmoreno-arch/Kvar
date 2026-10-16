@@ -1,5 +1,5 @@
 /**
- * Recetas que trae Stoka: comida casera de todos los días. Viven en la app (no en la base),
+ * Recetas que trae Stoka: comida casera de todos los días y algunas más gourmet (etiqueta «gourmet»). Viven en la app (no en la base),
  * funcionan sin conexión y las recetas propias del hogar tienen prioridad sobre ellas.
  * Los ingredientes se escriben como los escribiría cualquiera y se interpretan con parseIngredientLine.
  */
@@ -205,6 +205,80 @@ const DEFS: Def[] = [
     tags: ['dulce', 'horno'],
     ingredients: ['3 manzanas', '3 huevos', '1 taza de azúcar', '½ taza de aceite', '2 tazas de harina', '1 cda de polvo de hornear'],
     steps: ['Batí los huevos con el azúcar y el aceite; sumá la harina y el polvo de hornear.', 'Agregá las manzanas en cubos.', 'Horneá 45 minutos a 180 °C.'],
+  },
+
+  // --- Gourmet: más elaboradas, pero posibles en casa (filtro «Gourmet» en ¿Qué cocino?) -------------------
+  {
+    key: 'risotto-de-hongos', title: 'Risotto de hongos', servings: 3, minutes: 40, meals: ['cena'],
+    constraints: ['sin_horno', 'una_olla'], tags: ['gourmet', 'arroz'],
+    ingredients: ['300 g de arroz', '250 g de champiñones', '1 cebolla', '½ taza de vino blanco', '1 l de caldo', '40 g de manteca', '60 g de queso parmesano', '1 cda de aceite', 'sal a gusto'],
+    steps: ['Calentá el caldo y mantenelo caliente.', 'Rehogá la cebolla picada en el aceite y la mitad de la manteca; sumá los champiñones laminados y dorálos.', 'Agregá el arroz, nacaralo 2 minutos y mojá con el vino.', 'Sumá el caldo de a un cucharón, revolviendo, durante 18 minutos.', 'Fuera del fuego, mantecá con el resto de la manteca y el parmesano. Dejá reposar 2 minutos tapado.'],
+  },
+  {
+    key: 'lomo-champignones', title: 'Lomo con salsa de champiñones y papas rústicas', servings: 3, minutes: 50, meals: ['cena'],
+    tags: ['gourmet', 'carne', 'horno'],
+    ingredients: ['600 g de lomo', '250 g de champiñones', '200 ml de crema', '½ taza de vino blanco', '4 papas', 'romero a gusto', '30 g de manteca', '2 cdas de aceite', 'sal y pimienta a gusto'],
+    steps: ['Cortá las papas en gajos con cáscara, condimentalas con aceite, romero y sal y horneálas 35 minutos a 200 °C.', 'Sellá el lomo entero en la sartén bien caliente, 3 minutos por lado, y terminá en el horno 10 minutos.', 'En la misma sartén, dorá los champiñones en la manteca, desglasá con el vino y sumá la crema hasta que espese.', 'Dejá reposar la carne 5 minutos, cortala en medallones y serví con la salsa y las papas.'],
+  },
+  {
+    key: 'salmon-costra-hierbas', title: 'Salmón con costra de hierbas y puré de calabaza', servings: 2, minutes: 35, meals: ['cena'],
+    tags: ['gourmet', 'pescado', 'horno'],
+    ingredients: ['400 g de salmón', '½ taza de pan rallado', '2 cdas de perejil', '1 limón', '500 g de calabaza', '30 g de manteca', '2 cdas de aceite de oliva', 'sal y pimienta a gusto'],
+    steps: ['Herví la calabaza en cubos 15 minutos y hacé un puré con la manteca, sal y pimienta.', 'Mezclá el pan rallado con el perejil picado, la ralladura del limón y el aceite de oliva.', 'Cubrí el salmón con la costra y horneálo 12 minutos a 200 °C.', 'Serví sobre el puré con unas gotas de jugo de limón.'],
+  },
+  {
+    key: 'noquis-calabaza-salvia', title: 'Ñoquis de calabaza con manteca de salvia', servings: 4, minutes: 60, meals: ['almuerzo', 'cena'],
+    constraints: ['sin_horno'], tags: ['gourmet', 'pasta'],
+    ingredients: ['500 g de calabaza', '250 g de harina', '1 huevo', '40 g de queso parmesano', '60 g de manteca', 'salvia a gusto', 'sal a gusto'],
+    steps: ['Cociná la calabaza al vapor o en el microondas hasta que esté tierna y pisala bien seca.', 'Sumá el huevo, la mitad del parmesano, sal y la harina de a poco hasta tener una masa suave.', 'Formá cilindros, cortá los ñoquis y hervilos hasta que suban.', 'Derretí la manteca con la salvia hasta que dore y saltéa los ñoquis. Terminá con el resto del parmesano.'],
+  },
+  {
+    key: 'carbonara', title: 'Spaghetti carbonara (como en Roma)', servings: 4, minutes: 25, meals: ['almuerzo', 'cena'],
+    constraints: ['sin_horno'], tags: ['gourmet', 'pasta', 'rapido'],
+    ingredients: ['400 g de fideos', '150 g de panceta', '4 yemas', '80 g de queso parmesano', 'pimienta negra a gusto', 'sal a gusto'],
+    steps: ['Dorá la panceta en tiras en una sartén, sin aceite, hasta que esté crocante.', 'Batí las yemas con el parmesano y mucha pimienta.', 'Herví los fideos al dente y guardá una taza del agua.', 'Fuera del fuego, mezclá los fideos con la panceta y la crema de yemas, sumando agua de la cocción hasta que quede sedosa (sin que se cocine el huevo).'],
+  },
+  {
+    key: 'bondiola-cerveza', title: 'Bondiola braseada a la cerveza con puré rústico', servings: 4, minutes: 150, meals: ['almuerzo', 'cena'],
+    constraints: ['una_olla'], tags: ['gourmet', 'carne'],
+    ingredients: ['1 kg de bondiola', '1 lata de cerveza negra', '2 cebollas', '2 cdas de miel', '1 cda de mostaza', '4 papas', '30 g de manteca', '2 cdas de aceite', 'sal y pimienta a gusto'],
+    steps: ['Dorá la bondiola entera en la olla con el aceite, por todos lados.', 'Sumá las cebollas en pluma, la cerveza, la miel y la mostaza. Tapá y cociná a fuego bajo 2 horas, dándola vuelta cada tanto.', 'Herví las papas con cáscara y pisalas con la manteca, dejando trocitos.', 'Desmenuzá la carne con dos tenedores y serví con la salsa reducida sobre el puré.'],
+  },
+  {
+    key: 'pollo-limon-romero', title: 'Pollo al limón con romero y ajos confitados', servings: 4, minutes: 70, meals: ['almuerzo', 'cena'],
+    tags: ['gourmet', 'pollo', 'horno'],
+    ingredients: ['1 kg de pollo', '2 limones', '10 dientes de ajo', 'romero a gusto', '4 papas', '4 cdas de aceite de oliva', 'sal y pimienta a gusto'],
+    steps: ['Mariná el pollo con el jugo de un limón, el aceite de oliva, el romero, sal y pimienta (mejor 1 hora).', 'Poné en una fuente las papas en rodajas, el pollo, el otro limón en cuartos y los dientes de ajo enteros con cáscara.', 'Horneá 50 minutos a 200 °C, bañando el pollo con sus jugos a mitad de cocción.', 'Serví apretando los ajos confitados sobre la carne.'],
+  },
+  {
+    key: 'langostinos-ajillo', title: 'Langostinos al ajillo', servings: 2, minutes: 15, meals: ['cena'],
+    constraints: ['sin_horno', 'una_olla'], tags: ['gourmet', 'pescado', 'rapido'],
+    ingredients: ['400 g de langostinos', '4 dientes de ajo', '½ taza de aceite de oliva', '¼ taza de vino blanco', '1 cdita de ají molido', '2 cdas de perejil', 'pan (opcional)', 'sal a gusto'],
+    steps: ['Calentá el aceite de oliva con los ajos laminados y el ají molido, sin que se quemen.', 'Sumá los langostinos y cociná 2 minutos por lado.', 'Agregá el vino, dejá evaporar 1 minuto y terminá con el perejil.', 'Serví bien caliente, con pan para mojar.'],
+  },
+  {
+    key: 'pescado-papillote', title: 'Pescado en papillote con vegetales', servings: 2, minutes: 30, meals: ['cena'],
+    tags: ['gourmet', 'pescado', 'horno'],
+    ingredients: ['2 filetes de merluza', '1 zapallito', '1 zanahoria', '1 limón', '¼ taza de vino blanco', '20 g de manteca', '1 cda de perejil', 'sal y pimienta a gusto'],
+    steps: ['Cortá el zapallito y la zanahoria en tiras finas.', 'Sobre papel manteca, poné los vegetales, el pescado, rodajas de limón, la manteca, el vino, sal y pimienta.', 'Cerrá bien el paquete y horneá 15 minutos a 200 °C.', 'Abrilo en la mesa y terminá con el perejil.'],
+  },
+  {
+    key: 'ensalada-quinoa-cabra', title: 'Ensalada tibia de quinoa, vegetales asados y queso de cabra', servings: 2, minutes: 40, meals: ['almuerzo', 'vianda'],
+    tags: ['gourmet', 'ensalada', 'verduras', 'horno'],
+    ingredients: ['1 taza de quinoa', '300 g de calabaza', '1 morrón', '1 cebolla morada', '100 g de queso de cabra', '50 g de rúcula', '1 cda de miel', '3 cdas de aceite de oliva', 'sal a gusto'],
+    steps: ['Asá la calabaza, el morrón y la cebolla en cubos con aceite de oliva, 25 minutos a 200 °C.', 'Lavá la quinoa y hervila 15 minutos.', 'Mezclá la quinoa con los vegetales, la rúcula y el queso de cabra desmenuzado.', 'Aliñá con aceite de oliva, miel y sal.'],
+  },
+  {
+    key: 'mousse-chocolate', title: 'Mousse de chocolate', servings: 6, minutes: 30, meals: ['dulce'],
+    constraints: ['sin_horno'], tags: ['gourmet', 'dulce'],
+    ingredients: ['200 g de chocolate', '4 huevos', '200 ml de crema', '3 cdas de azúcar', 'sal a gusto'],
+    steps: ['Derretí el chocolate a baño María y dejalo entibiar.', 'Mezclá las yemas con el chocolate.', 'Batí la crema a medio punto y las claras a nieve con el azúcar y la sal.', 'Uní todo con movimientos envolventes y enfriá al menos 3 horas.'],
+  },
+  {
+    key: 'panna-cotta', title: 'Panna cotta con frutos rojos', servings: 4, minutes: 20, meals: ['dulce'],
+    constraints: ['sin_horno', 'una_olla'], tags: ['gourmet', 'dulce'],
+    ingredients: ['500 ml de crema', '80 g de azúcar', '1 sobre de gelatina sin sabor', '1 cdita de esencia de vainilla', '200 g de frutos rojos'],
+    steps: ['Hidratá la gelatina en 4 cucharadas de agua fría.', 'Calentá la crema con 50 g de azúcar y la vainilla, sin que hierva, y disolvé la gelatina.', 'Repartí en vasitos y enfriá 4 horas.', 'Cociná los frutos rojos con el resto del azúcar 5 minutos y servilos por encima.'],
   },
 ];
 

@@ -424,6 +424,8 @@ export interface SuggestionGroups {
 
 export interface CookFilters {
   quick?: boolean;
+  /** Solo las más elaboradas (etiqueta «gourmet») */
+  gourmet?: boolean;
   meal?: MealType | null;
   constraints?: RecipeConstraint[];
 }
@@ -491,6 +493,7 @@ export function learnPreferences(feedback: RecipeFeedback[], now = Date.now()): 
 
 export function matchesFilters(recipe: Recipe, filters: CookFilters): boolean {
   if (filters.quick && (recipe.total_minutes ?? Infinity) > QUICK_MINUTES) return false;
+  if (filters.gourmet && !recipe.tags.includes('gourmet')) return false;
   if (filters.meal && !recipe.meal_types.includes(filters.meal)) return false;
   for (const c of filters.constraints ?? []) if (!recipe.constraints.includes(c)) return false;
   return true;
@@ -536,7 +539,8 @@ export function suggestRecipes(
     if (s.expiring.length && missing <= 1) groups.expiring.push(s);
     else if (missing === 0) groups.ready.push(s);
     else if (missing === 1) groups.oneMissing.push(s);
-    else if (missing <= 3) groups.more.push(s);
+    // Con «Gourmet» se muestran todas: suelen pedir algo de compras y es para planear algo especial
+    else if (missing <= 3 || opts.filters?.gourmet) groups.more.push(s);
   }
   const order = (a: Suggestion, b: Suggestion) =>
     b.score - a.score || a.missing.length - b.missing.length || compareText(a.recipe.title, b.recipe.title);

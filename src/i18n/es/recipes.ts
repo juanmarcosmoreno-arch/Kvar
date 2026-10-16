@@ -11,6 +11,7 @@ export const recipes = {
     eating: 'Comemos',
     filters: 'Filtros',
     quick: (min: number) => `Rápido (≤ ${min} min)`,
+    gourmet: 'Gourmet',
     expiring: 'Para aprovechar lo que vence',
     ready: 'Tenés todo',
     oneMissing: 'Te falta 1 cosa',

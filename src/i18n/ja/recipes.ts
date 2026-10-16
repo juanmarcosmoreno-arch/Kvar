@@ -11,6 +11,7 @@ export const recipes: Messages['recipes'] = {
     eating: '人数',
     filters: '絞り込み',
     quick: (min) => `時短（${min}分以内）`,
+    gourmet: 'グルメ',
     expiring: '期限が近いものを使う',
     ready: '材料がそろっています',
     oneMissing: 'あと1つ足りません',

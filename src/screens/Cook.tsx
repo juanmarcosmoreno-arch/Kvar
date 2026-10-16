@@ -16,10 +16,11 @@ import { addMissingToList } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
 
-type FilterKey = 'quick' | MealType | RecipeConstraint;
+type FilterKey = 'quick' | 'gourmet' | MealType | RecipeConstraint;
 function filterOptions(): { key: FilterKey; label: string }[] {
   const { meals, constraints } = m.common;
   return [
+    { key: 'gourmet', label: `✨ ${m.recipes.cook.gourmet}` },
     { key: 'quick', label: m.recipes.cook.quick(QUICK_MINUTES) },
     ...(Object.keys(meals) as MealType[]).map((k) => ({ key: k, label: meals[k] })),
     ...(Object.keys(constraints) as RecipeConstraint[]).map((c) => ({ key: c, label: constraints[c] })),
@@ -47,6 +48,7 @@ export function Cook() {
   const own = view.recipes ?? [];
   const filters: CookFilters = {
     quick: active.includes('quick'),
+    gourmet: active.includes('gourmet'),
     meal: active.find(isMeal) ?? null,
     constraints: active.filter(isConstraint),
   };
@@ -245,7 +247,11 @@ function RecipeCard({ s, onOpen, quickAdd }: { s: Suggestion; onOpen: () => void
   const uses = s.lines
     .filter((l) => l.product && l.availability !== 'missing')
     .map((l) => l.product!.name);
-  const meta = [minutesLabel(recipe.total_minutes), recipe.source !== 'catalog' ? m.recipes.fromHome : null].filter(Boolean);
+  const meta = [
+    recipe.tags.includes('gourmet') ? `✨ ${t.gourmet}` : null,
+    minutesLabel(recipe.total_minutes),
+    recipe.source !== 'catalog' ? m.recipes.fromHome : null,
+  ].filter(Boolean);
   const add = (e: React.MouseEvent) => {
     e.stopPropagation();
     const n = addMissingToList(s);
