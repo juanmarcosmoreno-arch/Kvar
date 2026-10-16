@@ -7,7 +7,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Apple Watch: conectado desde el arranque (también si iOS abre la app en segundo plano para el reloj)
+        WatchBridge.shared.activate()
         return true
     }
 

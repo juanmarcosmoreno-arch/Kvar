@@ -2,13 +2,14 @@ import ActivityKit
 import AppIntents
 import Capacitor
 import Foundation
+import Speech
 import WatchConnectivity
 import WidgetKit
 
 /// Le pasa al Apple Watch lo necesario para sumarse al hogar (dirección de Supabase, clave pública,
 /// código de invitación). El reloj después trabaja solo, como un miembro más.
 @objc(KvarWatchPlugin)
-public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
+public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "KvarWatchPlugin"
     public let jsName = "KvarWatch"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -19,12 +20,8 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
         CAPPluginMethod(name: "listActivity", returnType: CAPPluginReturnPromise),
     ]
 
-    private var pending: [String: Any]?
-
     override public func load() {
-        guard WCSession.isSupported() else { return }
-        WCSession.default.delegate = self
-        WCSession.default.activate()
+        WatchBridge.shared.activate()
     }
 
     @objc func sync(_ call: CAPPluginCall) {
@@ -36,8 +33,7 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
         for key in ["supabaseUrl", "supabaseKey", "inviteCode", "householdId", "householdName", "memberName", "tickMode", "aisle"] {
             context[key] = call.getString(key) ?? ""
         }
-        pending = context
-        send()
+        WatchBridge.shared.update(context)
         let session = WCSession.default
         call.resolve(["paired": session.isPaired, "installed": session.isWatchAppInstalled])
     }
@@ -89,6 +85,30 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
             }
         }
     }
+}
+
+// MARK: - Conexión con el reloj
+//
+// Un solo delegado de WatchConnectivity para toda la app. Se activa al arrancar (AppDelegate), así también
+// atiende al reloj cuando iOS despierta la app en segundo plano: por ejemplo, para pasar a texto lo que
+// dijiste en «Decime» (el reloj no tiene reconocimiento de voz propio).
+final class WatchBridge: NSObject, WCSessionDelegate {
+    static let shared = WatchBridge()
+    private var pending: [String: Any]?
+    private var activated = false
+
+    func activate() {
+        guard WCSession.isSupported(), !activated else { return }
+        activated = true
+        WCSession.default.delegate = self
+        WCSession.default.activate()
+    }
+
+    /// Datos del hogar para el reloj (se reintenta si todavía no está conectado)
+    func update(_ context: [String: Any]) {
+        pending = context
+        send()
+    }
 
     private func send() {
         let session = WCSession.default
@@ -102,18 +122,88 @@ public class KvarWatchPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate {
         }
     }
 
-    public func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         DispatchQueue.main.async { self.send() }
     }
 
-    public func sessionWatchStateDidChange(_ session: WCSession) {
+    func sessionWatchStateDidChange(_ session: WCSession) {
         DispatchQueue.main.async { self.send() } // por ejemplo, cuando se instala la app del reloj
     }
 
-    public func sessionDidBecomeInactive(_ session: WCSession) {}
+    func sessionDidBecomeInactive(_ session: WCSession) {}
 
-    public func sessionDidDeactivate(_ session: WCSession) {
+    func sessionDidDeactivate(_ session: WCSession) {
         WCSession.default.activate()
+    }
+
+    /// «Decime» en el reloj: llega el audio, se pasa a texto acá y se le devuelve el texto.
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        guard let audio = message["audio"] as? Data else {
+            replyHandler(["error": "sin audio"])
+            return
+        }
+        let lang = message["lang"] as? String ?? Locale.preferredLanguages.first ?? "es-UY"
+        WatchTranscriber.transcribe(audio, lang: lang) { text, error in
+            if let text, !text.isEmpty {
+                replyHandler(["text": text])
+            } else {
+                replyHandler(["error": error ?? "vacío"])
+            }
+        }
+    }
+}
+
+/// Audio del reloj → texto (reconocimiento de voz del iPhone; en el dispositivo si se puede).
+enum WatchTranscriber {
+    private static var running: [SFSpeechRecognitionTask] = []
+    private static let lock = NSLock()
+
+    static func transcribe(_ audio: Data, lang: String, completion: @escaping (String?, String?) -> Void) {
+        guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
+            completion(nil, "permission")
+            return
+        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("stoka-reloj-\(UUID().uuidString).m4a")
+        do {
+            try audio.write(to: url)
+        } catch {
+            completion(nil, "file")
+            return
+        }
+        let candidates = [lang, Locale.preferredLanguages.first ?? "", "es-UY"]
+        guard let recognizer = candidates.lazy.compactMap({ SFSpeechRecognizer(locale: Locale(identifier: $0)) }).first(where: { $0.isAvailable }) else {
+            try? FileManager.default.removeItem(at: url)
+            completion(nil, "unavailable")
+            return
+        }
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        request.shouldReportPartialResults = false
+        if recognizer.supportsOnDeviceRecognition { request.requiresOnDeviceRecognition = true }
+        if #available(iOS 16.0, *) { request.addsPunctuation = true }
+
+        var finished = false
+        var task: SFSpeechRecognitionTask?
+        task = recognizer.recognitionTask(with: request) { result, error in
+            lock.lock()
+            let first = !finished
+            if result?.isFinal == true || error != nil { finished = true }
+            lock.unlock()
+            guard first, result?.isFinal == true || error != nil else { return }
+            lock.lock()
+            running.removeAll { $0 === task }
+            lock.unlock()
+            try? FileManager.default.removeItem(at: url)
+            if let result, result.isFinal {
+                completion(result.bestTranscription.formattedString, nil)
+            } else {
+                completion(nil, error?.localizedDescription)
+            }
+        }
+        if let task {
+            lock.lock()
+            running.append(task)
+            lock.unlock()
+        }
     }
 }
 

@@ -200,6 +200,11 @@ algo de la lista** («Sumar al stock» o «Solo tachar» y cargar el stock despu
 
 Si ya tenías el reloj andando y cambia el código, volvé a copiar los archivos (paso 2) y compilá de nuevo.
 
+**Micrófono del reloj («Decime»)**: el reloj graba y el iPhone lo pasa a texto. Una sola vez en Xcode: target
+**StokaWatch Watch App** → pestaña **Info** → **+** → **Privacy - Microphone Usage Description** con el texto
+«Para escucharte cuando tocás Decime». En el iPhone, el reconocimiento de voz tiene que estar permitido (tocá el
+micrófono de Stoka una vez).
+
 En el reloj: **la lista de compras** (tocar = comprado), **«¿Se terminó?»** (un toque y va a la lista) y **agregar a
 la lista** dictando. El iPhone le pasa al reloj el hogar y su código; el reloj entra como un miembro más
 («Reloj de Juan») y habla directo con Supabase, así funciona aunque el iPhone esté en el bolsillo.

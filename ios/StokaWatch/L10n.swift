@@ -48,6 +48,16 @@ enum L10n {
     static var kindList: String { t("kindList") }
     static var notFound: String { t("notFound") }
     static var newItem: String { t("newItem") }
+    static var listening: String { t("listening") }
+    static var done: String { t("done") }
+    static var thinking: String { t("thinking") }
+    static var tryAgain: String { t("tryAgain") }
+    static var typeInstead: String { t("typeInstead") }
+    static var micDenied: String { t("micDenied") }
+    static var micMissing: String { t("micMissing") }
+    static var didntHear: String { t("didntHear") }
+    static var needSpeechPermission: String { t("needSpeech") }
+    static var phoneUnreachable: String { t("phoneUnreachable") }
 
     private static let table: [String: [String: String]] = [
         "es": [
@@ -75,6 +85,16 @@ enum L10n {
             "kindList": "A la lista",
             "notFound": "No lo encontré en el stock",
             "newItem": "nuevo",
+            "listening": "Te escucho… (corta solo cuando terminás)",
+            "done": "Listo",
+            "thinking": "Entendiendo…",
+            "tryAgain": "Probar de nuevo",
+            "typeInstead": "Escribir",
+            "micDenied": "Stoka no tiene permiso del micrófono. Activalo en Configuración → Privacidad → Micrófono.",
+            "micMissing": "Falta el permiso del micrófono en la app del reloj. Mientras tanto, escribilo.",
+            "didntHear": "No te escuché bien. Probá de nuevo.",
+            "needSpeech": "Abrí Stoka en el iPhone, tocá el micrófono una vez y permití el reconocimiento de voz.",
+            "phoneUnreachable": "No encuentro el iPhone. Acercalo o escribilo.",
         ],
         "en": [
             "openPhone": "Open Stoka on your iPhone to connect the watch.", "connecting": "Connecting…", "retry": "Try again",
@@ -101,6 +121,16 @@ enum L10n {
             "kindList": "To the list",
             "notFound": "Not in your stock",
             "newItem": "new",
+            "listening": "Listening… (stops when you’re done)",
+            "done": "Done",
+            "thinking": "Understanding…",
+            "tryAgain": "Try again",
+            "typeInstead": "Type it",
+            "micDenied": "Stoka can’t use the microphone. Allow it in Settings → Privacy → Microphone.",
+            "micMissing": "The watch app is missing the microphone permission. Type it for now.",
+            "didntHear": "I didn’t catch that. Try again.",
+            "needSpeech": "Open Stoka on your iPhone, tap the microphone once and allow speech recognition.",
+            "phoneUnreachable": "I can’t reach your iPhone. Bring it closer or type it.",
         ],
         "pt": [
             "openPhone": "Abra o Stoka no iPhone para conectar o relógio.", "connecting": "Conectando…", "retry": "Tentar de novo",
@@ -127,6 +157,16 @@ enum L10n {
             "kindList": "Para a lista",
             "notFound": "Não está no estoque",
             "newItem": "novo",
+            "listening": "Estou ouvindo… (para sozinho quando você termina)",
+            "done": "Pronto",
+            "thinking": "Entendendo…",
+            "tryAgain": "Tentar de novo",
+            "typeInstead": "Digitar",
+            "micDenied": "O Stoka não tem permissão do microfone. Ative em Ajustes → Privacidade → Microfone.",
+            "micMissing": "Falta a permissão do microfone no app do relógio. Por enquanto, digite.",
+            "didntHear": "Não ouvi bem. Tente de novo.",
+            "needSpeech": "Abra o Stoka no iPhone, toque no microfone uma vez e permita o reconhecimento de fala.",
+            "phoneUnreachable": "Não encontro o iPhone. Aproxime-o ou digite.",
         ],
         "fr": [
             "openPhone": "Ouvrez Stoka sur l’iPhone pour connecter la montre.", "connecting": "Connexion…", "retry": "Réessayer",
@@ -153,6 +193,16 @@ enum L10n {
             "kindList": "À la liste",
             "notFound": "Pas dans votre stock",
             "newItem": "nouveau",
+            "listening": "Je vous écoute… (s’arrête quand vous avez fini)",
+            "done": "OK",
+            "thinking": "Je comprends…",
+            "tryAgain": "Réessayer",
+            "typeInstead": "Écrire",
+            "micDenied": "Stoka n’a pas accès au micro. Autorisez-le dans Réglages → Confidentialité → Micro.",
+            "micMissing": "L’app de la montre n’a pas l’autorisation du micro. Écrivez-le pour l’instant.",
+            "didntHear": "Je n’ai pas bien entendu. Réessayez.",
+            "needSpeech": "Ouvrez Stoka sur l’iPhone, touchez le micro une fois et autorisez la reconnaissance vocale.",
+            "phoneUnreachable": "Je ne trouve pas l’iPhone. Approchez-le ou écrivez.",
         ],
         "it": [
             "openPhone": "Apri Stoka sull’iPhone per collegare l’orologio.", "connecting": "Connessione…", "retry": "Riprova",
@@ -179,6 +229,16 @@ enum L10n {
             "kindList": "In lista",
             "notFound": "Non è in dispensa",
             "newItem": "nuovo",
+            "listening": "Ti ascolto… (si ferma quando finisci)",
+            "done": "Fatto",
+            "thinking": "Sto capendo…",
+            "tryAgain": "Riprova",
+            "typeInstead": "Scrivi",
+            "micDenied": "Stoka non può usare il microfono. Attivalo in Impostazioni → Privacy → Microfono.",
+            "micMissing": "All’app dell’orologio manca il permesso del microfono. Per ora scrivilo.",
+            "didntHear": "Non ho sentito bene. Riprova.",
+            "needSpeech": "Apri Stoka sull’iPhone, tocca il microfono una volta e consenti il riconoscimento vocale.",
+            "phoneUnreachable": "Non trovo l’iPhone. Avvicinalo o scrivilo.",
         ],
         "sv": [
             "openPhone": "Öppna Stoka på iPhone för att ansluta klockan.", "connecting": "Ansluter…", "retry": "Försök igen",
@@ -205,6 +265,16 @@ enum L10n {
             "kindList": "Till listan",
             "notFound": "Finns inte i förrådet",
             "newItem": "ny",
+            "listening": "Jag lyssnar… (slutar när du är klar)",
+            "done": "Klar",
+            "thinking": "Tolkar…",
+            "tryAgain": "Försök igen",
+            "typeInstead": "Skriv",
+            "micDenied": "Stoka får inte använda mikrofonen. Tillåt det i Inställningar → Integritet → Mikrofon.",
+            "micMissing": "Klockappen saknar mikrofonbehörighet. Skriv tills vidare.",
+            "didntHear": "Jag hörde inte. Försök igen.",
+            "needSpeech": "Öppna Stoka på iPhone, tryck på mikrofonen en gång och tillåt taligenkänning.",
+            "phoneUnreachable": "Hittar inte din iPhone. Ta den närmare eller skriv.",
         ],
         "da": [
             "openPhone": "Åbn Stoka på iPhone for at forbinde uret.", "connecting": "Forbinder…", "retry": "Prøv igen",
@@ -231,6 +301,16 @@ enum L10n {
             "kindList": "På listen",
             "notFound": "Ikke på lageret",
             "newItem": "ny",
+            "listening": "Jeg lytter… (stopper når du er færdig)",
+            "done": "Færdig",
+            "thinking": "Forstår…",
+            "tryAgain": "Prøv igen",
+            "typeInstead": "Skriv",
+            "micDenied": "Stoka må ikke bruge mikrofonen. Tillad det i Indstillinger → Anonymitet → Mikrofon.",
+            "micMissing": "Ur-appen mangler mikrofontilladelse. Skriv det indtil videre.",
+            "didntHear": "Jeg hørte det ikke. Prøv igen.",
+            "needSpeech": "Åbn Stoka på iPhone, tryk på mikrofonen én gang og tillad talegenkendelse.",
+            "phoneUnreachable": "Kan ikke finde din iPhone. Tag den tættere på eller skriv.",
         ],
         "zh": [
             "openPhone": "在 iPhone 上打开 Stoka 以连接手表。", "connecting": "正在连接…", "retry": "重试",
@@ -257,6 +337,16 @@ enum L10n {
             "kindList": "加入清单",
             "notFound": "库存里没有",
             "newItem": "新",
+            "listening": "正在听…（说完会自动停止）",
+            "done": "完成",
+            "thinking": "正在理解…",
+            "tryAgain": "再试一次",
+            "typeInstead": "输入",
+            "micDenied": "Stoka 没有麦克风权限。请在设置 → 隐私 → 麦克风中打开。",
+            "micMissing": "手表应用缺少麦克风权限。先用输入吧。",
+            "didntHear": "没听清，请再试一次。",
+            "needSpeech": "在 iPhone 上打开 Stoka，点一次麦克风并允许语音识别。",
+            "phoneUnreachable": "找不到 iPhone。请靠近一点或改用输入。",
         ],
         "ja": [
             "openPhone": "iPhone で Stoka を開いて時計と接続してください。", "connecting": "接続中…", "retry": "再試行",
@@ -283,6 +373,16 @@ enum L10n {
             "kindList": "リストへ",
             "notFound": "在庫にありません",
             "newItem": "新規",
+            "listening": "聞いています…（話し終えると止まります）",
+            "done": "完了",
+            "thinking": "理解しています…",
+            "tryAgain": "もう一度",
+            "typeInstead": "入力する",
+            "micDenied": "Stoka はマイクを使えません。設定 → プライバシー → マイクで許可してください。",
+            "micMissing": "時計アプリにマイクの許可がありません。今は入力してください。",
+            "didntHear": "聞き取れませんでした。もう一度どうぞ。",
+            "needSpeech": "iPhone で Stoka を開き、マイクを一度タップして音声認識を許可してください。",
+            "phoneUnreachable": "iPhone が見つかりません。近づけるか入力してください。",
         ],
     ]
 }

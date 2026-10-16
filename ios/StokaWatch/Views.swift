@@ -1,5 +1,6 @@
 import Combine
 import SwiftUI
+import WatchKit
 
 private let brandGreen = Color(red: 0.36, green: 0.73, blue: 0.48)
 
@@ -38,6 +39,8 @@ struct Message: View {
 /// Inicio: «Decime» (voz), «En el súper» (la lista para ir tachando) y «¿Se terminó?».
 struct HomeView: View {
     @EnvironmentObject var store: WatchStore
+    @State private var listening = false
+    @State private var spoken = ""
     @State private var heard: [VoiceAction] = []
     @State private var confirming = false
 
@@ -45,13 +48,12 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 10) {
-                    TextFieldLink(prompt: Text(L10n.voicePrompt)) {
+                    Button {
+                        listening = true
+                    } label: {
                         Label(L10n.speak, systemImage: "mic.fill")
                             .font(.headline)
                             .frame(maxWidth: .infinity, minHeight: 44)
-                    } onSubmit: { text in
-                        heard = WatchVoice.parse(text, products: store.products)
-                        confirming = true
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(brandGreen)
@@ -82,10 +84,97 @@ struct HomeView: View {
             }
             .navigationTitle(store.householdName)
             .navigationDestination(isPresented: $confirming) {
-                VoiceConfirmView(actions: $heard)
+                VoiceConfirmView(spoken: spoken, actions: $heard)
+            }
+            .sheet(isPresented: $listening) {
+                ListeningView { text in
+                    spoken = text
+                    heard = WatchVoice.parse(text, products: store.products)
+                    // Después de que se cierra la pantalla del micrófono
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { confirming = true }
+                }
+                .environmentObject(store)
             }
         }
         .task { await store.reloadQuietly() }
+    }
+}
+
+/// El micrófono, de una: grabo lo que decís, corto solo cuando terminás y el iPhone lo pasa a texto.
+struct ListeningView: View {
+    enum Stage: Equatable { case starting, listening, thinking, failed(String) }
+
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var recorder = VoiceRecorder()
+    @State private var stage: Stage = .starting
+    let onText: (String) -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            switch stage {
+            case .starting, .listening:
+                ZStack {
+                    Circle()
+                        .fill(brandGreen.opacity(0.25))
+                        .frame(width: 70 + 50 * recorder.level, height: 70 + 50 * recorder.level)
+                    Circle().fill(brandGreen).frame(width: 64, height: 64)
+                    Image(systemName: "mic.fill").font(.title2).foregroundStyle(.white)
+                }
+                .frame(height: 120)
+                .animation(.easeOut(duration: 0.1), value: recorder.level)
+                Text(L10n.listening).font(.footnote).foregroundStyle(.secondary)
+                Button(L10n.done) { finish() }
+                    .tint(brandGreen)
+            case .thinking:
+                ProgressView()
+                Text(L10n.thinking).font(.footnote)
+            case .failed(let message):
+                Text(message).font(.footnote).multilineTextAlignment(.center)
+                Button(L10n.tryAgain) { Task { await begin() } }
+                    .tint(brandGreen)
+                TextFieldLink(prompt: Text(L10n.voicePrompt)) {
+                    Label(L10n.typeInstead, systemImage: "keyboard")
+                } onSubmit: { text in
+                    onText(text)
+                    dismiss()
+                }
+            }
+        }
+        .task { await begin() }
+        .onDisappear { recorder.cancel() }
+    }
+
+    private func begin() async {
+        stage = .starting
+        if await recorder.start(onAutoStop: { finish() }) {
+            stage = .listening
+            WKInterfaceDevice.current().play(.start)
+        } else {
+            stage = .failed(VoiceRecorder.canRecord ? L10n.micDenied : L10n.micMissing)
+        }
+    }
+
+    private func finish() {
+        guard stage == .listening else { return }
+        WKInterfaceDevice.current().play(.stop)
+        guard let audio = recorder.stop() else {
+            stage = .failed(L10n.didntHear)
+            return
+        }
+        stage = .thinking
+        Task {
+            do {
+                let text = try await PhoneLink.shared.transcribe(audio)
+                onText(text)
+                dismiss()
+            } catch PhoneLink.TranscribeError.permission {
+                stage = .failed(L10n.needSpeechPermission)
+            } catch PhoneLink.TranscribeError.unreachable {
+                stage = .failed(L10n.phoneUnreachable)
+            } catch {
+                stage = .failed(L10n.didntHear)
+            }
+        }
     }
 }
 
@@ -93,11 +182,15 @@ struct HomeView: View {
 struct VoiceConfirmView: View {
     @EnvironmentObject var store: WatchStore
     @Environment(\.dismiss) private var dismiss
+    let spoken: String
     @Binding var actions: [VoiceAction]
     @State private var busy = false
 
     var body: some View {
         List {
+            if !spoken.isEmpty {
+                Text("«\(spoken)»").font(.footnote).foregroundStyle(.secondary)
+            }
             if actions.isEmpty {
                 Text(L10n.didntGet).font(.footnote)
             }
