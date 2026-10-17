@@ -270,5 +270,17 @@ do $$ begin
   end;
 end $$;
 
+-- Los precios de las webs los usa solo la función precios-web (con la clave de servicio)
+reset role;
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.web_prices) = 0, 'la app no debería ver web_prices';
+  begin
+    insert into public.web_prices (chain, query, items) values ('tata', 'arroz', '[]');
+    raise exception 'la app no debería poder escribir web_prices';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
 rollback;
 \echo 'RLS y lógica de stock: OK'
