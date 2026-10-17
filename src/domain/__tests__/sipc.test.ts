@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { chainOf, parsePriceCell, parsePriceTable } from '../../../supabase/functions/precios-uy/index';
-import { atStore, basketByStore, discountFor } from '../prices';
+import { atStore, basketByStore, discountFor, goodBuysAt } from '../prices';
 import { cheaperAt } from '../spending';
 import { chainOfKey, itemKey, itemLabel, matchItems, matchProducts, searchItems, sipcLines, sipcStoreKey, type SipcData } from '../sipc';
 import { product } from './fixtures';
@@ -70,6 +70,14 @@ describe('precios.uy: relacionar productos', () => {
     ]);
     expect(searchItems(data, 'arroz')[0].offers.has('disco-sipc-37')).toBe(true);
     expect(searchItems(data, 'leche')).toEqual([]);
+  });
+
+  it('buen precio acá: lo que sale claramente menos que en los otros, aunque no sea tuyo', () => {
+    // En Disco: arroz 50 (Ta-Ta 60, −17 %, en oferta); yerba Canarias 300 (Ta-Ta 270: no); Baldo solo en Disco (sin con qué comparar)
+    const disco = goodBuysAt(data, 'disco-sipc-37', { discounts: [], when: 3 });
+    expect(disco.map((x) => [x.name, Math.round(x.saving * 100), x.offer])).toEqual([['Arroz blanco - Vidarroz, 1.0', 17, true]]);
+    expect(goodBuysAt(data, 'tata-sipc-164', { discounts: [], when: 3 })).toEqual([]);
+    expect(goodBuysAt(data, 'disco-sipc-37', { discounts: [], when: 3, exclude: new Set([itemKey('Arroz blanco - Vidarroz, 1.0')]) })).toEqual([]);
   });
 
   it('precios de hoy como líneas: el comparador y los descuentos de la cadena', () => {

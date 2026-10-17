@@ -3,7 +3,7 @@
  * Todo se calcula en el teléfono.
  */
 import { MIN_SAVING, pricesByStore, storeKey, type PurchaseLine, type StorePrice } from './spending';
-import { chainOfKey } from './sipc';
+import { chainOfKey, itemKey, sipcStoreKey, type SipcData } from './sipc';
 import type { Product, ShoppingItem } from './types';
 
 /**
@@ -273,6 +273,57 @@ export function atStore(
   result.deals.sort(bySaving);
   result.deals = result.deals.slice(0, 5);
   return result;
+}
+
+export interface GoodBuy {
+  /** Clave del artículo de precios.uy */
+  key: string;
+  name: string;
+  /** Lo que pagás acá (con tus descuentos) */
+  here: number;
+  /** Lo normal en los otros súper (el del medio) */
+  other: Offer;
+  /** Cuánto menos que en `other` */
+  saving: number;
+  offer: boolean;
+}
+
+/** Para sugerir algo que no ibas a comprar, la diferencia tiene que ser clara */
+const GOOD_BUY_SAVING = 0.12;
+
+/**
+ * «Buen precio acá»: de todo lo que publica precios.uy en el súper donde estás, lo que acá es lo más barato (o empata)
+ * y sale bastante menos que lo normal en tus otros súper, o está en oferta. Para comprarlo aunque no esté en la lista.
+ */
+export function goodBuysAt(data: SipcData, here: string, opts: { discounts: StoreDiscount[]; when: When; exclude?: Set<string>; limit?: number }): GoodBuy[] {
+  const byItem = new Map<string, { name: string; prices: StorePrice[]; offerHere: boolean }>();
+  for (const store of data.stores) {
+    const key = sipcStoreKey(store);
+    for (const p of data.prices[store.id] ?? []) {
+      const k = itemKey(p.name);
+      const row = byItem.get(k) ?? { name: p.name, prices: [], offerHere: false };
+      row.prices.push({ store: key, name: p.name, price: p.price, at: p.date ?? data.at });
+      if (key === here && p.offer) row.offerHere = true;
+      byItem.set(k, row);
+    }
+  }
+  const out: GoodBuy[] = [];
+  for (const [key, row] of byItem) {
+    if (opts.exclude?.has(key)) continue;
+    const all = offers(row.prices, opts.discounts, opts.when);
+    const mine = all.find((o) => o.store === here);
+    const others = all.filter((o) => o.store !== here);
+    if (!mine || !others.length) continue;
+    // Acá es lo más barato (o empata: Disco y Devoto suelen tener el mismo precio)…
+    if (mine.effective > others[0].effective) continue;
+    // …y bastante menos que lo normal en los otros súper (la mediana)
+    const typical = others[Math.floor((others.length - 1) / 2)];
+    const saving = 1 - mine.effective / typical.effective;
+    if (saving >= GOOD_BUY_SAVING || (row.offerHere && saving > 0)) {
+      out.push({ key, name: row.name, here: mine.effective, other: typical, saving, offer: row.offerHere });
+    }
+  }
+  return out.sort((a, b) => b.saving - a.saving).slice(0, opts.limit ?? 8);
 }
 
 /** Los súper con algún precio en los últimos 6 meses (claves) */

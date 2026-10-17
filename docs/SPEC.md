@@ -355,6 +355,8 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   (dependen de las tarjetas de cada uno); los precios vienen de los tickets del hogar.
 - **Estoy en el súper → ¿en cuál?**: con los descuentos de hoy, de la lista «Llevá acá» / «Mejor en otro lado», y
   «Aprovechá» con lo de siempre que ahí está ≥10 % más barato. Vence a las 4 horas.
+- **Buen precio acá** (en un súper de precios.uy): de todo lo que publica, lo que ahí es lo más barato (o empata) y sale
+  ≥12 % menos que lo normal (la mediana de tus otros súper), o está en oferta; con un toque va a la lista.
 - Al leer un ticket sin súper reconocido, se pregunta de cuál es. «Más barato en X» en la lista usa los descuentos de hoy.
 - **Precios de hoy (precios.uy, solo Uruguay)**: la Edge Function `precios-uy` hace lo mismo que la página del SIPC
   (sesión JSF, locales de una zona del mapa, «Lista de precios» de cada local) y devuelve los locales cerca

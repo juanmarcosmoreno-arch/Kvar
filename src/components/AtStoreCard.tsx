@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { atStore, discountAppliesAt, type StoreTip } from '../domain/prices';
+import { atStore, discountAppliesAt, goodBuysAt, type GoodBuy, type StoreTip } from '../domain/prices';
+import { addListItem } from '../store/actions';
+import { toast } from '../store/toast';
 import { storeKey, storeLabel } from '../domain/spending';
 import type { Snapshot } from '../domain/types';
 import { compareText, formatDecimal, m } from '../i18n';
@@ -7,7 +9,7 @@ import { formatCurrency } from '../lib/currency';
 import { addStore, setHereStore, useHereStore } from '../lib/pricePrefs';
 import { usePriceData } from '../lib/priceData';
 import { useSipc } from '../lib/sipc';
-import { isSipcStore, sipcStoreKey } from '../domain/sipc';
+import { isSipcStore, itemLabel, sipcStoreKey } from '../domain/sipc';
 import { useUI } from '../store/ui';
 import { Icon } from './Icon';
 
@@ -85,7 +87,11 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
   // Los descuentos de hoy acá (de todo o de una marca)
   const todays = data.discounts.filter((d) => d.percent > 0 && discountAppliesAt(d, here) && (!d.days.length || d.days.includes(today)));
   const hasPrices = lines.some((l) => l.product_id && storeKey(l.store) === here);
-  const empty = tips && !tips.buyHere.length && !tips.elsewhere.length && !tips.deals.length;
+  // Buen precio acá: de todo precios.uy (no solo lo tuyo), sin repetir lo que ya aparece arriba
+  const shown = new Set([...(tips?.buyHere ?? []), ...(tips?.elsewhere ?? []), ...(tips?.deals ?? [])].map((x) => x.productId));
+  const exclude = new Set(sipc.matches.filter((x) => shown.has(x.product.id)).map((x) => x.item));
+  const buys = isSipcStore(here) && sipc.data ? goodBuysAt(sipc.data, here, { discounts: data.discounts, when: today, exclude }) : [];
+  const empty = tips && !tips.buyHere.length && !tips.elsewhere.length && !tips.deals.length && !buys.length;
 
   return (
     <section className="card space-y-3 border-primary/30 p-4">
@@ -126,8 +132,49 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
       {tips && tips.deals.length > 0 && (
         <TipList title={t.deals} icon="tag" tone="ok" tips={tips.deals} detail={(x) => t.lessThan(pct(x.saving), storeLabel(x.other.store))} onOpen={ui.openProduct} />
       )}
+      {buys.length > 0 && <GoodBuys buys={buys} />}
       {empty && <p className="text-sm text-muted">{hasPrices ? t.nothing : t.noPrices(storeLabel(here))}</p>}
     </section>
+  );
+}
+
+/** Sugerencias: buen precio acá, aunque no esté en la lista (con un toque va a la lista) */
+function GoodBuys({ buys }: { buys: GoodBuy[] }) {
+  const t = m.prices.here;
+  return (
+    <div className="space-y-1">
+      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#2E7A4A] dark:text-ok">
+        <Icon name="tag" size={16} /> {t.goodBuys}
+      </h3>
+      <p className="text-xs text-muted">{t.goodBuysHint}</p>
+      <ul className="divide-y divide-line">
+        {buys.map((x) => {
+          const label = itemLabel(x.name);
+          return (
+            <li key={x.key} className="flex min-h-[52px] items-center gap-2 py-1.5">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium">{label}</span>
+                <span className="block truncate text-xs text-muted">
+                  {x.offer && <span className="mr-1 rounded bg-low/20 px-1 font-medium text-[#9A6300] dark:text-low">{m.prices.today.offer}</span>}
+                  {t.vsTypical(pct(x.saving))}
+                </span>
+              </span>
+              <span className="shrink-0 text-sm font-medium tabular-nums">{formatCurrency(x.here)}</span>
+              <button
+                className="flex min-h-tap min-w-tap shrink-0 items-center justify-center rounded-full text-primary"
+                aria-label={`${m.shopping.soon.add}: ${label}`}
+                onClick={() => {
+                  addListItem({ name: label });
+                  toast(m.shopping.soon.added(label));
+                }}
+              >
+                <Icon name="plus" size={20} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
