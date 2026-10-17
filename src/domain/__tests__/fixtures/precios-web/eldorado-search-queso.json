@@ -1,0 +1,218 @@
+[
+ {
+  "productId": "8375",
+  "productName": "Queso Conaprole Muzzarella Grande Kg",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "queso-conaprole-muzzarella-grande-kg",
+  "productReference": "252153",
+  "categoryId": "178",
+  "categories": [
+   "/Frescos/Fiambrería/Quesos y Muzzarellas/",
+   "/Frescos/Fiambrería/",
+   "/Frescos/"
+  ],
+  "link": "https://www.eldorado.com.uy/queso-conaprole-muzzarella-grande-kg/p",
+  "items": [
+   {
+    "itemId": "8375",
+    "name": "Queso Conaprole Muzzarella Grande Kg",
+    "nameComplete": "Queso Conaprole Muzzarella Grande Kg",
+    "complementName": "",
+    "ean": "2070300000008",
+    "measurementUnit": "kg",
+    "unitMultiplier": 0.1,
+    "images": [
+     {
+      "imageId": "1162456",
+      "imageLabel": "252153",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1162456/252153.jpg?v=638475990993430000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 589,
+       "ListPrice": 589,
+       "PriceWithoutDiscount": 589,
+       "FullSellingPrice": 58.9,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "55104",
+  "productName": "Queso Rallado Conaprole Sbriz Deshidratado 200gr",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "queso-rallado-conaprole-sbriz-deshidratado-200gr",
+  "productReference": "1656651",
+  "categoryId": "133",
+  "categories": [
+   "/Comestibles/Almacen/Queso rallado/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/queso-rallado-conaprole-sbriz-deshidratado-200gr/p",
+  "items": [
+   {
+    "itemId": "55068",
+    "name": "Queso Rallado Conaprole Sbriz Deshidratado 200gr",
+    "nameComplete": "Queso Rallado Conaprole Sbriz Deshidratado 200gr",
+    "complementName": "",
+    "ean": "7730105010026",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1177245",
+      "imageLabel": "7730105010026",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1177245/7730105010026.jpg?v=638887873801470000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 249.9,
+       "ListPrice": 249.9,
+       "PriceWithoutDiscount": 249.9,
+       "FullSellingPrice": 249.9,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "7248",
+  "productName": "Queso Requeson Conaprole 250Gr .",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "queso-requeson-conaprole-250gr",
+  "productReference": "252918",
+  "categoryId": "199",
+  "categories": [
+   "/Frescos/Lacteos/Quesos Rallado / Untable/",
+   "/Frescos/Lacteos/",
+   "/Frescos/"
+  ],
+  "link": "https://www.eldorado.com.uy/queso-requeson-conaprole-250gr/p",
+  "items": [
+   {
+    "itemId": "7248",
+    "name": "Queso Requeson Conaprole 250Gr .",
+    "nameComplete": "Queso Requeson Conaprole 250Gr .",
+    "complementName": "",
+    "ean": "77309549",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1165608",
+      "imageLabel": "77309549",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1165608/77309549.jpg?v=638536514413300000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 163,
+       "ListPrice": 163,
+       "PriceWithoutDiscount": 163,
+       "FullSellingPrice": 163,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "1539",
+  "productName": "Queso Conaprole Cremoso Cuartirolo Kg. .",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "queso-conaprole-cremoso-cuartirolo-kg",
+  "productReference": "705408",
+  "categoryId": "178",
+  "categories": [
+   "/Frescos/Fiambrería/Quesos y Muzzarellas/",
+   "/Frescos/Fiambrería/",
+   "/Frescos/"
+  ],
+  "link": "https://www.eldorado.com.uy/queso-conaprole-cremoso-cuartirolo-kg/p",
+  "items": [
+   {
+    "itemId": "1540",
+    "name": "Queso Conaprole Cremoso Cuartirolo Kg. .",
+    "nameComplete": "Queso Conaprole Cremoso Cuartirolo Kg. .",
+    "complementName": "",
+    "ean": "2071200000006",
+    "measurementUnit": "kg",
+    "unitMultiplier": 0.1,
+    "images": [
+     {
+      "imageId": "1140860",
+      "imageLabel": null,
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1140860/705408.gif?v=637957409765070000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 669,
+       "ListPrice": 669,
+       "PriceWithoutDiscount": 669,
+       "FullSellingPrice": 66.9,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

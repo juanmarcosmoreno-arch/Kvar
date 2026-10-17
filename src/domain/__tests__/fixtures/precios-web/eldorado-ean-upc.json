@@ -1,0 +1,110 @@
+[
+ {
+  "productId": "7244",
+  "productName": "Dulce De Leche Conaprole 500Gr .",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "dulce-de-leche-conaprole-500gr",
+  "productReference": "252724",
+  "categoryId": "111",
+  "categories": [
+   "/Comestibles/Almacen/Dulces/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/dulce-de-leche-conaprole-500gr/p",
+  "items": [
+   {
+    "itemId": "7244",
+    "name": "Dulce De Leche Conaprole 500Gr .",
+    "nameComplete": "Dulce De Leche Conaprole 500Gr .",
+    "complementName": "",
+    "ean": "7730105005114",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1165497",
+      "imageLabel": "7730105005114",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1165497/7730105005114.jpg?v=638536504310700000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 137,
+       "ListPrice": 137,
+       "PriceWithoutDiscount": 137,
+       "FullSellingPrice": 137,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "49288",
+  "productName": "Grapamiel Rosa Negra Premium Cafe Botella 750cc",
+  "brand": "ROSA NEGRA",
+  "brandId": 5474,
+  "linkText": "grapamiel-rosa-negra-premium-cafe-botella-750cc",
+  "productReference": "1647654",
+  "categoryId": "79",
+  "categories": [
+   "/Bebidas/Bebidas Con Alcohol/Bebidas Blancas/",
+   "/Bebidas/Bebidas Con Alcohol/",
+   "/Bebidas/"
+  ],
+  "link": "https://www.eldorado.com.uy/grapamiel-rosa-negra-premium-cafe-botella-750cc/p",
+  "items": [
+   {
+    "itemId": "49237",
+    "name": "Grapamiel Rosa Negra Premium Cafe Botella 750cc",
+    "nameComplete": "Grapamiel Rosa Negra Premium Cafe Botella 750cc",
+    "complementName": "",
+    "ean": "737186521592",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1163502",
+      "imageLabel": "737186521592",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1163502/737186521592.jpg?v=638494911008630000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 1087,
+       "ListPrice": 1087,
+       "PriceWithoutDiscount": 1087,
+       "FullSellingPrice": 1087,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 10,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

@@ -1,0 +1,272 @@
+[
+ {
+  "productId": "20928",
+  "productName": "Jugo Tang En Polvo Naranja Mango 15gr",
+  "brand": "TANG",
+  "brandId": 3857,
+  "linkText": "jugo-tang-en-polvo-naranja-mango-15gr",
+  "productReference": "1633625",
+  "categoryId": "94",
+  "categories": [
+   "/Bebidas/Bebidas Sin Alcohol/Jugos y Jugos en Polvo/",
+   "/Bebidas/Bebidas Sin Alcohol/",
+   "/Bebidas/"
+  ],
+  "link": "https://www.eldorado.com.uy/jugo-tang-en-polvo-naranja-mango-15gr/p",
+  "items": [
+   {
+    "itemId": "20927",
+    "name": "Jugo Tang En Polvo Naranja Mango 18Gr",
+    "nameComplete": "Jugo Tang En Polvo Naranja Mango 15gr Jugo Tang En Polvo Naranja Mango 18Gr",
+    "complementName": "",
+    "ean": "7622201757793",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1181282",
+      "imageLabel": "7622201757793",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1181282/7622201757793.jpg.jpg?v=639180097944370000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 15,
+       "ListPrice": 23,
+       "PriceWithoutDiscount": 15,
+       "FullSellingPrice": 15,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "20319",
+  "productName": "Jugo Tang En Polvo Naranja 15gr",
+  "brand": "TANG",
+  "brandId": 3857,
+  "linkText": "jugo-tang-en-polvo-naranja-15gr",
+  "productReference": "1633428",
+  "categoryId": "94",
+  "categories": [
+   "/Bebidas/Bebidas Sin Alcohol/Jugos y Jugos en Polvo/",
+   "/Bebidas/Bebidas Sin Alcohol/",
+   "/Bebidas/"
+  ],
+  "link": "https://www.eldorado.com.uy/jugo-tang-en-polvo-naranja-15gr/p",
+  "items": [
+   {
+    "itemId": "20318",
+    "name": "Jugo Tang En Polvo Naranja 18Gr",
+    "nameComplete": "Jugo Tang En Polvo Naranja 15gr Jugo Tang En Polvo Naranja 18Gr",
+    "complementName": "",
+    "ean": "7622201757731",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1181280",
+      "imageLabel": "7622201757731",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1181280/7622201757731.jpg.jpg?v=639180097843300000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 15,
+       "ListPrice": 23,
+       "PriceWithoutDiscount": 15,
+       "FullSellingPrice": 15,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "7425",
+  "productName": "Jugo Clight En Polvo Naranja,Durazno 7.5g",
+  "brand": "CLIGHT",
+  "brandId": 851,
+  "linkText": "jugo-clight-en-polvo-naranja-durazno-7-5g",
+  "productReference": "127107",
+  "categoryId": "94",
+  "categories": [
+   "/Bebidas/Bebidas Sin Alcohol/Jugos y Jugos en Polvo/",
+   "/Bebidas/Bebidas Sin Alcohol/",
+   "/Bebidas/"
+  ],
+  "link": "https://www.eldorado.com.uy/jugo-clight-en-polvo-naranja-durazno-7-5g/p",
+  "items": [
+   {
+    "itemId": "7425",
+    "name": "Jugo Clight En Polvo Naranja-Durazno 20Gr Vit C+D",
+    "nameComplete": "Jugo Clight En Polvo Naranja,Durazno 7.5g Jugo Clight En Polvo Naranja-Durazno 20Gr Vit C+D",
+    "complementName": "",
+    "ean": "7622201807634",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1181260",
+      "imageLabel": "7622201702717",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1181260/7622201702717.jpg.jpg?v=639180096746700000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 27,
+       "ListPrice": 27,
+       "PriceWithoutDiscount": 27,
+       "FullSellingPrice": 27,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "15593",
+  "productName": "Jabon En Barra Cavallaro Coco 200gr",
+  "brand": "CAVALLARO",
+  "brandId": 744,
+  "linkText": "jabon-en-barra-cavallaro-coco-200gr",
+  "productReference": "1612054",
+  "categoryId": "389",
+  "categories": [
+   "/Limpieza/Cuidado De La Ropa/Jabones/",
+   "/Limpieza/Cuidado De La Ropa/",
+   "/Limpieza/"
+  ],
+  "link": "https://www.eldorado.com.uy/jabon-en-barra-cavallaro-coco-200gr/p",
+  "items": [
+   {
+    "itemId": "15593",
+    "name": "Jabon Cavallaro Barra De Coco Para Ropa",
+    "nameComplete": "Jabon En Barra Cavallaro Coco 200gr Jabon Cavallaro Barra De Coco Para Ropa",
+    "complementName": "",
+    "ean": "7840118010095",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1148245",
+      "imageLabel": null,
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1148245/1612054.gif?v=637957427839630000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 73,
+       "ListPrice": 73,
+       "PriceWithoutDiscount": 73,
+       "FullSellingPrice": 73,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "10791",
+  "productName": "Jabon En Polvo Granby Matic 3Kg",
+  "brand": "GRANBY",
+  "brandId": 1744,
+  "linkText": "jabon-en-polvo-granby-matic-3kg",
+  "productReference": "1598764",
+  "categoryId": "389",
+  "categories": [
+   "/Limpieza/Cuidado De La Ropa/Jabones/",
+   "/Limpieza/Cuidado De La Ropa/",
+   "/Limpieza/"
+  ],
+  "link": "https://www.eldorado.com.uy/jabon-en-polvo-granby-matic-3kg/p",
+  "items": [
+   {
+    "itemId": "10791",
+    "name": "Jabon En Polvo Granby Matic 3Kg",
+    "nameComplete": "Jabon En Polvo Granby Matic 3Kg",
+    "complementName": "",
+    "ean": "7791290795020",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1162442",
+      "imageLabel": "7791290795020",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1162442/7791290795020.jpg?v=638475776966700000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 247,
+       "ListPrice": 247,
+       "PriceWithoutDiscount": 247,
+       "FullSellingPrice": 247,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

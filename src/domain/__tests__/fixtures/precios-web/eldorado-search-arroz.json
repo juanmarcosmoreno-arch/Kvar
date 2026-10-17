@@ -1,0 +1,276 @@
+[
+ {
+  "productId": "27716",
+  "productName": "Arroz El Dorado 1Kg",
+  "brand": "EL DORADO",
+  "brandId": 1310,
+  "linkText": "arroz-el-dorado-1kg",
+  "productReference": "1640375",
+  "categoryId": "102",
+  "categories": [
+   "/Comestibles/Almacen/Arroz/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/arroz-el-dorado-1kg/p",
+  "items": [
+   {
+    "itemId": "27688",
+    "name": "Arroz El Dorado 1Kg",
+    "nameComplete": "Arroz El Dorado 1Kg",
+    "complementName": "",
+    "ean": "7730934623756",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1154603",
+      "imageLabel": "7730934623756",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1154603/7730934623756.jpg?v=638284991948600000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 51,
+       "ListPrice": 64.9,
+       "PriceWithoutDiscount": 51,
+       "FullSellingPrice": 51,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "47108",
+  "productName": "Arroz Vida 1kg",
+  "brand": "VIDA",
+  "brandId": 4184,
+  "linkText": "arroz-vida-1kg",
+  "productReference": "55050",
+  "categoryId": "102",
+  "categories": [
+   "/Comestibles/Almacen/Arroz/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/arroz-vida-1kg/p",
+  "items": [
+   {
+    "itemId": "47058",
+    "name": "Arroz Vida 1kg",
+    "nameComplete": "Arroz Vida 1kg",
+    "complementName": "",
+    "ean": "7730114000728",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1178090",
+      "imageLabel": "55050",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1178090/55050.jpg?v=638945016182600000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 35,
+       "ListPrice": 39.9,
+       "PriceWithoutDiscount": 35,
+       "FullSellingPrice": 35,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "1405",
+  "productName": "Arroz Shiva Patna 1kg",
+  "brand": "SHIVA",
+  "brandId": 5648,
+  "linkText": "arroz-shiva-patna-1kg",
+  "productReference": "75987",
+  "categoryId": "102",
+  "categories": [
+   "/Comestibles/Almacen/Arroz/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/arroz-shiva-patna-1kg/p",
+  "items": [
+   {
+    "itemId": "1406",
+    "name": "Arroz Shiva 1Kg",
+    "nameComplete": "Arroz Shiva Patna 1kg Arroz Shiva 1Kg",
+    "complementName": "",
+    "ean": "7730114000025",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1140682",
+      "imageLabel": null,
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1140682/75987.gif?v=637957409131870000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 45,
+       "ListPrice": 45,
+       "PriceWithoutDiscount": 45,
+       "FullSellingPrice": 45,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "1917",
+  "productName": "Galleta Cerealitas Arroz 160Gr",
+  "brand": "CEREALITAS",
+  "brandId": 770,
+  "linkText": "galleta-cerealitas-arroz-160gr",
+  "productReference": "65987",
+  "categoryId": "117",
+  "categories": [
+   "/Comestibles/Almacen/Galletas/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/galleta-cerealitas-arroz-160gr/p",
+  "items": [
+   {
+    "itemId": "1918",
+    "name": "Galleta Cerealitas Arroz 160Gr",
+    "nameComplete": "Galleta Cerealitas Arroz 160Gr",
+    "complementName": "",
+    "ean": "7622201753061",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1181275",
+      "imageLabel": "7622201753061",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1181275/7622201753061.jpg.jpg?v=639180097578400000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [
+        {
+         "<Name>k__BackingField": "20% OFF"
+        }
+       ],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 123.92,
+       "ListPrice": 154.9,
+       "PriceWithoutDiscount": 154.9,
+       "FullSellingPrice": 123.92,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T02:59:59Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "17351",
+  "productName": "Conf. Arroz Con Leche Porcion",
+  "brand": "OTRAS MARCAS",
+  "brandId": 1,
+  "linkText": "conf-arroz-con-leche-porcion",
+  "productReference": "59188",
+  "categoryId": "172",
+  "categories": [
+   "/Comestibles/Elaboracion Propia/Rotiseria/",
+   "/Comestibles/Elaboracion Propia/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/conf-arroz-con-leche-porcion/p",
+  "items": [
+   {
+    "itemId": "17351",
+    "name": "Conf. Arroz Con Leche Porcion",
+    "nameComplete": "Conf. Arroz Con Leche Porcion",
+    "complementName": "",
+    "ean": "2152800000006",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1171263",
+      "imageLabel": "59188",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1171263/59188.jpg?v=638648520284300000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 99,
+       "ListPrice": 99,
+       "PriceWithoutDiscount": 99,
+       "FullSellingPrice": 99,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

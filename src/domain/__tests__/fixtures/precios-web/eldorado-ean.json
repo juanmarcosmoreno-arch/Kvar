@@ -1,0 +1,164 @@
+[
+ {
+  "productId": "47108",
+  "productName": "Arroz Vida 1kg",
+  "brand": "VIDA",
+  "brandId": 4184,
+  "linkText": "arroz-vida-1kg",
+  "productReference": "55050",
+  "categoryId": "102",
+  "categories": [
+   "/Comestibles/Almacen/Arroz/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/arroz-vida-1kg/p",
+  "items": [
+   {
+    "itemId": "47058",
+    "name": "Arroz Vida 1kg",
+    "nameComplete": "Arroz Vida 1kg",
+    "complementName": "",
+    "ean": "7730114000728",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1178090",
+      "imageLabel": "55050",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1178090/55050.jpg?v=638945016182600000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 35,
+       "ListPrice": 39.9,
+       "PriceWithoutDiscount": 35,
+       "FullSellingPrice": 35,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "8714",
+  "productName": "Dulce De Leche Conaprole Manjar 1Kg .",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "dulce-de-leche-conaprole-manjar-1kg",
+  "productReference": "705500",
+  "categoryId": "111",
+  "categories": [
+   "/Comestibles/Almacen/Dulces/",
+   "/Comestibles/Almacen/",
+   "/Comestibles/"
+  ],
+  "link": "https://www.eldorado.com.uy/dulce-de-leche-conaprole-manjar-1kg/p",
+  "items": [
+   {
+    "itemId": "8714",
+    "name": "Dulce De Leche Conaprole Manjar 1Kg .",
+    "nameComplete": "Dulce De Leche Conaprole Manjar 1Kg .",
+    "complementName": "",
+    "ean": "7730105005435",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1165502",
+      "imageLabel": "7730105005435",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1165502/7730105005435.jpg?v=638536504670630000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 179,
+       "ListPrice": 197,
+       "PriceWithoutDiscount": 179,
+       "FullSellingPrice": 179,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "1740",
+  "productName": "Manteca Conaprole Salada 200Gr .",
+  "brand": "CONAPROLE",
+  "brandId": 922,
+  "linkText": "manteca-conaprole-salada-200gr",
+  "productReference": "252803",
+  "categoryId": "197",
+  "categories": [
+   "/Frescos/Lacteos/Mantecas/",
+   "/Frescos/Lacteos/",
+   "/Frescos/"
+  ],
+  "link": "https://www.eldorado.com.uy/manteca-conaprole-salada-200gr/p",
+  "items": [
+   {
+    "itemId": "1741",
+    "name": "Manteca Conaprole Salada 200Gr .",
+    "nameComplete": "Manteca Conaprole Salada 200Gr .",
+    "complementName": "",
+    "ean": "77306456",
+    "measurementUnit": "un",
+    "unitMultiplier": 1,
+    "images": [
+     {
+      "imageId": "1165606",
+      "imageLabel": "77306456",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1165606/77306456.jpg?v=638536514302730000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 103,
+       "ListPrice": 103,
+       "PriceWithoutDiscount": 103,
+       "FullSellingPrice": 103,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

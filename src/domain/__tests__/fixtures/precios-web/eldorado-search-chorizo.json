@@ -1,0 +1,56 @@
+[
+ {
+  "productId": "55782",
+  "productName": "Chorizo Venturini Tope De Gama A/V 6un 660gr",
+  "brand": "VENTURINI",
+  "brandId": 5773,
+  "linkText": "chorizo-venturini-tope-de-gama-a-v-6un-660gr",
+  "productReference": "1657659",
+  "categoryId": "147",
+  "categories": [
+   "/Frescos/Carnicería/Embutidos/",
+   "/Frescos/Carnicería/",
+   "/Frescos/"
+  ],
+  "link": "https://www.eldorado.com.uy/chorizo-venturini-tope-de-gama-a-v-6un-660gr/p",
+  "items": [
+   {
+    "itemId": "55745",
+    "name": "Chorizo Venturini Tope De Gama A/V 6un 660gr",
+    "nameComplete": "Chorizo Venturini Tope De Gama A/V 6un 660gr",
+    "complementName": "",
+    "ean": "2254800000007",
+    "measurementUnit": "kg",
+    "unitMultiplier": 0.66,
+    "images": [
+     {
+      "imageId": "1180466",
+      "imageLabel": "1657659",
+      "imageUrl": "https://eldoradouy.vteximg.com.br/arquivos/ids/1180466/1657659.jpg?v=639087697458470000"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Supermercados El Dorado - Polakof y Cía SA",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DiscountHighLight": [],
+       "Teasers": [],
+       "PromotionTeasers": [],
+       "Price": 360.45,
+       "ListPrice": 404,
+       "PriceWithoutDiscount": 360.45,
+       "FullSellingPrice": 237.89,
+       "RewardValue": 0,
+       "PriceValidUntil": "2100-01-02T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0
+      }
+     }
+    ]
+   }
+  ]
+ }
+]
