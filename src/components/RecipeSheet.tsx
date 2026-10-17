@@ -5,6 +5,11 @@ import {
 } from '../domain/recipes';
 import type { Product, Recipe, StockStatus } from '../domain/types';
 import { formatList, m } from '../i18n';
+import { recipeCost, sizeOfSipc, ticketRef, type PriceRef } from '../domain/recipeCost';
+import { allItems, matchItems } from '../domain/sipc';
+import { formatCurrency } from '../lib/currency';
+import { useSipc } from '../lib/sipc';
+import { usePurchases } from '../lib/stats';
 import { addMissingToList, cookedRecipe, deleteRecipe, dismissRecipe } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -40,6 +45,7 @@ function Body({
   const t = m.recipes.sheet;
   const s = useMemo(() => assessRecipe(recipe, view.products, servings), [recipe, view.products, servings]);
   const own = isHouseRecipe(recipe);
+  const cost = useRecipeCost(s.lines, s.factor);
 
   if (cooking) return <Cooked recipe={recipe} used={usedProducts(s)} onDone={onClose} onBack={() => setCooking(false)} />;
 
@@ -75,6 +81,17 @@ function Body({
         <ul className="card divide-y divide-line">
           {s.lines.map((l) => <Ingredient key={l.ingredient.id} line={l} />)}
         </ul>
+        {cost && cost.priced > 0 && (
+          <div className="space-y-0.5 px-1 text-xs text-muted">
+            <p className="font-medium text-ink/80">
+              {t.cost(formatCurrency(Math.round(cost.total / 10) * 10, { cents: false }), formatCurrency(Math.round(cost.total / servings / 5) * 5, { cents: false }))}
+            </p>
+            <p>
+              {t.costHint}
+              {cost.missing.length > 0 && ` ${t.costMissing(formatList(cost.missing.map((x) => x.toLowerCase())))}`}
+            </p>
+          </div>
+        )}
       </section>
 
       {steps.length > 0 && (
@@ -124,6 +141,34 @@ function Body({
       </div>
     </div>
   );
+}
+
+/** Costo aproximado: precio de hoy (precios.uy) del producto o del ingrediente; si no, el último de los tickets */
+function useRecipeCost(lines: IngredientLine[], factor: number) {
+  const view = useView()!;
+  const sipc = useSipc(view.products);
+  const purchases = usePurchases(view.household.id);
+  return useMemo(() => {
+    const items = sipc.data ? allItems(sipc.data) : [];
+    const byKey = new Map(items.map((x) => [x.key, x]));
+    const names = items.map((x) => x.name);
+    const keyOf = new Map(items.map((x) => [x.name, x.key]));
+    const fromItem = (key: string | undefined): PriceRef | null => {
+      const item = key ? byKey.get(key) : undefined;
+      if (!item?.prices.length) return null;
+      return { price: Math.min(...item.prices.map((p) => p.price)), ...sizeOfSipc(item.name) };
+    };
+    const ticketLines = purchases.status === 'ready' ? purchases.lines : [];
+    const priceFor = (line: IngredientLine): PriceRef | null => {
+      if (line.product) {
+        const match = sipc.matches.find((x) => x.product.id === line.product!.id);
+        const ref = fromItem(match?.item) ?? ticketRef(ticketLines, line.product.id);
+        if (ref) return ref;
+      }
+      return fromItem(keyOf.get(matchItems(line.ingredient.name, names)[0] ?? ''));
+    };
+    return recipeCost(lines, factor, priceFor);
+  }, [lines, factor, sipc, purchases]);
 }
 
 function Ingredient({ line }: { line: IngredientLine }) {

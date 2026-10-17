@@ -367,6 +367,12 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   convierten en líneas de ticket por local (`cadena-sipc-id`), así canasta, «más barato en», «Estoy en el súper» y
   los descuentos de la cadena funcionan igual. Para lo que precios.uy no publica, siguen los tickets.
 
+### Cuánto sale una receta (implementado)
+- Abajo de los ingredientes: «≈ $ 420 en total · $ 105 por persona», con el precio de hoy (precios.uy, el más barato de
+  tus súper) del producto o del ingrediente, o el último de tus tickets. Se cuenta la parte del envase que usa la
+  receta (g/ml/cucharadas según el tamaño; unidades según cuántas trae; latas y paquetes enteros; tomates, cebollas…
+  con un peso típico). Lo «a gusto», la sal y el agua quedan afuera; lo que no tiene precio se nombra.
+
 ### Hay de sobra (implementado)
 - Marca del producto (`products.surplus`), no un cuarto estado: sigue en «Hay». Se activa desde la ficha (solo con «Hay»),
   se comparte con el hogar y la quita la base (trigger) cuando pasa a «Queda poco» o «No hay».
