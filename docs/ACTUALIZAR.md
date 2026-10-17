@@ -14,6 +14,16 @@ git pull --no-edit origin claude/kvar-pantry-app-lv5jo3
 
 ## 2. Supabase (solo cuando Claude te dice que hay algo nuevo)
 
+> **Ojo: cada cosa va en un lugar distinto.**
+>
+> | Qué copiaste | Dónde se pega |
+> |---|---|
+> | un archivo **`.sql`** (migración) | **SQL Editor** |
+> | un **`index.ts`** (función) | **Edge Functions** → la función → **Code** |
+>
+> Si el SQL Editor dice *syntax error at or near "export"*, pegaste una función ahí: no rompiste nada, pegala en
+> Edge Functions.
+
 ### Una migración (cambio en la base)
 
 1. Copiá el archivo al portapapeles (cambiá el nombre por el que te diga Claude):
