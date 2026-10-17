@@ -50,7 +50,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <UIContext.Provider value={ui}>
-      <div className="mx-auto flex min-h-full max-w-lg flex-col pb-[calc(env(safe-area-inset-bottom)+88px)] pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex min-h-full max-w-lg flex-col md:max-w-2xl pb-[calc(env(safe-area-inset-bottom)+88px)] pt-[env(safe-area-inset-top)]">
         {isDemo && <DemoBar />}
         {children}
       </div>
@@ -131,7 +131,7 @@ function TabBar({ onFab }: { onFab: () => void }) {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur"
       aria-label={m.shell.nav.label}
     >
-      <div className="mx-auto grid max-w-lg grid-cols-5 items-end px-2">
+      <div className="mx-auto grid max-w-lg grid-cols-5 items-end px-2 md:max-w-2xl">
         <Tab to="/" icon="home" label={m.shell.nav.home} />
         <Tab to="/inventario" icon="box" label={m.shell.nav.products} />
         <div className="flex justify-center">

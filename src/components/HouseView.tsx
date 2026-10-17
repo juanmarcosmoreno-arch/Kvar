@@ -34,7 +34,7 @@ export function HouseView({
     }));
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-lg md:max-w-2xl">
       <Roof />
       <div className="-mt-[3px] space-y-5 rounded-b-[28px] border-[6px] border-t-0 border-primary bg-surface/70 px-3 pb-5 pt-3">
         {shelves.length === 0 && <p className="py-8 text-center text-sm text-muted">{m.stock.inventory.noMatchTitle}</p>}
@@ -100,7 +100,7 @@ function Shelf({
   const shown = many && !open ? items.slice(0, COLLAPSED) : items;
   const tiles = (
     <>
-      <div className="grid grid-cols-4 gap-x-1 gap-y-3 sm:grid-cols-5">
+      <div className="grid grid-cols-4 gap-x-1 gap-y-3 sm:grid-cols-5 md:grid-cols-6">
         {shown.map((p) => (
           <Tile key={p.id} product={p} categoryName={catName.get(p.category_id ?? '')} onOpen={() => onOpen(p.id)} />
         ))}

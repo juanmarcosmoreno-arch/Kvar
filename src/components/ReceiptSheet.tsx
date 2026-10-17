@@ -286,7 +286,7 @@ function ReviewList({
         })}
       </ul>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg bg-bg/95 px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-lg bg-bg/95 md:max-w-xl px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
         <button className="btn-primary w-full" disabled={!included.length} onClick={onConfirm}>
           {pricesOnly ? m.capture.receipt.confirmPrices(included.length) : m.capture.receipt.confirm(included.length)}
         </button>

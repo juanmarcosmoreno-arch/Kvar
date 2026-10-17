@@ -24,7 +24,7 @@ export function Sheet({
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" role="dialog" aria-modal="true">
       <button aria-label={m.common.close} className="animate-fade absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="animate-sheet relative mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-[1.75rem] bg-bg pb-[calc(env(safe-area-inset-bottom)+12px)] shadow-2xl">
+      <div className="animate-sheet relative mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-[1.75rem] md:max-w-xl bg-bg pb-[calc(env(safe-area-inset-bottom)+12px)] shadow-2xl">
         <div className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-line" />
         <div className="flex items-center justify-between px-5 pt-2">
           <h2 className="text-xl font-semibold">{title}</h2>
