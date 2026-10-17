@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  applyStatusToList, groupListByCategory, listReasonFor, openCount, recentlyChecked,
+  applyStatusToList, groupListByCategory, groupListByPriority, listPriority, listReasonFor, openCount, recentlyChecked,
 } from '../shoppingList';
 import { category, item, NOW, product } from './fixtures';
 
@@ -84,5 +84,55 @@ describe('agrupado por categoría', () => {
       item({ id: 'd' }),
     ];
     expect(recentlyChecked(list, 3_600_000, now).map((i) => i.id)).toEqual(['b', 'a']);
+  });
+});
+
+describe('por urgencia', () => {
+  const cats = [category('lac', 'Lácteos', 4), category('fru', 'Frutas y verduras', 1), category('lim', 'Limpieza', 7)];
+  const products = [
+    product({ id: 'leche', name: 'Leche', category_id: 'lac', status: 'out', is_staple: true }),
+    product({ id: 'yerba', name: 'Yerba', category_id: null, status: 'out', is_staple: true }),
+    product({ id: 'banana', name: 'Banana', category_id: 'fru', status: 'out', is_staple: true }),
+    product({ id: 'cafe', name: 'Café', category_id: 'lac', status: 'low', is_staple: true }),
+    product({ id: 'queso', name: 'Queso', category_id: 'lac', status: 'out', is_staple: false }),
+    product({ id: 'lavandina', name: 'Lavandina', category_id: 'lim', status: 'low', is_staple: false }),
+  ];
+  const list = [
+    item({ id: 'q', product_id: 'queso', reason: 'out' }),
+    item({ id: 'v', name: 'Velas', reason: 'manual' }),
+    item({ id: 'l', product_id: 'leche', reason: 'out' }),
+    item({ id: 'c', product_id: 'cafe', reason: 'low' }),
+    item({ id: 'lv', product_id: 'lavandina', reason: 'low' }),
+    item({ id: 'y', product_id: 'yerba', reason: 'out' }),
+    item({ id: 'b', product_id: 'banana', reason: 'out' }),
+  ];
+
+  it('qué tan urgente es cada cosa (cuenta el estado de ahora del producto)', () => {
+    expect(listPriority({ reason: 'low' }, products[0])).toBe(0); // en la lista como «queda poco», pero ya no hay
+    expect(listPriority({ reason: 'low' }, products[3])).toBe(1);
+    expect(listPriority({ reason: 'out' }, products[4])).toBe(2);
+    expect(listPriority({ reason: 'low' }, products[5])).toBe(3);
+    expect(listPriority({ reason: 'out' }, undefined)).toBe(2); // agregado a mano como «no hay»
+    expect(listPriority({ reason: 'manual' }, undefined)).toBe(3);
+  });
+
+  it('básicos que no hay, básicos que quedan poco, lo que no hay y lo demás; adentro por categoría', () => {
+    const groups = groupListByPriority(list, products, cats, null);
+    expect(groups.map((g) => [g.key, g.items.map((i) => i.id)])).toEqual([
+      ['urgente-basico', ['b', 'l', 'y']],
+      ['poco-basico', ['c']],
+      ['no-hay', ['q']],
+      ['resto', ['lv', 'v']],
+    ]);
+    expect(groups[0].title).toBe('Básicos que no hay');
+  });
+
+  it('adentro de cada grupo, en el orden en que se recorre el súper', () => {
+    const order = { trips: 3, product: new Map([['yerba', 0.1], ['leche', 0.5], ['banana', 0.9]]), category: new Map<string, number>() };
+    expect(groupListByPriority(list, products, cats, order)[0].items.map((i) => i.id)).toEqual(['y', 'l', 'b']);
+  });
+
+  it('sin nada urgente no aparecen grupos vacíos', () => {
+    expect(groupListByPriority([item({ id: 'v', name: 'Velas' })], products, cats, null).map((g) => g.key)).toEqual(['resto']);
   });
 });

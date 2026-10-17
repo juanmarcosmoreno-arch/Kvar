@@ -5,7 +5,7 @@ import { itemName, recentlyChecked } from '../domain/shoppingList';
 import { cheaperAt, storeLabel } from '../domain/spending';
 import type { ShoppingItem } from '../domain/types';
 import { Header } from '../components/Shell';
-import { Icon } from '../components/Icon';
+import { Icon, type IconName } from '../components/Icon';
 import { SyncBadge } from '../components/SyncBadge';
 import { RunningOutChips } from '../components/RunningOut';
 import { AtStoreCard } from '../components/AtStoreCard';
@@ -40,6 +40,10 @@ function reasonLabel(reason: ShoppingItem['reason']): string | null {
 }
 
 /** Lista de compras agrupada por categoría. Tocar = comprado → el producto pasa a "Hay". */
+
+/** Íconos de los grupos «por urgencia» */
+const PRIORITY_ICON: Record<string, IconName> = { 'urgente-basico': 'star', 'poco-basico': 'star', 'no-hay': 'cart', resto: 'shelf' };
+
 export function ShoppingList() {
   const view = useView()!;
   const [text, setText] = useState('');
@@ -225,18 +229,18 @@ export function ShoppingList() {
           )}
         </form>
 
-        {groups.length > 1 && order.learned && (
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted">{m.shopping.aisle.label}</span>
-            <div className="flex rounded-full bg-sunken p-1 text-sm" role="group" aria-label={m.shopping.aisle.label}>
-              {(['aisle', 'category'] as const).map((mode) => (
+        {groups.reduce((n, g) => n + g.items.length, 0) > 1 && (
+          <div className="space-y-1.5">
+            <span className="block text-sm text-muted">{m.shopping.aisle.label}</span>
+            <div className="flex w-full rounded-full bg-sunken p-1 text-sm" role="group" aria-label={m.shopping.aisle.label}>
+              {(order.learned ? (['priority', 'aisle', 'category'] as const) : (['priority', 'category'] as const)).map((mode) => (
                 <button
                   key={mode}
-                  className={`min-h-[36px] rounded-full px-3 font-medium ${order.mode === mode ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
+                  className={`min-h-[36px] flex-1 whitespace-nowrap rounded-full px-2 font-medium ${order.mode === mode ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
                   aria-pressed={order.mode === mode}
                   onClick={() => setListOrderMode(mode)}
                 >
-                  {mode === 'aisle' ? m.shopping.aisle.byAisle : m.shopping.aisle.byCategory}
+                  {mode === 'priority' ? m.shopping.aisle.byPriority : mode === 'aisle' ? m.shopping.aisle.byAisle : m.shopping.aisle.byCategory}
                 </button>
               ))}
             </div>
@@ -253,7 +257,7 @@ export function ShoppingList() {
         {groups.map((g) => (
           <section key={g.key} className="space-y-2">
             <h2 className="section-title flex items-center gap-2">
-              <Icon name={categoryIcon(g.key === 'none' ? null : g.title)} size={15} />
+              <Icon name={PRIORITY_ICON[g.key] ?? categoryIcon(g.key === 'none' ? null : g.title)} size={15} />
               {g.title}
             </h2>
             <ul className="card divide-y divide-line">

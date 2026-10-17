@@ -13,8 +13,19 @@ struct ListItem: Decodable, Identifiable, Equatable {
     struct ProductInfo: Decodable, Equatable {
         let name: String
         let category_id: String?
+        let status: String?
+        let is_staple: Bool?
     }
     var title: String { products?.name ?? name ?? L10n.product }
+    var isStaple: Bool { products?.is_staple ?? false }
+    /// El estado de ahora del producto (lo agregado a mano: el motivo con que se agregó)
+    var status: String { products?.status ?? (reason == "out" ? "out" : reason == "low" ? "low" : "ok") }
+    /// Qué tan urgente es (igual que en el iPhone): 0 básico que no hay, 1 básico que queda poco, 2 no hay, 3 lo demás
+    var priority: Int {
+        if isStaple && status == "out" { return 0 }
+        if isStaple && status == "low" { return 1 }
+        return status == "out" ? 2 : 3
+    }
 }
 
 struct Product: Decodable, Identifiable, Equatable {
@@ -107,7 +118,7 @@ final class WatchStore: ObservableObject {
         guard let config, let api else { return }
         let hh = "eq.\(config.householdId)"
         let itemsData = try await api.get("shopping_list_items", query: [
-            URLQueryItem(name: "select", value: "id,name,quantity,product_id,reason,products(name,category_id)"),
+            URLQueryItem(name: "select", value: "id,name,quantity,product_id,reason,products(name,category_id,status,is_staple)"),
             URLQueryItem(name: "household_id", value: hh),
             URLQueryItem(name: "checked_at", value: "is.null"),
         ])
@@ -139,15 +150,17 @@ final class WatchStore: ObservableObject {
         try? await refresh()
     }
 
-    /// En el orden en que se recorre el súper (aprendido en el iPhone); si no, por categoría.
+    /// En el mismo orden que el iPhone: por urgencia (lo básico que no hay primero y, adentro, como se recorre el
+    /// súper), por pasillo o por categoría.
     private func sorted(_ list: [ListItem]) -> [ListItem] {
-        let aisle = config?.aisle ?? [:]
-        func key(_ item: ListItem) -> (Double, Int, String) {
+        let mode = config?.listOrder ?? "priority"
+        let aisle: [String: Double] = mode == "category" ? [:] : (config?.aisle ?? [:])
+        func key(_ item: ListItem) -> (Int, Double, Int, String) {
             let category = item.products?.category_id
             let byProduct = item.product_id.flatMap { aisle["p:\($0)"] }
             let byCategory = category.flatMap { aisle["c:\($0)"] }
             let order = category.flatMap { categoryOrder[$0] } ?? 999
-            return (byProduct ?? byCategory ?? 2, order, item.title.lowercased())
+            return (mode == "priority" ? item.priority : 0, byProduct ?? byCategory ?? 2, order, item.title.lowercased())
         }
         return list.sorted { key($0) < key($1) }
     }

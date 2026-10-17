@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: '顺序',
     byAisle: '按货架',
     byCategory: '按分类',
+    byPriority: '按紧急程度',
     hint: '按你们在超市勾选的顺序排列。',
     learning: '在超市边买边勾选几次之后，清单会自动按货架顺序排列。',
+  },
+  priority: {
+    outStaple: '没有了的必需品',
+    lowStaple: '快用完的必需品',
+    out: '没有了',
+    rest: '其他',
   },
   cheaper: (store, pct) => `${store} 更便宜（−${pct}）`,
   soon: {

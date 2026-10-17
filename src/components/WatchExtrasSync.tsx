@@ -2,12 +2,14 @@ import { useEffect, useMemo } from 'react';
 import { learnAisleOrder, MIN_TRIPS } from '../domain/aisleOrder';
 import type { Snapshot } from '../domain/types';
 import { useEvents } from '../lib/stats';
+import { useListOrderMode } from '../lib/listOrder';
 import { useTickMode } from '../lib/tickMode';
 import { setWatchExtras } from '../lib/watch';
 
-/** Le pasa al Apple Watch qué hacer al tachar y el recorrido del súper (para ordenar la lista igual que acá). */
+/** Le pasa al Apple Watch qué hacer al tachar, el recorrido del súper y el orden de la lista (para verla igual que acá). */
 export function WatchExtrasSync({ view }: { view: Snapshot }) {
   const tickMode = useTickMode();
+  const listOrder = useListOrderMode();
   const events = useEvents(view.household.id);
   const aisle = useMemo(() => {
     if (events.status !== 'ready') return null;
@@ -20,8 +22,8 @@ export function WatchExtrasSync({ view }: { view: Snapshot }) {
   }, [events, view.products]);
 
   useEffect(() => {
-    if (aisle) setWatchExtras({ tickMode, aisle });
-  }, [tickMode, aisle]);
+    if (aisle) setWatchExtras({ tickMode, aisle, listOrder });
+  }, [tickMode, aisle, listOrder]);
 
   return null;
 }

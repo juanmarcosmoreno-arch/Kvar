@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: '並び順',
     byAisle: '売り場順',
     byCategory: 'カテゴリ順',
+    byPriority: '急ぎの順',
     hint: 'お店でチェックした順番に並んでいます。',
     learning: 'お店でチェックしながら何回か買い物すると、リストが売り場順に自動で並びます。',
+  },
+  priority: {
+    outStaple: '切れている定番品',
+    lowStaple: '残り少ない定番品',
+    out: '切れている',
+    rest: 'その他',
   },
   cheaper: (store, pct) => `${store}のほうが安い（−${pct}）`,
   soon: {

@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: 'Ordem',
     byAisle: 'Por corredor',
     byCategory: 'Por categoria',
+    byPriority: 'Por urgência',
     hint: 'Ordenada do jeito que vocês marcam as coisas no mercado.',
     learning: 'Depois de algumas compras marcando no mercado, a lista se ordena sozinha por corredor.',
+  },
+  priority: {
+    outStaple: 'Básicos que acabaram',
+    lowStaple: 'Básicos acabando',
+    out: 'Acabou',
+    rest: 'O resto',
   },
   cheaper: (store, pct) => `Mais barato no ${store} (−${pct})`,
   soon: {

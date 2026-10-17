@@ -12,6 +12,8 @@ struct WatchConfig: Codable, Equatable {
     var tickMode: String?
     /// Recorrido del súper aprendido en el iPhone: «p:<producto>» / «c:<categoría>» → posición de 0 a 1
     var aisle: [String: Double]?
+    /// Orden de la lista, el mismo que en el iPhone: «priority» (lo básico que no hay primero), «aisle» o «category»
+    var listOrder: String?
 
     init?(dict: [String: Any]) {
         guard let url = dict["supabaseUrl"] as? String, !url.isEmpty,
@@ -26,6 +28,7 @@ struct WatchConfig: Codable, Equatable {
         householdName = dict["householdName"] as? String ?? L10n.home
         memberName = dict["memberName"] as? String ?? ""
         tickMode = dict["tickMode"] as? String
+        listOrder = dict["listOrder"] as? String
         if let json = dict["aisle"] as? String, let data = json.data(using: .utf8) {
             aisle = try? JSONDecoder().decode([String: Double].self, from: data)
         }

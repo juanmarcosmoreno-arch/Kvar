@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: 'Ordine',
     byAisle: 'Per corsia',
     byCategory: 'Per categoria',
+    byPriority: 'Per urgenza',
     hint: 'Ordinata come spuntate le cose al supermercato.',
     learning: 'Dopo un paio di spese spuntando al supermercato, la lista si ordina da sola per corsia.',
+  },
+  priority: {
+    outStaple: 'Essenziali finiti',
+    lowStaple: 'Essenziali quasi finiti',
+    out: 'Finito',
+    rest: 'Il resto',
   },
   cheaper: (store, pct) => `Più economico da ${store} (−${pct})`,
   soon: {

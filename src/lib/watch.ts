@@ -42,15 +42,16 @@ let last = '';
 let lastArgs: { view: Snapshot; userId: string } | null = null;
 
 /**
- * Lo que el reloj usa en el súper, además de la conexión: qué hacer al tachar («stock» o «check») y el
- * recorrido del súper aprendido («p:<producto>» / «c:<categoría>» → posición de 0 a 1).
+ * Lo que el reloj usa en el súper, además de la conexión: qué hacer al tachar («stock» o «check»), el
+ * recorrido del súper aprendido («p:<producto>» / «c:<categoría>» → posición de 0 a 1) y el orden de la lista
+ * («priority», «aisle» o «category», el mismo que en el teléfono).
  */
-let extras: { tickMode: string; aisle: string } = { tickMode: 'stock', aisle: '{}' };
+let extras: { tickMode: string; aisle: string; listOrder: string } = { tickMode: 'stock', aisle: '{}', listOrder: 'priority' };
 
-export function setWatchExtras(next: { tickMode: string; aisle: Record<string, number> }) {
+export function setWatchExtras(next: { tickMode: string; aisle: Record<string, number>; listOrder: string }) {
   const aisle = JSON.stringify(next.aisle);
-  if (next.tickMode === extras.tickMode && aisle === extras.aisle) return;
-  extras = { tickMode: next.tickMode, aisle };
+  if (next.tickMode === extras.tickMode && aisle === extras.aisle && next.listOrder === extras.listOrder) return;
+  extras = { tickMode: next.tickMode, aisle, listOrder: next.listOrder };
   if (lastArgs) void syncWatch(lastArgs.view, lastArgs.userId);
 }
 

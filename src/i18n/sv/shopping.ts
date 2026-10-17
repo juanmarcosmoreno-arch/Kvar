@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: 'Ordning',
     byAisle: 'Efter gång',
     byCategory: 'Efter kategori',
+    byPriority: 'Viktigast först',
     hint: 'Sorterad i den ordning ni bockar av i butiken.',
     learning: 'Efter ett par inköp där ni bockar av i butiken sorterar listan sig själv efter gång.',
+  },
+  priority: {
+    outStaple: 'Basvaror som är slut',
+    lowStaple: 'Basvaror som börjar ta slut',
+    out: 'Slut',
+    rest: 'Övrigt',
   },
   cheaper: (store, pct) => `Billigare på ${store} (−${pct})`,
   soon: {

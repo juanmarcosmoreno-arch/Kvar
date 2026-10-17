@@ -145,3 +145,47 @@ export function recentlyChecked(list: ShoppingItem[], sinceMs: number, now = Dat
     .filter((i) => i.checked_at && now - Date.parse(i.checked_at) <= sinceMs)
     .sort((a, b) => b.checked_at!.localeCompare(a.checked_at!));
 }
+
+// --- Por urgencia ----------------------------------------------------------------------------------------------
+
+/**
+ * Qué tan urgente es comprarlo: 0 = básico que no hay, 1 = básico que queda poco, 2 = no hay (no básico),
+ * 3 = lo demás. Cuenta el estado de ahora del producto; lo agregado a mano sin producto va con lo demás.
+ */
+export function listPriority(item: Pick<ShoppingItem, 'reason'>, product: Pick<Product, 'status' | 'is_staple'> | undefined): 0 | 1 | 2 | 3 {
+  const status = product ? product.status : item.reason === 'out' ? 'out' : item.reason === 'low' ? 'low' : 'ok';
+  if (product?.is_staple && status === 'out') return 0;
+  if (product?.is_staple && status === 'low') return 1;
+  if (status === 'out') return 2;
+  return 3;
+}
+
+export const PRIORITY_KEYS = ['urgente-basico', 'poco-basico', 'no-hay', 'resto'] as const;
+
+/**
+ * La lista por urgencia: primero los básicos que no hay, después los básicos que quedan poco, después lo que no hay
+ * y al final lo demás. Dentro de cada grupo, en el orden en que se recorre el súper (si ya se aprendió) o por
+ * categoría, para no ir y volver.
+ */
+export function groupListByPriority(
+  list: ShoppingItem[],
+  products: Product[],
+  categories: Category[],
+  order: AisleOrder | null,
+): ListGroup[] {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  // Por categoría como base; con el recorrido aprendido, cada cosa donde se agarra (sin bloques de categoría)
+  const base = groupListByCategory(list, products, categories).flatMap((g) => g.items);
+  const LAST = 2;
+  const pos = (i: ShoppingItem) => (order && i.product_id ? aislePosition(order, byId.get(i.product_id)) : null) ?? LAST;
+  const sorted = order ? base.map((item, i) => ({ item, i })).sort((a, b) => pos(a.item) - pos(b.item) || a.i - b.i).map((x) => x.item) : base;
+  const t = m.shopping.priority;
+  const titles = [t.outStaple, t.lowStaple, t.out, t.rest];
+  const groups: ListGroup[] = PRIORITY_KEYS.map((key, i) => ({ key, title: titles[i], items: [] }));
+  for (const item of sorted) {
+    const product = item.product_id ? byId.get(item.product_id) : undefined;
+    groups[listPriority(item, product)].items.push(item);
+  }
+  return groups.filter((g) => g.items.length > 0);
+}
+

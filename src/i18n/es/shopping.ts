@@ -22,8 +22,15 @@ export const shopping = {
     label: 'Orden',
     byAisle: 'Por pasillo',
     byCategory: 'Por categoría',
+    byPriority: 'Por urgencia',
     hint: 'Ordenada como la vienen tachando en el súper.',
     learning: 'Después de un par de compras tachando en el súper, la lista se ordena sola por pasillo.',
+  },
+  priority: {
+    outStaple: 'Básicos que no hay',
+    lowStaple: 'Básicos que quedan poco',
+    out: 'No hay',
+    rest: 'Lo demás',
   },
   cheaper: (store: string, pct: string) => `Más barato en ${store} (−${pct})`,
   soon: {

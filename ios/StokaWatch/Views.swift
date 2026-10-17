@@ -269,10 +269,13 @@ struct SuperView: View {
                             Image(systemName: "circle").font(.title3).foregroundStyle(.secondary)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(item.title).lineLimit(2)
-                                if item.reason == "out" {
-                                    Text(L10n.out).font(.caption2).foregroundStyle(.red)
-                                } else if item.reason == "low" {
-                                    Text(L10n.low).font(.caption2).foregroundStyle(.orange)
+                                if item.status == "out" || item.status == "low" {
+                                    HStack(spacing: 3) {
+                                        if item.isStaple { Image(systemName: "star.fill").font(.system(size: 9)) }
+                                        Text(item.status == "out" ? L10n.out : L10n.low)
+                                    }
+                                    .font(.caption2)
+                                    .foregroundStyle(item.status == "out" ? Color.red : Color.orange)
                                 }
                             }
                             Spacer(minLength: 0)

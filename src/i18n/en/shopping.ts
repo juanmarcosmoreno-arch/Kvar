@@ -23,8 +23,15 @@ export const shopping: Messages['shopping'] = {
     label: 'Order',
     byAisle: 'By aisle',
     byCategory: 'By category',
+    byPriority: 'By urgency',
     hint: 'Sorted the way you tick things off in the store.',
     learning: 'After a couple of trips ticking things off in the store, the list sorts itself by aisle.',
+  },
+  priority: {
+    outStaple: 'Staples you\'re out of',
+    lowStaple: 'Staples running low',
+    out: 'Out of',
+    rest: 'Everything else',
   },
   cheaper: (store, pct) => `Cheaper at ${store} (−${pct})`,
   soon: {
