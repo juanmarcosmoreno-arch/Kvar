@@ -65,14 +65,16 @@ export function ShoppingList() {
     ),
     [view.products, events, purchases],
   );
-  // Dónde conviene cada cosa (según los tickets)
-  // Con los descuentos de hoy y sin los súper que no se comparan
-  // Primero los precios de hoy (precios.uy); para lo que no publica, los tickets
+  // Dónde conviene cada cosa: primero los precios de hoy (precios.uy); para lo que no publica, los tickets.
+  // Con los descuentos de hoy y sin los súper que no se comparan.
   const pricePrefs = usePricePrefs();
   const sipc = useSipc(view.products);
   const cheaper = useMemo(() => {
     const day = new Date().getDay();
-    const adjust = (store: string, price: number) => withDiscount(price, discountFor(pricePrefs.discounts, store, day));
+    const adjust = (store: string, price: number, name: string, productId: string) => {
+      const product = byId.get(productId);
+      return withDiscount(price, discountFor(pricePrefs.discounts, store, day, [name, product?.name, product?.brand].filter(Boolean).join(' ')));
+    };
     const today = cheaperAt(sipc.lines, new Date(), adjust);
     if (purchases.status !== 'ready') return today;
     const lines = visibleLines(purchases.lines, new Set(pricePrefs.hidden));

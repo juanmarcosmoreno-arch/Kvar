@@ -39,7 +39,7 @@ export function TodayPrices({
     // Lo que comprás seguido (según los tickets) con su cantidad; si no hay tickets, uno de cada uno
     const usual = usualBasket(ticketLines);
     const own = new Map(sipc.matches.map((x) => [x.product.id, usual.get(x.product.id) ?? 1]));
-    return basketByStore(sipc.lines, { ...opts, basket: own });
+    return basketByStore(sipc.lines, { ...opts, basket: own }, products);
   }, [sipc, ticketLines, when, discounts]); // eslint-disable-line react-hooks/exhaustive-deps
   const offers = useMemo(() => {
     const out = new Set<string>();

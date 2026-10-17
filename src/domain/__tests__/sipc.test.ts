@@ -69,7 +69,7 @@ describe('precios.uy: relacionar productos', () => {
     expect(cheaperAt(lines).get('y')).toMatchObject({ store: 'tata-sipc-164' });
     expect(cheaperAt(lines).get('a')).toMatchObject({ store: 'disco-sipc-37' });
     expect(chainOfKey(sipcStoreKey(data.stores[0]))).toBe('disco');
-    const discounts = [{ id: 'd', store: 'disco', percent: 20, days: [], card: '', cap: null }];
+    const discounts = [{ id: 'd', stores: ['disco'], brand: '', percent: 20, days: [], card: '', cap: null }];
     expect(discountFor(discounts, 'disco-sipc-37', 3)?.id).toBe('d');
     // 300 − 20 % = 240 < 270
     const r = atStore(lines, products, [], 'disco-sipc-37', { discounts, when: 3 });

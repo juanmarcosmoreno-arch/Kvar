@@ -15,7 +15,7 @@ const item = (product_id: string): ShoppingItem => ({
   id: `i-${product_id}`, household_id: 'hh', product_id, name: null, quantity: null, note: null, reason: 'manual',
   checked_at: null, checked_by: null, created_at: at(10, 1),
 });
-const disc = (over: Partial<StoreDiscount>): StoreDiscount => ({ id: 'd', store: 'disco', percent: 15, days: [], card: 'Itaú', cap: null, ...over });
+const disc = (over: Partial<StoreDiscount>): StoreDiscount => ({ id: 'd', stores: ['disco'], brand: '', percent: 15, days: [], card: 'Itaú', cap: null, ...over });
 
 const products = ['yerba', 'cafe', 'aceite', 'leche'].map((id) => product({ id, name: id[0].toUpperCase() + id.slice(1) }));
 
@@ -30,7 +30,7 @@ const lines = [
 ];
 
 describe('descuentos', () => {
-  const ds = [disc({ id: 'mar', days: [2], percent: 20 }), disc({ id: 'siempre', percent: 5 }), disc({ id: 'otro', store: 'tata', percent: 50 })];
+  const ds = [disc({ id: 'mar', days: [2], percent: 20 }), disc({ id: 'siempre', percent: 5 }), disc({ id: 'otro', stores: ['tata'], percent: 50 })];
   it('el mejor descuento del día', () => {
     expect(discountFor(ds, 'disco', 2)?.id).toBe('mar');
     expect(discountFor(ds, 'disco', 3)?.id).toBe('siempre');
@@ -38,6 +38,36 @@ describe('descuentos', () => {
     expect(discountFor(ds, 'disco', 'none')).toBeNull();
     expect(discountFor(ds, 'tienda-inglesa', 2)).toBeNull();
     expect(withDiscount(200, ds[0])).toBe(160);
+  });
+});
+
+describe('descuentos de una marca en varios súper', () => {
+  const conaprole = disc({ id: 'c', stores: ['disco', 'tienda-inglesa'], brand: 'Conaprole', percent: 15, card: '' });
+  it('solo lo de esa marca, en esos súper', () => {
+    expect(discountFor([conaprole], 'tienda-inglesa', 3, 'MANTECA CONAPROLE 200G')?.id).toBe('c');
+    expect(discountFor([conaprole], 'disco-sipc-37', 3, 'Queso rallado Conaprole, 80.0')?.id).toBe('c');
+    expect(discountFor([conaprole], 'disco', 3, 'Manteca Kasdorf, 200.0')).toBeNull();
+    expect(discountFor([conaprole], 'disco', 3)).toBeNull();
+    expect(discountFor([conaprole], 'tata', 3, 'Manteca Conaprole')).toBeNull();
+  });
+
+  it('la marca puede estar en el producto del hogar', () => {
+    const manteca = product({ id: 'manteca', name: 'Manteca', brand: 'Conaprole' });
+    const ls = [line('manteca', 'Disco', 100), line('manteca', 'Tienda Inglesa', 90), line('manteca', 'Tata', 88)];
+    const row = priceTable(ls, [manteca], { discounts: [conaprole], when: 3, now })[0];
+    expect(row.offers.map((o) => [o.store, o.effective])).toEqual([['disco', 85], ['tienda-inglesa', 76.5], ['tata', 88]].sort((a, b) => (a[1] as number) - (b[1] as number)));
+  });
+
+  it('en la canasta, solo sobre esos productos y con su tope', () => {
+    const ls = [
+      ...[at(9, 1), at(10, 1)].flatMap((d) => [line('leche', 'Disco', 100, d), line('cafe', 'Disco', 300, d), line('yerba', 'Disco', 200, d)]),
+      ...[at(9, 8), at(10, 8)].flatMap((d) => [line('leche', 'Tata', 100, d), line('cafe', 'Tata', 300, d), line('yerba', 'Tata', 200, d)]),
+    ].map((l) => (l.product_id === 'leche' ? { ...l, name: 'Leche Conaprole 1 L' } : l));
+    const b = basketByStore(ls, { discounts: [{ ...conaprole, stores: ['disco'] }], when: 3, now });
+    const disco = b.stores.find((s) => s.store === 'disco')!;
+    expect(disco.saved).toBeCloseTo(15, 5);
+    const capped = basketByStore(ls, { discounts: [{ ...conaprole, stores: ['disco'], cap: 5 }], when: 3, now });
+    expect(capped.stores.find((s) => s.store === 'disco')!.saved).toBe(5);
   });
 });
 

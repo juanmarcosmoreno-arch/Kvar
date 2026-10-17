@@ -347,7 +347,9 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - Pantalla **Precios** (ícono de etiqueta en Inicio, y desde Gastos): buscador, **tu canasta** (lo comprado 2+ veces en
   6 meses, cuánto saldría en cada súper; lo que no tiene precio en un súper se estima con lo caro/barato que es ese súper
   en lo demás) y **dónde conviene cada cosa** (último precio de cada súper, 6 meses).
-- **Descuentos con tarjeta** por súper: porcentaje, días de la semana, tarjeta y tope por compra. Se compara lo que se
+- **Descuentos con tarjeta**: uno o varios súper (o cadenas), opcionalmente solo una marca («15 % en Conaprole en
+  Tienda Inglesa, Disco, Géant y Devoto»: vale si la marca está en el nombre del ticket, de precios.uy o del producto),
+  porcentaje, días de la semana, tarjeta y tope por compra (en la canasta, el tope de cada descuento). Se compara lo que se
   paga de verdad: hoy, el mejor día de cada súper o sin descuentos. El tope se aplica a la canasta, no por producto.
 - **Mis supermercados**: cuáles se comparan y agregar otros a mano. Súper y descuentos se guardan en cada teléfono
   (dependen de las tarjetas de cada uno); los precios vienen de los tickets del hogar.

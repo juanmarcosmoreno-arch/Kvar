@@ -24,7 +24,10 @@ const HERE_HOURS = 4;
 const EMPTY: PricePrefs = { discounts: [], hidden: [], extra: [] };
 /** En la demo: un descuento de ejemplo para ver cómo cambia la comparación */
 const DEMO: PricePrefs = {
-  discounts: [{ id: 'demo-disco', store: 'disco', percent: 15, days: [2, 4], card: 'Itaú', cap: 1500 }],
+  discounts: [
+    { id: 'demo-disco', stores: ['disco'], brand: '', percent: 15, days: [2, 4], card: 'Itaú', cap: 1500 },
+    { id: 'demo-conaprole', stores: ['tienda-inglesa', 'disco', 'geant', 'devoto'], brand: 'Conaprole', percent: 15, days: [], card: '', cap: null },
+  ],
   hidden: [],
   extra: [],
 };
@@ -49,7 +52,25 @@ function writeJSON(key: string, value: unknown) {
   }
 }
 
-let prefs: PricePrefs = { ...EMPTY, ...(readJSON<PricePrefs>(KEY) ?? (isDemo ? DEMO : EMPTY)) };
+/** Los descuentos de antes eran de un solo súper y sin marca */
+type SavedDiscount = Partial<StoreDiscount> & { store?: string };
+const upgrade = (d: SavedDiscount): StoreDiscount => ({
+  id: d.id ?? crypto.randomUUID(),
+  stores: d.stores ?? (d.store ? [d.store] : []),
+  brand: d.brand ?? '',
+  percent: d.percent ?? 0,
+  days: d.days ?? [],
+  card: d.card ?? '',
+  cap: d.cap ?? null,
+});
+
+function readPrefs(): PricePrefs {
+  const saved = readJSON<Omit<PricePrefs, 'discounts'> & { discounts?: SavedDiscount[] }>(KEY);
+  if (!saved) return isDemo ? DEMO : EMPTY;
+  return { ...EMPTY, ...saved, discounts: (saved.discounts ?? []).map(upgrade) };
+}
+
+let prefs: PricePrefs = readPrefs();
 let here: { store: string; at: number } | null = readJSON(HERE_KEY);
 
 const emit = () => listeners.forEach((l) => l());
@@ -91,7 +112,10 @@ export function addStore(name: string): string | null {
 }
 
 export function removeStore(store: string) {
-  save({ ...prefs, extra: prefs.extra.filter((s) => s !== store), discounts: prefs.discounts.filter((d) => d.store !== store) });
+  const discounts = prefs.discounts
+    .map((d) => ({ ...d, stores: d.stores.filter((s) => s !== store) }))
+    .filter((d) => d.stores.length > 0);
+  save({ ...prefs, extra: prefs.extra.filter((s) => s !== store), discounts });
 }
 
 /** En qué súper estás (null si no elegiste o ya pasaron unas horas) */

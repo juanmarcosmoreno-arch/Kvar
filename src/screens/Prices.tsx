@@ -34,7 +34,7 @@ export function Prices() {
 
   const opts = { discounts: data.discounts, when: data.discounts.length ? when : ('none' as const) };
   const rows = useMemo(() => priceTable(data.lines, view.products, opts), [data, view.products, when]); // eslint-disable-line react-hooks/exhaustive-deps
-  const basket = useMemo(() => basketByStore(data.lines, opts), [data, when]); // eslint-disable-line react-hooks/exhaustive-deps
+  const basket = useMemo(() => basketByStore(data.lines, opts, view.products), [data, view.products, when]); // eslint-disable-line react-hooks/exhaustive-deps
   const compared = rows.filter((r) => r.offers.length >= 2).sort((a, b) => b.saving - a.saving);
   const found = q.trim()
     ? searchProducts(q, rows.map((r) => r.product))

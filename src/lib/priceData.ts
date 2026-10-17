@@ -36,7 +36,7 @@ export function usePriceData(householdId: string): PriceData {
       prefs,
       stores,
       allStores,
-      discounts: prefs.discounts.filter((d) => !hidden.has(d.store)),
+      discounts: prefs.discounts.map((d) => ({ ...d, stores: d.stores.filter((s) => !hidden.has(s)) })).filter((d) => d.stores.length > 0),
     };
   }, [data, prefs]);
 }

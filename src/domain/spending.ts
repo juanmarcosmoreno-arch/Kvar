@@ -178,6 +178,8 @@ export function storeLabel(key: string): string {
 
 export interface StorePrice {
   store: string;
+  /** Cómo venía en el ticket o en precios.uy (para los descuentos de una marca) */
+  name: string;
   /** Último precio por unidad (o por kilo) en ese súper */
   price: number;
   at: string;
@@ -200,7 +202,7 @@ export function pricesByStore(lines: PurchaseLine[], now: Date): Map<string, Sto
     if (!(price > 0)) continue;
     const byStore = latest.get(l.product_id) ?? new Map<string, StorePrice>();
     const prev = byStore.get(store);
-    if (!prev || Date.parse(prev.at) <= t) byStore.set(store, { store, price, at: l.bought_at });
+    if (!prev || Date.parse(prev.at) <= t) byStore.set(store, { store, name: l.name, price, at: l.bought_at });
     latest.set(l.product_id, byStore);
   }
   const out = new Map<string, StorePrice[]>();
@@ -273,12 +275,12 @@ export function storePricesOf(lines: PurchaseLine[], productId: string, now = ne
 export function cheaperAt(
   lines: PurchaseLine[],
   now = new Date(),
-  adjust?: (store: string, price: number) => number,
+  adjust?: (store: string, price: number, name: string, productId: string) => number,
 ): Map<string, { store: string; saving: number }> {
   const out = new Map<string, { store: string; saving: number }>();
   for (const [productId, raw] of pricesByStore(lines, now)) {
     if (raw.length < 2) continue;
-    const prices = adjust ? raw.map((p) => ({ ...p, price: adjust(p.store, p.price) })).sort((a, b) => a.price - b.price) : raw;
+    const prices = adjust ? raw.map((p) => ({ ...p, price: adjust(p.store, p.price, p.name, productId) })).sort((a, b) => a.price - b.price) : raw;
     // Contra el segundo más barato: «conviene en X» tiene que ser cierto aunque haya un tercero carísimo
     const saving = 1 - prices[0].price / prices[1].price;
     if (saving >= MIN_SAVING) out.set(productId, { store: prices[0].store, saving });

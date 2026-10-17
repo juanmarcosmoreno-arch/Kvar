@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { atStore, discountFor, type StoreTip } from '../domain/prices';
+import { atStore, discountAppliesAt, type StoreTip } from '../domain/prices';
 import { storeKey, storeLabel } from '../domain/spending';
 import type { Snapshot } from '../domain/types';
 import { formatDecimal, m } from '../i18n';
@@ -82,7 +82,8 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
     );
   }
 
-  const discount = discountFor(data.discounts, here, today);
+  // Los descuentos de hoy acá (de todo o de una marca)
+  const todays = data.discounts.filter((d) => d.percent > 0 && discountAppliesAt(d, here) && (!d.days.length || d.days.includes(today)));
   const hasPrices = lines.some((l) => l.product_id && storeKey(l.store) === here);
   const empty = tips && !tips.buyHere.length && !tips.elsewhere.length && !tips.deals.length;
 
@@ -94,7 +95,12 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-semibold">{t.title(storeLabel(here))}</span>
-          {discount && <span className="block text-sm text-primary">{t.today(`${discount.percent} %`, discount.card)}</span>}
+          {todays.map((d) => (
+            <span key={d.id} className="block text-sm text-primary">
+              {t.today(`${d.percent} %`, d.card)}
+              {d.brand.trim() && ` · ${m.prices.discounts.onlyBrand(d.brand.trim())}`}
+            </span>
+          ))}
         </span>
         <button className="min-h-tap shrink-0 px-1 text-sm font-medium text-primary" onClick={() => setPicking(true)}>
           {t.change}

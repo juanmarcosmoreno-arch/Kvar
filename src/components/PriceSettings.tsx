@@ -6,15 +6,21 @@ import { formatList, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { addStore, deleteDiscount, removeStore, saveDiscount, setStoreCompared } from '../lib/pricePrefs';
 import { pricesPerStore, WEEK, weekdayName, type PriceData } from '../lib/priceData';
+import { useSipcPrefs } from '../lib/sipc';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
 
-/** «15 % · mar y jue · Itaú · tope $ 1.500» */
+/** «Tienda Inglesa, Disco y Géant» */
+export const discountStores = (d: StoreDiscount) => formatList(d.stores.map(storeLabel));
+
+/** «15 % · solo Conaprole · mar y jue · Itaú · tope $ 1.500» */
 export function discountSummary(d: StoreDiscount): string {
   const t = m.prices.discounts;
   const days = d.days.length ? formatList(WEEK.filter((x) => d.days.includes(x)).map((x) => weekdayName(x))) : t.everyDay;
-  return [`${d.percent} %`, days, d.card.trim(), d.cap ? t.capText(formatCurrency(d.cap)) : ''].filter(Boolean).join(' · ');
+  return [`${d.percent} %`, d.brand.trim() ? t.onlyBrand(d.brand.trim()) : '', days, d.card.trim(), d.cap ? t.capText(formatCurrency(d.cap)) : '']
+    .filter(Boolean)
+    .join(' · ');
 }
 
 /** Mis supermercados: cuáles se comparan, y agregar uno a mano. */
@@ -76,7 +82,10 @@ export function StoresEditor({ data }: { data: PriceData }) {
 export function DiscountsEditor({ data }: { data: PriceData }) {
   const t = m.prices.discounts;
   const [editing, setEditing] = useState<StoreDiscount | 'new' | null>(null);
-  const list = [...data.prefs.discounts].sort((a, b) => storeLabel(a.store).localeCompare(storeLabel(b.store)) || b.percent - a.percent);
+  const list = [...data.prefs.discounts].sort((a, b) => discountStores(a).localeCompare(discountStores(b)) || b.percent - a.percent);
+  const sipc = useSipcPrefs();
+  // Los súper de siempre, los de los tickets y las cadenas de los súper de precios.uy elegidos
+  const choices = [...new Set([...data.stores, ...sipc.stores.map((s) => s.chain), ...data.allStores])];
   return (
     <div className="space-y-2">
       {list.length === 0 ? (
@@ -90,7 +99,7 @@ export function DiscountsEditor({ data }: { data: PriceData }) {
                   −{d.percent}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{storeLabel(d.store)}</span>
+                  <span className="block truncate font-medium">{discountStores(d)}</span>
                   <span className="block truncate text-sm text-muted">{discountSummary(d)}</span>
                 </span>
                 <Icon name="edit" size={18} className="shrink-0 text-muted" />
@@ -105,7 +114,7 @@ export function DiscountsEditor({ data }: { data: PriceData }) {
       <DiscountSheet
         key={editing === 'new' ? 'new' : editing?.id ?? 'closed'}
         discount={editing}
-        stores={data.stores.length ? data.stores : data.allStores}
+        stores={choices}
         onClose={() => setEditing(null)}
       />
     </div>
@@ -119,21 +128,23 @@ function DiscountSheet({
 }: { discount: StoreDiscount | 'new' | null; stores: string[]; onClose: () => void }) {
   const t = m.prices.discounts;
   const initial = discount && discount !== 'new' ? discount : null;
-  const [store, setStore] = useState(initial?.store ?? stores[0] ?? '');
+  const [chosen, setChosen] = useState<string[]>(initial?.stores ?? []);
+  const [brand, setBrand] = useState(initial?.brand ?? '');
   const [percent, setPercent] = useState(String(initial?.percent ?? 15));
   const [days, setDays] = useState<number[]>(initial?.days ?? []);
   const [card, setCard] = useState(initial?.card ?? '');
   const [cap, setCap] = useState(initial?.cap ? String(initial.cap) : '');
   const value = Math.min(100, parseAmount(percent));
-  const choices = initial && !stores.includes(initial.store) ? [initial.store, ...stores] : stores;
+  const choices = [...new Set([...(initial?.stores ?? []), ...stores])];
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!store || !(value > 0)) return;
+    if (!chosen.length || !(value > 0)) return;
     const capValue = parseAmount(cap);
     saveDiscount({
       id: initial?.id ?? crypto.randomUUID(),
-      store,
+      stores: chosen,
+      brand: brand.trim(),
       percent: value,
       days: [...days].sort(),
       card: card.trim(),
@@ -148,20 +159,31 @@ function DiscountSheet({
       <form onSubmit={save} className="space-y-5 pb-4">
         <div className="space-y-1.5">
           <span className="text-sm text-muted">{t.store}</span>
+          <p className="text-xs text-muted">{t.storesHint}</p>
           <div className="flex flex-wrap gap-2">
-            {choices.map((s) => (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={store === s}
-                className={`chip min-h-tap ${store === s ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
-                onClick={() => setStore(s)}
-              >
-                {storeLabel(s)}
-              </button>
-            ))}
+            {choices.map((s) => {
+              const on = chosen.includes(s);
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={on}
+                  className={`chip min-h-tap ${on ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
+                  onClick={() => setChosen(on ? chosen.filter((x) => x !== s) : [...chosen, s])}
+                >
+                  {on && <Icon name="check" size={14} strokeWidth={2.5} />}
+                  {storeLabel(s)}
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        <label className="block space-y-1.5">
+          <span className="text-sm text-muted">{t.brand}</span>
+          <input className="field" placeholder={t.brandPlaceholder} value={brand} onChange={(e) => setBrand(e.target.value)} />
+          <span className="block text-xs text-muted">{t.brandHint}</span>
+        </label>
 
         <div className="space-y-1.5">
           <span className="text-sm text-muted">{t.percent}</span>
@@ -248,7 +270,7 @@ function DiscountSheet({
               <Icon name="trash" size={18} /> {t.delete}
             </button>
           )}
-          <button type="submit" className="btn-primary" disabled={!store || !(value > 0)}>
+          <button type="submit" className="btn-primary" disabled={!chosen.length || !(value > 0)}>
             {t.save}
           </button>
         </div>

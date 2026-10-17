@@ -6,11 +6,16 @@ import { MIN_SAVING, pricesByStore, storeKey, type PurchaseLine, type StorePrice
 import { chainOfKey } from './sipc';
 import type { Product, ShoppingItem } from './types';
 
-/** «15 % en Disco los martes y jueves con Itaú (tope $1.500 por compra)» */
+/**
+ * «15 % en Disco los martes y jueves con Itaú (tope $1.500 por compra)», o
+ * «15 % en productos Conaprole en Tienda Inglesa, Disco, Géant y Devoto».
+ */
 export interface StoreDiscount {
   id: string;
-  /** Clave del súper (storeKey) */
-  store: string;
+  /** Súper donde vale (claves de storeKey; en los locales de precios.uy, la cadena) */
+  stores: string[];
+  /** Solo los productos de esa marca («Conaprole»); vacío = todo */
+  brand: string;
   /** 15 = 15 % */
   percent: number;
   /** Días de la semana (0 = domingo); vacío = todos los días */
@@ -26,13 +31,22 @@ export type When = number | 'best' | 'none';
 
 const DAY = 86_400_000;
 
-/** El mejor descuento de ese súper para ese día */
-export function discountFor(discounts: StoreDiscount[], store: string, when: When): StoreDiscount | null {
+const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+/** ¿El descuento vale en ese súper? Los locales de precios.uy («disco-sipc-37») usan los de su cadena */
+export const discountAppliesAt = (d: StoreDiscount, store: string) => d.stores.includes(store) || d.stores.includes(chainOfKey(store));
+
+/**
+ * El mejor descuento de ese súper para ese día. `text` es lo que se compra (nombre del ticket o de precios.uy y
+ * del producto): los descuentos de una marca solo valen si la marca aparece ahí.
+ */
+export function discountFor(discounts: StoreDiscount[], store: string, when: When, text?: string): StoreDiscount | null {
   if (when === 'none') return null;
   let best: StoreDiscount | null = null;
+  const folded = text ? ` ${fold(text)} ` : null;
   for (const d of discounts) {
-    // Los locales de precios.uy («disco-sipc-37») usan los descuentos de su cadena
-    if ((d.store !== store && d.store !== chainOfKey(store)) || !(d.percent > 0)) continue;
+    if (!discountAppliesAt(d, store) || !(d.percent > 0)) continue;
+    if (d.brand.trim() && !(folded && folded.includes(fold(d.brand)))) continue;
     if (when !== 'best' && d.days.length > 0 && !d.days.includes(when)) continue;
     if (!best || d.percent > best.percent) best = d;
   }
@@ -59,11 +73,14 @@ export interface Offer extends StorePrice {
   discount: StoreDiscount | null;
 }
 
+/** Lo que se compra, para los descuentos de una marca: el nombre del ticket o de precios.uy, y el del producto */
+const textOf = (name: string, product?: Product) => [name, product?.name, product?.brand].filter(Boolean).join(' ');
+
 /** Los precios de un producto en cada súper, del que te sale más barato al más caro */
-export function offers(prices: StorePrice[], discounts: StoreDiscount[], when: When): Offer[] {
+export function offers(prices: StorePrice[], discounts: StoreDiscount[], when: When, product?: Product): Offer[] {
   return prices
     .map((p) => {
-      const discount = discountFor(discounts, p.store, when);
+      const discount = discountFor(discounts, p.store, when, textOf(p.name, product));
       return { ...p, discount, effective: withDiscount(p.price, discount) };
     })
     .sort((a, b) => a.effective - b.effective);
@@ -91,7 +108,7 @@ export function priceTable(lines: PurchaseLine[], products: Product[], opts: Com
   for (const [productId, prices] of pricesByStore(lines, opts.now ?? new Date())) {
     const product = byId.get(productId);
     if (!product) continue;
-    const list = offers(prices, opts.discounts, opts.when);
+    const list = offers(prices, opts.discounts, opts.when, product);
     const saving = list.length >= 2 ? 1 - list[0].effective / list[1].effective : 0;
     rows.push({ product, offers: list, saving });
   }
@@ -122,9 +139,8 @@ export interface BasketStore {
   store: string;
   /** Lo que saldría la canasta ahí, con el descuento */
   total: number;
-  /** El descuento que se aplicó (ya con el tope) */
+  /** Lo que se descontó (ya con los topes) */
   saved: number;
-  discount: StoreDiscount | null;
   /** De cuántos productos de la canasta hay precio en ese súper (el resto se estima) */
   known: number;
 }
@@ -141,12 +157,15 @@ const MIN_KNOWN = 3;
  * ¿Cuánto te saldría lo de siempre en cada súper? Lo que no tiene precio en un súper se estima con lo caro o
  * barato que es ese súper en lo que sí se pudo comparar (relativo al más barato de cada producto).
  */
-export function basketByStore(lines: PurchaseLine[], opts: CompareOptions): Basket {
+export function basketByStore(lines: PurchaseLine[], opts: CompareOptions, products: Product[] = []): Basket {
   const now = opts.now ?? new Date();
   const basket = opts.basket ?? usualBasket(lines, now);
   const prices = pricesByStore(lines, now);
+  const byId = new Map(products.map((p) => [p.id, p]));
   const ref = new Map<string, number>();
   const byStore = new Map<string, Map<string, number>>();
+  // Lo que se compra de cada producto en cada súper (para los descuentos de una marca)
+  const texts = new Map<string, string>();
   for (const [productId] of basket) {
     const list = prices.get(productId);
     if (!list?.length) continue;
@@ -155,6 +174,7 @@ export function basketByStore(lines: PurchaseLine[], opts: CompareOptions): Bask
       const own = byStore.get(p.store) ?? new Map<string, number>();
       own.set(productId, p.price);
       byStore.set(p.store, own);
+      texts.set(`${p.store}|${productId}`, textOf(p.name, byId.get(productId)));
     }
   }
   const stores: BasketStore[] = [];
@@ -164,10 +184,18 @@ export function basketByStore(lines: PurchaseLine[], opts: CompareOptions): Bask
     for (const [id, price] of own) ratio += price / ref.get(id)!;
     ratio /= own.size;
     let shelf = 0;
-    for (const [id, base] of ref) shelf += basket.get(id)! * (own.get(id) ?? base * ratio);
-    const discount = discountFor(opts.discounts, store, opts.when);
-    const saved = discount ? Math.min((shelf * discount.percent) / 100, discount.cap ?? Infinity) : 0;
-    stores.push({ store, total: shelf - saved, saved, discount, known: own.size });
+    // Cada descuento suma lo de sus productos y después se aplica su tope
+    const byDiscount = new Map<StoreDiscount, number>();
+    for (const [id, base] of ref) {
+      const cost = basket.get(id)! * (own.get(id) ?? base * ratio);
+      shelf += cost;
+      const text = texts.get(`${store}|${id}`) ?? textOf('', byId.get(id));
+      const d = discountFor(opts.discounts, store, opts.when, text);
+      if (d) byDiscount.set(d, (byDiscount.get(d) ?? 0) + (cost * d.percent) / 100);
+    }
+    let saved = 0;
+    for (const [d, amount] of byDiscount) saved += Math.min(amount, d.cap ?? Infinity);
+    stores.push({ store, total: shelf - saved, saved, known: own.size });
   }
   stores.sort((a, b) => a.total - b.total);
   return { items: ref.size, stores: stores.length >= 2 ? stores : [] };
@@ -215,7 +243,7 @@ export function atStore(
     const product = byId.get(productId);
     const list = prices.get(productId);
     if (!product || !list) return null;
-    const all = offers(list, opts.discounts, opts.when);
+    const all = offers(list, opts.discounts, opts.when, product);
     const here = all.find((o) => o.store === store);
     const other = all.find((o) => o.store !== store);
     if (!here || !other) return null;
