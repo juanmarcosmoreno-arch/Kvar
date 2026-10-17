@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { basketByStore, offers as offersOf, priceTable, usualBasket, type Offer, type StoreDiscount, type When } from '../domain/prices';
 import { addListItem } from '../store/actions';
 import { toast } from '../store/toast';
-import { DEPARTMENTS, distanceKm, itemKey, itemLabel, searchItems, type SipcMatch, type SipcStore } from '../domain/sipc';
+import { allItems, DEPARTMENTS, distanceKm, itemKey, itemLabel, searchItems, type SipcItem, type SipcMatch, type SipcStore } from '../domain/sipc';
 import { storeLabel, type PurchaseLine } from '../domain/spending';
 import type { Product } from '../domain/types';
 import { compareText, formatDecimal, locale, m } from '../i18n';
@@ -14,6 +14,9 @@ import { Sheet } from './Sheet';
 
 const pct = (x: number) => `${formatDecimal(Math.abs(x) * 100, 0)} %`;
 const COLLAPSED = 8;
+const BROWSE_PAGE = 40;
+/** Menos que esto: el local publica poco (Kinko 40, El Clon 29; los súper grandes, 100–180) */
+const FEW = 60;
 
 /**
  * Precios de hoy (precios.uy) en los súper elegidos: tu canasta y tus productos, misma marca y tamaño en cada uno.
@@ -34,6 +37,7 @@ export function TodayPrices({
   const [setup, setSetup] = useState(false);
   const [brandFor, setBrandFor] = useState<SipcMatch | null>(null);
   const [all, setAll] = useState(false);
+  const [browse, setBrowse] = useState(0);
   const opts = { discounts, when };
 
   const rows = useMemo(() => priceTable(sipc.lines, products, opts), [sipc.lines, products, when, discounts]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -50,6 +54,8 @@ export function TodayPrices({
     return out;
   }, [sipc.data]);
   const matchOf = new Map(sipc.matches.map((x) => [x.product.id, x]));
+  // Todo lo que publica precios.uy en tus súper (para «Ver todo»)
+  const everything = useMemo(() => (sipc.data ? allItems(sipc.data) : []), [sipc.data]);
 
   if (!sipc.configured) {
     return (
@@ -81,6 +87,8 @@ export function TodayPrices({
   // Al buscar: también todo lo que publica precios.uy (aunque no esté en tus productos)
   const shownItems = new Set(shown.map((r) => matchOf.get(r.product.id)?.item));
   const catalog = q && sipc.data ? searchItems(sipc.data, q).filter((x) => !shownItems.has(x.key)) : [];
+  // Cuántos artículos publica cada súper elegido (algunos locales publican muy pocos)
+  const counts = sipc.data ? sipc.data.stores.map((st) => ({ store: st, n: sipc.data!.prices[st.id]?.length ?? 0 })) : [];
 
   return (
     <section className="space-y-3">
@@ -102,6 +110,14 @@ export function TodayPrices({
         </button>
       </div>
 
+      {!q && counts.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-xs text-muted">
+            {counts.map((c) => `${prettyStoreName(c.store.name)} ${t.storeCount(c.n)}`).join(' · ')}
+          </p>
+          {counts.some((c) => c.n < FEW) && <p className="text-xs text-[#9A6300] dark:text-low">{t.fewHint}</p>}
+        </div>
+      )}
       {sipc.status === 'loading' && !sipc.data && <p className="text-sm text-muted">{t.loading}</p>}
       {sipc.status === 'error' && <p className="rounded-xl bg-out/10 p-3 text-sm text-out">{sipc.data ? t.error : t.errorNone}</p>}
 
@@ -194,39 +210,33 @@ export function TodayPrices({
           <h3 className="section-title">{t.searchTitle}</h3>
           {catalog.length === 0 && !shown.length && <p className="card p-4 text-sm text-muted">{t.searchNone}</p>}
           <div className="space-y-3">
-            {catalog.map((item) => {
-              const list = offersOf(item.prices, discounts, when);
-              const saving = list.length >= 2 ? 1 - list[0].effective / list[1].effective : 0;
-              const label = itemLabel(item.name);
-              return (
-                <div key={item.key} className="card p-3">
-                  <div className="flex items-center gap-2 px-1">
-                    <span className="min-h-[40px] min-w-0 flex-1 py-2 font-medium">{label}</span>
-                    {saving >= 0.05 && (
-                      <span className="shrink-0 rounded-full bg-ok/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2E7A4A] dark:text-ok">
-                        −{pct(saving)}
-                      </span>
-                    )}
-                  </div>
-                  <ul className="space-y-0.5">
-                    {list.map((o) => (
-                      <TodayLine key={o.store} offer={o} best={o === list[0] && list.length > 1} offer2={item.offers.has(o.store)} />
-                    ))}
-                  </ul>
-                  <button
-                    className="mt-1 flex min-h-[40px] items-center gap-1.5 px-1 text-sm font-medium text-primary"
-                    onClick={() => {
-                      addListItem({ name: label });
-                      toast(m.shopping.soon.added(label));
-                    }}
-                  >
-                    <Icon name="cart" size={16} /> {m.shopping.soon.add}
-                  </button>
-                </div>
-              );
-            })}
+            {catalog.map((item) => (
+              <CatalogCard key={item.key} item={item} discounts={discounts} when={when} />
+            ))}
           </div>
         </div>
+      )}
+
+      {!q && sipc.data && (
+        browse > 0 ? (
+          <div className="space-y-2">
+            <h3 className="section-title">{t.searchTitle}</h3>
+            <div className="space-y-3">
+              {everything.slice(0, browse).map((item) => (
+                <CatalogCard key={item.key} item={item} discounts={discounts} when={when} />
+              ))}
+            </div>
+            {everything.length > browse && (
+              <button className="flex min-h-tap w-full items-center justify-center gap-1 text-sm font-medium text-primary" onClick={() => setBrowse(browse + BROWSE_PAGE)}>
+                {m.prices.best.more(everything.length - browse)} <Icon name="down" size={16} />
+              </button>
+            )}
+          </div>
+        ) : (
+          <button className="btn-ghost w-full" onClick={() => setBrowse(BROWSE_PAGE)}>
+            <Icon name="search" size={18} /> {t.browseAll(everything.length)}
+          </button>
+        )
       )}
 
       {!q && (
@@ -238,6 +248,39 @@ export function TodayPrices({
       <StoresSheet open={setup} onClose={() => setSetup(false)} sipc={sipc} />
       <BrandSheet match={brandFor} sipc={sipc} onClose={() => setBrandFor(null)} />
     </section>
+  );
+}
+
+/** Un artículo de precios.uy (aunque no esté en tus productos), con su precio en cada súper y «A la lista» */
+function CatalogCard({ item, discounts, when }: { item: SipcItem; discounts: StoreDiscount[]; when: When }) {
+  const list = offersOf(item.prices, discounts, when);
+  const saving = list.length >= 2 ? 1 - list[0].effective / list[1].effective : 0;
+  const label = itemLabel(item.name);
+  return (
+    <div className="card p-3">
+      <div className="flex items-center gap-2 px-1">
+        <span className="min-h-[40px] min-w-0 flex-1 py-2 font-medium">{label}</span>
+        {saving >= 0.05 && (
+          <span className="shrink-0 rounded-full bg-ok/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2E7A4A] dark:text-ok">
+            −{pct(saving)}
+          </span>
+        )}
+      </div>
+      <ul className="space-y-0.5">
+        {list.map((o) => (
+          <TodayLine key={o.store} offer={o} best={o === list[0] && list.length > 1} offer2={item.offers.has(o.store)} />
+        ))}
+      </ul>
+      <button
+        className="mt-1 flex min-h-[40px] items-center gap-1.5 px-1 text-sm font-medium text-primary"
+        onClick={() => {
+          addListItem({ name: label });
+          toast(m.shopping.soon.added(label));
+        }}
+      >
+        <Icon name="cart" size={16} /> {m.shopping.soon.add}
+      </button>
+    </div>
   );
 }
 

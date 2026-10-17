@@ -166,11 +166,22 @@ export function searchItems(data: SipcData, query: string, limit = 30): SipcItem
     .filter((w) => w.length >= 2)
     .map((w) => (w.length > 4 && w.endsWith('es') ? w.slice(0, -2) : w.length > 3 && w.endsWith('s') ? w.slice(0, -1) : w));
   if (!words.length) return [];
+  return collectItems(data, (key) => words.every((w) => key.includes(w)))
+    .sort((a, b) => b.prices.length - a.prices.length || a.name.localeCompare(b.name))
+    .slice(0, limit);
+}
+
+/** Todo lo que publica precios.uy en los súper elegidos, por nombre (para recorrerlo sin buscar) */
+export function allItems(data: SipcData): SipcItem[] {
+  return collectItems(data, () => true).sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+}
+
+function collectItems(data: SipcData, match: (key: string) => boolean): SipcItem[] {
   const byKey = new Map<string, SipcItem>();
   for (const store of data.stores) {
     for (const p of data.prices[store.id] ?? []) {
       const key = itemKey(p.name);
-      if (!words.every((w) => key.includes(w))) continue;
+      if (!match(key)) continue;
       const item = byKey.get(key) ?? { key, name: p.name, prices: [], offers: new Set<string>() };
       const storeKey = sipcStoreKey(store);
       item.prices.push({ store: storeKey, name: p.name, price: p.price, at: p.date ?? data.at });
@@ -178,9 +189,7 @@ export function searchItems(data: SipcData, query: string, limit = 30): SipcItem
       byKey.set(key, item);
     }
   }
-  return [...byKey.values()]
-    .sort((a, b) => b.prices.length - a.prices.length || a.name.localeCompare(b.name))
-    .slice(0, limit);
+  return [...byKey.values()];
 }
 
 /** Distancia aproximada en km */
