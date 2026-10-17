@@ -7,6 +7,9 @@ import { Header } from '../components/Shell';
 import { Icon } from '../components/Icon';
 import { SyncBadge } from '../components/SyncBadge';
 import { RunningOutChips } from '../components/RunningOut';
+import { AtStoreCard } from '../components/AtStoreCard';
+import { discountFor, visibleLines, withDiscount } from '../domain/prices';
+import { usePricePrefs } from '../lib/pricePrefs';
 import { categoryIcon } from '../lib/categoryIcon';
 import { addListItem, checkItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
 import { suggestedQuantities } from '../domain/suggestQuantity';
@@ -62,7 +65,14 @@ export function ShoppingList() {
     [view.products, events, purchases],
   );
   // Dónde conviene cada cosa (según los tickets)
-  const cheaper = useMemo(() => (purchases.status === 'ready' ? cheaperAt(purchases.lines) : new Map<string, { store: string; saving: number }>()), [purchases]);
+  // Con los descuentos de hoy y sin los súper que no se comparan
+  const pricePrefs = usePricePrefs();
+  const cheaper = useMemo(() => {
+    if (purchases.status !== 'ready') return new Map<string, { store: string; saving: number }>();
+    const day = new Date().getDay();
+    const lines = visibleLines(purchases.lines, new Set(pricePrefs.hidden));
+    return cheaperAt(lines, new Date(), (store, price) => withDiscount(price, discountFor(pricePrefs.discounts, store, day)));
+  }, [purchases, pricePrefs]);
   const cheaperText = (item: ShoppingItem) => {
     const c = item.product_id ? cheaper.get(item.product_id) : undefined;
     return c ? m.shopping.cheaper(storeLabel(c.store), `${formatDecimal(c.saving * 100, 0)} %`) : null;
@@ -168,6 +178,7 @@ export function ShoppingList() {
           {presence.me ? m.shopping.stopShopping : m.shopping.imShopping}
         </button>
         {presence.me && <p className="-mt-4 text-center text-sm text-muted">{m.shopping.meShoppingBanner}</p>}
+        {presence.me && <AtStoreCard view={view} />}
         {groups.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
             <button className="btn-ghost" onClick={() => ui.openScan('bought')}>

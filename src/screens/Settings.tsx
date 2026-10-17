@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Shell';
 import { Icon, type IconName } from '../components/Icon';
 import { Toggle } from '../components/Toggle';
+import { DiscountsEditor, StoresEditor } from '../components/PriceSettings';
+import { usePriceData } from '../lib/priceData';
 import type { Category, Location } from '../domain/types';
 import { isStandalone } from '../lib/auth';
 import { APP_VERSION, isNative, PUBLIC_URL } from '../lib/platform';
@@ -26,6 +28,7 @@ import { toast } from '../store/toast';
 
 export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold: () => void }) {
   const view = useView()!;
+  const priceData = usePriceData(view.household.id);
   const navigate = useNavigate();
   const online = useStore((s) => s.online);
   const [hhName, setHhName] = useState(view.household.name);
@@ -204,6 +207,14 @@ export function Settings({ userId, onSwitchHousehold }: { userId: string; onSwit
 
         <Section title={m.alerts.settings.title} hint={m.alerts.settings.hint}>
           <AlertsSettings />
+        </Section>
+
+        <Section title={m.prices.discounts.title} hint={m.prices.discounts.hint}>
+          <DiscountsEditor data={priceData} />
+        </Section>
+
+        <Section title={m.prices.stores.title} hint={m.prices.stores.hint}>
+          <StoresEditor data={priceData} />
         </Section>
 
         <Section title={m.money.settings.title} hint={m.money.settings.hint}>

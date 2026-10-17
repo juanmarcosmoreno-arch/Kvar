@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { spendingStats, storeLabel, whereCheaper } from '../domain/spending';
 import { formatDecimal, m } from '../i18n';
 import { categoryIcon } from '../lib/categoryIcon';
@@ -103,6 +104,16 @@ export function SpendingView({ months }: { months: number }) {
         </section>
       )}
       {where && where.stores.length <= 1 && <p className="text-sm text-muted">{t.stores.needMore}</p>}
+      <Link to="/precios" className="card flex min-h-[64px] items-center gap-3 px-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Icon name="tag" size={20} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">{m.prices.open}</span>
+          <span className="block text-sm text-muted">{m.prices.openHint}</span>
+        </span>
+        <Icon name="chevron" className="text-muted" />
+      </Link>
 
       {s.priceChanges.length > 0 && (
         <section className="space-y-2">

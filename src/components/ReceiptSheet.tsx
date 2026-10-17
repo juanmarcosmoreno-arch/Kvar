@@ -8,6 +8,9 @@ import { applyReceipt } from '../store/actions';
 import { getMe } from '../lib/me';
 import { PayerPicker } from './SplitCard';
 import { useView } from '../store/store';
+import { storeLabel } from '../domain/spending';
+import { addStore } from '../lib/pricePrefs';
+import { usePriceData } from '../lib/priceData';
 import { toast } from '../store/toast';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
@@ -24,6 +27,8 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
   const [phase, setPhase] = useState<Phase>('start');
   const [text, setText] = useState('');
   const [parsed, setParsed] = useState<ParsedReceipt | null>(null);
+  // El súper del ticket: se reconoce solo; si no, se pregunta
+  const [store, setStore] = useState<string | null>(null);
   const [review, setReview] = useState<ReviewLine[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +53,7 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
       return;
     }
     setParsed(p);
+    setStore(p.store);
     setReview(buildReview(p, view.aliases ?? [], view.products));
     setPhase('review');
   };
@@ -70,7 +76,7 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
   const [paidBy, setPaidBy] = useState<string | null>(null);
   const confirm = () => {
     const ticket = { date: parsed?.date, total: parsed?.total };
-    const { updated, created } = applyReceipt(review, parsed?.store ?? null, ticket, { pricesOnly, paidBy: paidBy ?? getMe() });
+    const { updated, created } = applyReceipt(review, store, ticket, { pricesOnly, paidBy: paidBy ?? getMe() });
     toast(pricesOnly ? m.capture.receipt.appliedPrices(review.filter((r) => r.include).length) : m.capture.receipt.applied(updated, created));
     close();
   };
@@ -142,6 +148,8 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
           setPricesOnly={setPricesOnly}
           paidBy={paidBy}
           setPaidBy={setPaidBy}
+          store={store}
+          setStore={setStore}
           onConfirm={confirm}
         />
       )}
@@ -150,8 +158,10 @@ export function ReceiptSheet({ open, onClose }: { open: boolean; onClose: () => 
 }
 
 function ReviewList({
-  parsed, review, setReview, editing, setEditing, pricesOnly, setPricesOnly, paidBy, setPaidBy, onConfirm,
+  parsed, review, setReview, editing, setEditing, pricesOnly, setPricesOnly, paidBy, setPaidBy, store, setStore, onConfirm,
 }: {
+  store: string | null;
+  setStore: (s: string | null) => void;
   paidBy: string | null;
   setPaidBy: (id: string) => void;
   pricesOnly: boolean;
@@ -174,7 +184,11 @@ function ReviewList({
     <div className="space-y-4 pb-24">
       <div className="space-y-1 text-sm">
         <p className="text-muted">
-          {parsed.store === 'macromercado' ? 'Macromercado' : parsed.store ?? m.capture.receipt.ticket}
+          {store ? (
+            <button className="font-medium text-primary underline-offset-2 hover:underline" onClick={() => setStore(null)}>
+              {storeLabel(store)}
+            </button>
+          ) : m.capture.receipt.ticket}
           {parsed.date ? ` · ${parsed.date.split('-').reverse().join('/')}` : ''} · {m.capture.receipt.known(known)} ·{' '}
           {m.capture.receipt.fresh(included.length - known)}
         </p>
@@ -189,6 +203,8 @@ function ReviewList({
           </p>
         )}
       </div>
+
+      {!store && <StorePicker onPick={setStore} />}
 
       {/* Sumar al stock, o solo guardar los precios (para Gastos) */}
       <div className="space-y-1.5">
@@ -309,6 +325,48 @@ function LineEditor({
           {m.capture.receipt.newButton}
         </button>
       </div>
+    </div>
+  );
+}
+
+/** «¿De qué súper es?»: para comparar precios hace falta saberlo */
+function StorePicker({ onPick }: { onPick: (store: string) => void }) {
+  const view = useView()!;
+  const data = usePriceData(view.household.id);
+  const [other, setOther] = useState<string | null>(null);
+  const t = m.prices.receipt;
+  const choices = [...new Set([...data.stores, ...data.allStores])].slice(0, 10);
+  return (
+    <div className="card space-y-2 border-primary/30 p-3">
+      <p className="text-sm font-medium">{t.which}</p>
+      <div className="flex flex-wrap gap-2">
+        {choices.map((s) => (
+          <button key={s} type="button" className="chip min-h-[40px] bg-surface" onClick={() => onPick(s)}>
+            {storeLabel(s)}
+          </button>
+        ))}
+        {other === null && (
+          <button type="button" className="chip min-h-[40px] border-dashed bg-surface text-muted" onClick={() => setOther('')}>
+            {t.other}
+          </button>
+        )}
+      </div>
+      {other !== null && (
+        <div className="flex gap-2">
+          <input className="field" autoFocus placeholder={t.otherPlaceholder} value={other} onChange={(e) => setOther(e.target.value)} />
+          <button
+            type="button"
+            className="btn-primary shrink-0 px-4"
+            disabled={!other.trim()}
+            onClick={() => {
+              const key = addStore(other);
+              if (key) onPick(key);
+            }}
+          >
+            <Icon name="check" size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -85,6 +85,8 @@ function detectStore(text: string): string | null {
   if (t.includes('geant') || t.includes('géant')) return 'geant';
   if (t.includes('ta-ta') || t.includes('tata')) return 'tata';
   if (t.includes('el dorado')) return 'el-dorado';
+  if (t.includes('multi ahorro') || t.includes('multiahorro')) return 'multi-ahorro';
+  if (t.includes('kinko')) return 'kinko';
   return null;
 }
 

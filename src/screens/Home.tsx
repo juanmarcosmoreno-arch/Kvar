@@ -36,6 +36,9 @@ export function Home() {
         right={
           <>
             <SyncBadge />
+            <Link to="/precios" aria-label={m.prices.open} className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
+              <Icon name="tag" />
+            </Link>
             <Link to="/estadisticas" aria-label={m.stats.open} className="flex min-h-tap min-w-tap items-center justify-center rounded-full text-muted">
               <Icon name="chart" />
             </Link>

@@ -153,9 +153,9 @@ export function receiptKey(store: string | null, date: string | null, total: num
 
 // --- ¿Dónde conviene? ---------------------------------------------------------------------------------------
 
-const KNOWN_STORES: Record<string, string> = {
+export const KNOWN_STORES: Record<string, string> = {
   macromercado: 'Macromercado', 'tienda-inglesa': 'Tienda Inglesa', disco: 'Disco', devoto: 'Devoto',
-  geant: 'Géant', tata: 'Ta-Ta', 'el-dorado': 'El Dorado',
+  geant: 'Géant', tata: 'Ta-Ta', 'el-dorado': 'El Dorado', 'multi-ahorro': 'Multi Ahorro', kinko: 'Kinko',
 };
 
 /** «Tienda Inglesa», «tienda-inglesa», «TIENDA INGLESA » → la misma clave */
@@ -183,7 +183,7 @@ const COMPARE_DAYS = 183;
 export const MIN_SAVING = 0.05;
 
 /** Último precio de cada súper para cada producto (del más barato al más caro). */
-function pricesByStore(lines: PurchaseLine[], now: Date): Map<string, StorePrice[]> {
+export function pricesByStore(lines: PurchaseLine[], now: Date): Map<string, StorePrice[]> {
   const since = now.getTime() - COMPARE_DAYS * DAY;
   const latest = new Map<string, Map<string, StorePrice>>();
   for (const l of lines) {
@@ -262,12 +262,17 @@ export function storePricesOf(lines: PurchaseLine[], productId: string, now = ne
 
 /**
  * Para la lista: en qué súper conviene cada producto (solo si la diferencia vale la pena).
- * product_id → { store, saving }
+ * product_id → { store, saving }. `adjust` aplica los descuentos con tarjeta (precio de góndola → lo que se paga).
  */
-export function cheaperAt(lines: PurchaseLine[], now = new Date()): Map<string, { store: string; saving: number }> {
+export function cheaperAt(
+  lines: PurchaseLine[],
+  now = new Date(),
+  adjust?: (store: string, price: number) => number,
+): Map<string, { store: string; saving: number }> {
   const out = new Map<string, { store: string; saving: number }>();
-  for (const [productId, prices] of pricesByStore(lines, now)) {
-    if (prices.length < 2) continue;
+  for (const [productId, raw] of pricesByStore(lines, now)) {
+    if (raw.length < 2) continue;
+    const prices = adjust ? raw.map((p) => ({ ...p, price: adjust(p.store, p.price) })).sort((a, b) => a.price - b.price) : raw;
     // Contra el segundo más barato: «conviene en X» tiene que ser cierto aunque haya un tercero carísimo
     const saving = 1 - prices[0].price / prices[1].price;
     if (saving >= MIN_SAVING) out.set(productId, { store: prices[0].store, saving });

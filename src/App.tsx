@@ -13,6 +13,7 @@ import { isConfigured } from './lib/supabase';
 import { applyTheme } from './lib/theme';
 import { Cook } from './screens/Cook';
 import { Stats } from './screens/Stats';
+import { Prices } from './screens/Prices';
 import { Home } from './screens/Home';
 import { Inventory } from './screens/Inventory';
 import { Login } from './screens/Login';
@@ -195,6 +196,7 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
         <Route path="/lista" element={<ShoppingList />} />
         <Route path="/cocino" element={<Cook />} />
         <Route path="/estadisticas" element={<Stats />} />
+        <Route path="/precios" element={<Prices />} />
         <Route path="/ajustes" element={<Settings userId={userId} onSwitchHousehold={onSwitchHousehold} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

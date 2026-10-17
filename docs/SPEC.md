@@ -343,6 +343,19 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   vence), en el idioma de la app; se abre como cualquier receta (con lo que falta marcado) y «Hacerla mía» la guarda.
   Sin Apple Intelligence se explica qué hace falta; en la demo se muestra un ejemplo.
 
+### Comparador de precios (implementado)
+- Pantalla **Precios** (ícono de etiqueta en Inicio, y desde Gastos): buscador, **tu canasta** (lo comprado 2+ veces en
+  6 meses, cuánto saldría en cada súper; lo que no tiene precio en un súper se estima con lo caro/barato que es ese súper
+  en lo demás) y **dónde conviene cada cosa** (último precio de cada súper, 6 meses).
+- **Descuentos con tarjeta** por súper: porcentaje, días de la semana, tarjeta y tope por compra. Se compara lo que se
+  paga de verdad: hoy, el mejor día de cada súper o sin descuentos. El tope se aplica a la canasta, no por producto.
+- **Mis supermercados**: cuáles se comparan y agregar otros a mano. Súper y descuentos se guardan en cada teléfono
+  (dependen de las tarjetas de cada uno); los precios vienen de los tickets del hogar.
+- **Estoy en el súper → ¿en cuál?**: con los descuentos de hoy, de la lista «Llevá acá» / «Mejor en otro lado», y
+  «Aprovechá» con lo de siempre que ahí está ≥10 % más barato. Vence a las 4 horas.
+- Al leer un ticket sin súper reconocido, se pregunta de cuál es. «Más barato en X» en la lista usa los descuentos de hoy.
+- Pendiente: precios sin ir al súper (datos abiertos de precios.uy).
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y
