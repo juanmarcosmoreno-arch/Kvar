@@ -2,8 +2,12 @@
  * Lectura de tickets de supermercado (Fase 3).
  * El OCR (Vision de Apple en iPhone, o la IA en la nube) entrega texto; acá se arman
  * las líneas sin IA, con reglas, y se proponen los productos del hogar.
- * Formato típico uruguayo (e-Ticket): CÓDIGO DESCRIPCIÓN CANTIDAD PRECIO MONTO[IVA]
- *   168953 LECHE CLADY ULTRA ENTERA S/FRIO 1LT X 4 2,000 185,07 370,14E
+ * Formatos uruguayos (e-Ticket):
+ *  - En un renglón (Macromercado): CÓDIGO DESCRIPCIÓN CANTIDAD PRECIO MONTO[IVA]
+ *      168953 LECHE CLADY ULTRA ENTERA S/FRIO 1LT X 4 2,000 185,07 370,14E
+ *  - En dos renglones (Disco, Devoto, Géant y otros): DESCRIPCIÓN MONTO, y abajo CANTIDAD [KG|UN] x PRECIO
+ *      AGUJA SIN HUESO          422.36
+ *      1.324 KG x 319.00
  */
 import { normalizeAlias, similarity, type Alias, type Candidate, type Match } from './aliases';
 
@@ -33,6 +37,23 @@ export interface ParsedReceipt {
 
 const LINE_RE =
   /^\s*(?:(\d{1,8})\s+)?(.+?)\s+(\d{1,4}[.,]\d{3})\s+(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})\s+(-?\d{1,3}(?:\.\d{3})*,\d{2}|-?\d+[.,]\d{2})\s*[A-Z]?\s*$/;
+
+/** Monto: «1.410,48», «422.36», «-12,00» */
+const AMOUNT = String.raw`-?\d{1,3}(?:[.,]\d{3})*[.,]\d{2}`;
+/** Cantidad: «1.324», «2», «0,560» */
+const QTY = String.raw`\d{1,4}(?:[.,]\d{1,3})?`;
+/** Unidad del renglón de cantidad (el OCR a veces pone punto o la escribe en minúscula) */
+const UNIT = String.raw`(?:KGS?|KG\.|K|UN|UN\.|UNI|UNID|UNIDAD(?:ES)?|U|LTS?|L|GRS?|G)`;
+/** Renglón de cantidad del formato en dos renglones: «1.324 KG x 319.00», «2 UN x 45,00», a veces con el monto al final */
+const QTY_LINE_RE = new RegExp(String.raw`^\s*(${QTY})\s*(${UNIT})?\s*[xX×*]\s*\$?\s*(${AMOUNT}|\d+)(?:\s+\$?\s*(${AMOUNT})\s*[A-Z]?)?\s*$`, 'i');
+/** Descripción y monto: «AGUJA SIN HUESO 422.36» (código adelante opcional) */
+const NAME_AMOUNT_RE = new RegExp(String.raw`^\s*(?:(\d{4,13})\s+)?(.*?[A-Za-zÁÉÍÓÚÑáéíóúñ]{2}.*?)\s+\$?\s*(${AMOUNT})\s*[A-Z]?\s*$`);
+/** Todo junto en un renglón (cuando el OCR une los dos): «AGUJA SIN HUESO 1.324 KG x 319.00 422.36» */
+const MERGED_RE = new RegExp(String.raw`^\s*(?:(\d{4,13})\s+)?(.*?[A-Za-zÁÉÍÓÚÑáéíóúñ]{2}.*?)\s+(${QTY})\s*(${UNIT})?\s*[xX×*]\s*\$?\s*(${AMOUNT}|\d+)\s+\$?\s*(${AMOUNT})\s*[A-Z]?\s*$`, 'i');
+/** Renglones que no son productos aunque tengan forma de «texto monto» */
+const NOT_ITEM_RE = /\b(sub\s*total|total|pago|tarjeta|cr[eé]dito|d[eé]bito|efectivo|cambio|vuelto|redondeo|iva|saldo|puntaje|moneda|rut|consumo final|e-?ticket|cajer[oa]|caja)\b/i;
+/** Descuento que corresponde al producto de arriba */
+const DISCOUNT_RE = /\b(desc(uento)?|dto|ahorro|bonif(icaci[oó]n)?|promo(ci[oó]n)?|rebaja|cup[oó]n|oferta)\b/i;
 
 /** Líneas que no son productos de la casa */
 const IGNORE_RE = /\b(bolsas?|bolsones?)\b/i;
@@ -76,18 +97,30 @@ export function packSizeOf(desc: string): number {
   return n >= 2 && n <= 200 ? n : 1;
 }
 
+const STORES: [RegExp, string][] = [
+  [/macromercado/, 'macromercado'],
+  [/tienda inglesa/, 'tienda-inglesa'],
+  [/\bdisco\b/, 'disco'],
+  [/\bdevoto\b/, 'devoto'],
+  [/\bg[eé]ant\b/, 'geant'],
+  [/\bta-?ta\b/, 'tata'],
+  [/\bel dorado\b/, 'el-dorado'],
+  [/multi ?ahorro/, 'multi-ahorro'],
+  [/\bkinko\b/, 'kinko'],
+];
+
+/**
+ * El súper del ticket: la marca que aparece primero (el logo va arriba; un ticket de Devoto o Géant puede decir
+ * «Supermercados Disco del Uruguay S.A.» más abajo, en la razón social).
+ */
 function detectStore(text: string): string | null {
   const t = text.toLowerCase();
-  if (t.includes('macromercado')) return 'macromercado';
-  if (t.includes('tienda inglesa')) return 'tienda-inglesa';
-  if (t.includes('disco')) return 'disco';
-  if (t.includes('devoto')) return 'devoto';
-  if (t.includes('geant') || t.includes('géant')) return 'geant';
-  if (t.includes('ta-ta') || t.includes('tata')) return 'tata';
-  if (t.includes('el dorado')) return 'el-dorado';
-  if (t.includes('multi ahorro') || t.includes('multiahorro')) return 'multi-ahorro';
-  if (t.includes('kinko')) return 'kinko';
-  return null;
+  let best: { at: number; key: string } | null = null;
+  for (const [re, key] of STORES) {
+    const at = t.search(re);
+    if (at >= 0 && (!best || at < best.at)) best = { at, key };
+  }
+  return best?.key ?? null;
 }
 
 function detectDate(text: string): string | null {
@@ -95,56 +128,170 @@ function detectDate(text: string): string | null {
   return m ? `${m[3]}-${m[2]}-${m[1]}` : null;
 }
 
+/** Una línea de producto armada a partir de sus partes */
+function makeLine(raw: string, code: string | undefined, description: string, quantity: number, unitPrice: number, amount: number, unit?: string): ReceiptLine {
+  const weighed = unit ? /^(k|g|l)/i.test(unit) : !Number.isInteger(quantity);
+  const packSize = packSizeOf(description);
+  return {
+    raw,
+    storeCode: code ?? null,
+    description: description.trim(),
+    clean: cleanDescription(description),
+    quantity,
+    weighed,
+    packSize,
+    units: weighed ? 1 : Math.max(1, Math.round(quantity)) * packSize,
+    unitPrice,
+    amount,
+    promo: /^OF\./i.test(description.trim()),
+  };
+}
+
+/** ¿Cantidad × precio da el monto? (con tolerancia por redondeo) */
+const consistent = (qty: number, price: number, amount: number) =>
+  qty > 0 && price > 0 && Math.abs(qty * price - amount) <= Math.max(0.02, Math.abs(amount) * 0.02);
+
+/** Un renglón que puede ser la descripción de un producto (sin monto) */
+const isNameOnly = (line: string) => /[A-Za-zÁÉÍÓÚÑáéíóúñ]{3}/.test(line) && !NOT_ITEM_RE.test(line) && !QTY_LINE_RE.test(line) && !/\d[.,]\d{2}\s*$/.test(line);
+
+const LONE_AMOUNT_RE = new RegExp(String.raw`^\$?\s*${AMOUNT}\s*[A-Z]?$`);
+
+/**
+ * El OCR a veces deja el monto solo en un renglón («AGUJA SIN HUESO» / «422.36» / «1.324 KG x 319.00»): se pega al
+ * renglón de arriba si es una descripción, o al de cantidad si le falta el monto.
+ */
+function joinLoneAmounts(rows: string[]): string[] {
+  const out: string[] = [];
+  for (const row of rows) {
+    const prev = out[out.length - 1];
+    if (prev != null && LONE_AMOUNT_RE.test(row)) {
+      const q = QTY_LINE_RE.exec(prev);
+      if (isNameOnly(prev) || (q && !q[4])) {
+        out[out.length - 1] = `${prev} ${row}`;
+        continue;
+      }
+    }
+    out.push(row);
+  }
+  return out;
+}
+
 export function parseReceiptText(text: string): ParsedReceipt {
   const lines: ReceiptLine[] = [];
   const ignored: string[] = [];
   let total: number | null = null;
   let rounding = 0;
+  let bagsSum = 0;
+  const rows = joinLoneAmounts(text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean));
+  const used = new Set<number>();
+  /** En qué renglón empieza cada producto (para dejarlos en el orden del ticket) */
+  const at = new Map<ReceiptLine, number>();
 
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line) continue;
+  const add = (line: ReceiptLine, row: number) => {
+    if (IGNORE_RE.test(line.description)) {
+      ignored.push(line.description);
+      bagsSum += line.amount; // las bolsas también suman al total
+      return;
+    }
+    lines.push(line);
+    at.set(line, row);
+  };
+
+  /** Formato en dos renglones: la descripción con el monto (o sin él) y el renglón de cantidad, en cualquier orden */
+  const pairAt = (i: number, strict: boolean): boolean => {
+    const q = QTY_LINE_RE.exec(rows[i]);
+    if (!q) return false;
+    const [, qtyS, unit, priceS, amountInQty] = q;
+    const qty = parseNumber(qtyS);
+    const price = parseNumber(priceS);
+    // Primero el renglón de arriba (el formato habitual), después el de abajo
+    for (const j of [i - 1, i + 1]) {
+      if (j < 0 || j >= rows.length || used.has(j)) continue;
+      const n = NAME_AMOUNT_RE.exec(rows[j]);
+      if (n && !NOT_ITEM_RE.test(n[2]) && !QTY_LINE_RE.test(rows[j])) {
+        const amount = parseNumber(n[3]);
+        if (strict && !consistent(qty, price, amount)) continue;
+        if (amount < 0) continue;
+        add(makeLine(`${rows[Math.min(i, j)]} / ${rows[Math.max(i, j)]}`, n[1], n[2], qty, price, amount, unit), Math.min(i, j));
+        used.add(i).add(j);
+        return true;
+      }
+      // El monto quedó pegado al renglón de cantidad (foto curvada) y arriba solo la descripción
+      if (amountInQty && j === i - 1 && isNameOnly(rows[j])) {
+        const amount = parseNumber(amountInQty);
+        if (strict && !consistent(qty, price, amount)) continue;
+        const code = /^(\d{4,13})\s+/.exec(rows[j])?.[1];
+        add(makeLine(`${rows[j]} / ${rows[i]}`, code, code ? rows[j].slice(code.length).trim() : rows[j], qty, price, amount, unit), j);
+        used.add(i).add(j);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // 1) Total, redondeo, el formato en un renglón y el que el OCR dejó todo junto
+  let mainTotal: number | null = null;
+  rows.forEach((line, i) => {
     const totalMatch = /TOTAL(?: DE COMPRA)?\s*:?\s*\$?\s*([\d.,]+)\s*$/i.exec(line);
-    if (totalMatch) {
+    if (totalMatch && !/sub\s*total/i.test(line)) {
+      // El renglón que empieza con «TOTAL» es el de la compra (abajo vienen «Pago total», etc.); si no hay, el último
+      if (/^TOTAL\b/i.test(line) && mainTotal == null) mainTotal = parseNumber(totalMatch[1]);
       total = parseNumber(totalMatch[1]);
-      continue;
+      used.add(i);
+      return;
     }
     const roundMatch = /^Redondeo\s+(-?[\d.,]+)/i.exec(line);
     if (roundMatch) {
       rounding = parseNumber(roundMatch[1]);
-      continue;
+      used.add(i);
+      return;
     }
     const m = LINE_RE.exec(line);
-    if (!m) continue;
-    const [, code, description, qtyS, priceS, amountS] = m;
-    if (IGNORE_RE.test(description)) {
-      ignored.push(description);
-      continue;
+    if (m) {
+      const [, code, description, qtyS, priceS, amountS] = m;
+      add(makeLine(line, code, description, parseNumber(qtyS), parseNumber(priceS), parseNumber(amountS)), i);
+      used.add(i);
+      return;
     }
-    const quantity = parseNumber(qtyS);
-    const weighed = !Number.isInteger(quantity);
-    const packSize = packSizeOf(description);
-    lines.push({
-      raw: line,
-      storeCode: code ?? null,
-      description: description.trim(),
-      clean: cleanDescription(description),
-      quantity,
-      weighed,
-      packSize,
-      units: weighed ? 1 : Math.round(quantity) * packSize,
-      unitPrice: parseNumber(priceS),
-      amount: parseNumber(amountS),
-      promo: /^OF\./i.test(description.trim()),
+    const merged = MERGED_RE.exec(line);
+    if (merged && !NOT_ITEM_RE.test(merged[2])) {
+      const [, code, description, qtyS, unit, priceS, amountS] = merged;
+      const qty = parseNumber(qtyS);
+      const price = parseNumber(priceS);
+      const amount = parseNumber(amountS);
+      if (consistent(qty, price, amount)) {
+        add(makeLine(line, code, description, qty, price, amount, unit), i);
+        used.add(i);
+      }
+    }
+  });
+
+  // 2) Dos renglones: primero los pares que cierran (cantidad × precio = monto), después los que el OCR leyó mal
+  for (const strict of [true, false]) {
+    rows.forEach((_, i) => {
+      if (!used.has(i)) pairAt(i, strict);
     });
   }
 
+  // 3) Descuentos («DESC. TARJETA -12,00»): se restan del producto de arriba
+  rows.forEach((line, i) => {
+    if (used.has(i)) return;
+    const n = NAME_AMOUNT_RE.exec(line);
+    // «DESC. TARJETA» es un descuento; el pago con tarjeta es positivo y no llega acá
+    if (!n || !DISCOUNT_RE.test(n[2]) || /\b(sub\s*total|total|redondeo)\b/i.test(n[2])) return;
+    const amount = parseNumber(n[3]);
+    if (!(amount < 0)) return;
+    let item: ReceiptLine | null = null;
+    for (const l of lines) if (at.get(l)! < i && (!item || at.get(l)! > at.get(item)!)) item = l;
+    if (!item) return;
+    item.amount = Math.round((item.amount + amount) * 100) / 100;
+    item.promo = true;
+    used.add(i);
+  });
+
+  if (mainTotal != null) total = mainTotal;
+  lines.sort((a, b) => at.get(a)! - at.get(b)!);
   const sum = lines.reduce((a, l) => a + l.amount, 0);
-  const bagsSum = text
-    .split(/\r?\n/)
-    .map((l) => LINE_RE.exec(l.trim()))
-    .filter((m): m is RegExpExecArray => Boolean(m && IGNORE_RE.test(m[2])))
-    .reduce((a, m) => a + parseNumber(m[5]), 0); // las bolsas también suman al total
   const difference = total == null ? null : Math.round((sum + bagsSum + rounding - total) * 100) / 100;
 
   return { store: detectStore(text), date: detectDate(text), lines, ignored, total, difference };

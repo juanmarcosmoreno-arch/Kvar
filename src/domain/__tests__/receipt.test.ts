@@ -82,3 +82,116 @@ describe('utilidades', () => {
     expect(packSizeOf('QUESO X 500 GR')).toBe(1);
   });
 });
+
+/** Ticket real de Disco Fresh Market (Solymar), como lo arma el lector de fotos: un producto en dos renglones */
+const DISCO = `en tus productos favoritos
+FRESH MARKET
+Disco
+Supermercados Disco del Uruguay S.A. LOCAL
+Rut: 210274130017
+Avda. Giannattasio Km. 23.500 18
+Solymar - Canelones
+Teléfonos: 26956892 - 26965140
+e-Ticket
+BJ7729049 17/10/2026
+CONTADO
+CONSUMO FINAL
+MONEDA: UYU
+AGUJA SIN HUESO 422.36
+1.324 KG x 319.00
+BONDIOLA ENTER MEDIA 248.83
+1.670 KG x 149.00
+PANAL BABYSEC PREMIU 949.00
+1.000 UN x 949.00
+TOTAL: $ 1620.19
+Tarjeta Credito/Debito $ 1620.19
+Pago total $ 1620.19
+CAMBIO $ 0.00
+ADENDA
+VT:33589
+Más
+JUAN MORENO ****8101
+Tarjeta MAS 0
+Puntaje del Ticket 248
+Saldo de la cuenta
+Gracias: JUAN MORENO
+Cajera [101802654]: ANY
+N° Trans Fecha Hora Caja
+2101219 17/10/2026 16:53:23 005
+CI Titular 8101
+FIN ADENDA
+Cod. de Seguridad: 2tjth2
+Res. DGI 2379/2012`;
+
+describe('ticket de Disco en dos renglones', () => {
+  const expectDisco = (r: ReturnType<typeof parseReceiptText>) => {
+    expect(r.lines.map((l) => [l.description, l.quantity, l.unitPrice, l.amount, l.weighed, l.units])).toEqual([
+      ['AGUJA SIN HUESO', 1.324, 319, 422.36, true, 1],
+      ['BONDIOLA ENTER MEDIA', 1.67, 149, 248.83, true, 1],
+      ['PANAL BABYSEC PREMIU', 1, 949, 949, false, 1],
+    ]);
+    expect(r.total).toBe(1620.19);
+    expect(r.difference).toBe(0);
+  };
+
+  it('lee los productos, el súper, la fecha y el total', () => {
+    const r = parseReceiptText(DISCO);
+    expect(r.store).toBe('disco');
+    expect(r.date).toBe('2026-10-17');
+    expectDisco(r);
+    expect(r.lines[0].clean).toBe('Aguja sin hueso');
+  });
+
+  it('aunque el OCR pegue el monto al renglón de la cantidad (foto curvada)', () => {
+    const curved = DISCO.replace('AGUJA SIN HUESO 422.36\n1.324 KG x 319.00', 'AGUJA SIN HUESO\n1.324 KG x 319.00 422.36')
+      .replace('PANAL BABYSEC PREMIU 949.00\n1.000 UN x 949.00', 'PANAL BABYSEC PREMIU\n1.000 UN x 949.00 949.00');
+    expectDisco(parseReceiptText(curved));
+  });
+
+  it('aunque el OCR junte los dos renglones en uno', () => {
+    expectDisco(parseReceiptText(DISCO.replace('AGUJA SIN HUESO 422.36\n1.324 KG x 319.00', 'AGUJA SIN HUESO 1.324 KG x 319.00 422.36')));
+  });
+
+  it('con la cantidad arriba de la descripción', () => {
+    const reversed = DISCO.replace('AGUJA SIN HUESO 422.36\n1.324 KG x 319.00', '1.324 KG x 319.00\nAGUJA SIN HUESO 422.36')
+      .replace('BONDIOLA ENTER MEDIA 248.83\n1.670 KG x 149.00', '1.670 KG x 149.00\nBONDIOLA ENTER MEDIA 248.83')
+      .replace('PANAL BABYSEC PREMIU 949.00\n1.000 UN x 949.00', '1.000 UN x 949.00\nPANAL BABYSEC PREMIU 949.00');
+    expectDisco(parseReceiptText(reversed));
+  });
+
+  it('con coma decimal y un número mal leído igual arma el producto (y avisa la diferencia)', () => {
+    const r = parseReceiptText(DISCO.replace('1.670 KG x 149.00', '1,670 KG x 149,00').replace('PANAL BABYSEC PREMIU 949.00', 'PANAL BABYSEC PREMIU 943.00'));
+    expect(r.lines).toHaveLength(3);
+    expect(r.lines[1].quantity).toBe(1.67);
+    expect(r.difference).toBe(-6);
+  });
+
+  it('un descuento se resta del producto de arriba', () => {
+    const r = parseReceiptText(DISCO.replace('1.000 UN x 949.00', '1.000 UN x 949.00\nDESC. TARJETA -94.90').replace('TOTAL: $ 1620.19', 'TOTAL: $ 1525.29'));
+    const panal = r.lines.find((l) => l.description.startsWith('PANAL'))!;
+    expect(panal.amount).toBe(854.1);
+    expect(panal.promo).toBe(true);
+    expect(r.difference).toBe(0);
+  });
+
+  it('SUBTOTAL no es el total', () => {
+    const r = parseReceiptText(DISCO.replace('TOTAL: $ 1620.19', 'SUBTOTAL 1620.19\nTOTAL: $ 1620.19'));
+    expect(r.total).toBe(1620.19);
+    expect(r.lines).toHaveLength(3);
+  });
+
+  it('el súper es la marca de arriba, no la razón social', () => {
+    expect(parseReceiptText(`DEVOTO\nSupermercados Disco del Uruguay S.A.\n${DISCO.split('MONEDA: UYU')[1]}`).store).toBe('devoto');
+    expect(parseReceiptText(`Géant\nSupermercados Disco del Uruguay S.A.\nTOTAL 10,00`).store).toBe('geant');
+  });
+});
+
+describe('ticket de Disco con el monto suelto', () => {
+  it('el monto en su propio renglón se pega a la descripción o a la cantidad', () => {
+    const r = parseReceiptText(DISCO
+      .replace('AGUJA SIN HUESO 422.36\n1.324 KG x 319.00', 'AGUJA SIN HUESO\n422.36\n1.324 KG x 319.00')
+      .replace('BONDIOLA ENTER MEDIA 248.83\n1.670 KG x 149.00', 'BONDIOLA ENTER MEDIA\n1.670 KG x 149.00\n248.83'));
+    expect(r.lines.map((l) => l.amount)).toEqual([422.36, 248.83, 949]);
+    expect(r.difference).toBe(0);
+  });
+});
