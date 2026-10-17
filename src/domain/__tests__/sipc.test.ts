@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { chainOf, parsePriceCell, parsePriceTable } from '../../../supabase/functions/precios-uy/index';
 import { atStore, basketByStore, discountFor } from '../prices';
 import { cheaperAt } from '../spending';
-import { chainOfKey, itemKey, itemLabel, matchItems, matchProducts, sipcLines, sipcStoreKey, type SipcData } from '../sipc';
+import { chainOfKey, itemKey, itemLabel, matchItems, matchProducts, searchItems, sipcLines, sipcStoreKey, type SipcData } from '../sipc';
 import { product } from './fixtures';
 
 const items = [
@@ -61,6 +61,15 @@ describe('precios.uy: relacionar productos', () => {
     ]);
     // Elegida a mano: Baldo (solo en Disco)
     expect(matchProducts(products, data, { y: itemKey('Yerba mate común Baldo, 1.0') })[0].itemName).toBe('Yerba mate común Baldo, 1.0');
+  });
+
+  it('buscar en todo lo de precios.uy, aunque no sea un producto del hogar', () => {
+    const r = searchItems(data, 'yerbas canarias');
+    expect(r.map((x) => [x.name, x.prices.map((p) => [p.store, p.price])])).toEqual([
+      ['Yerba mate común Canarias, 1.0', [['disco-sipc-37', 300], ['tata-sipc-164', 270]]],
+    ]);
+    expect(searchItems(data, 'arroz')[0].offers.has('disco-sipc-37')).toBe(true);
+    expect(searchItems(data, 'leche')).toEqual([]);
   });
 
   it('precios de hoy como líneas: el comparador y los descuentos de la cadena', () => {

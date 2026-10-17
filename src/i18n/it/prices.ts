@@ -106,6 +106,8 @@ export const prices: Messages['prices'] = {
     offer: 'offerta',
     brandTitle: (product) => `Quale ${product} confronti?`,
     brandAuto: 'Automatico (quella presente in più supermercati)',
+    searchTitle: 'Tutto su precios.uy',
+    searchNone: 'precios.uy non pubblica questo nei tuoi supermercati. Pubblica circa 200 articoli di base: dispensa, latticini, frutta e verdura, carne, pulizia e igiene.',
     fromTickets: 'Dai tuoi scontrini',
     fromTicketsHint: 'Quello che hai pagato nei tuoi acquisti: utile per ciò che precios.uy non pubblica, ma potrebbe non essere aggiornato.',
   },

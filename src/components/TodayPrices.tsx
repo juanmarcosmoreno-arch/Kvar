@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { basketByStore, priceTable, usualBasket, type Offer, type StoreDiscount, type When } from '../domain/prices';
-import { DEPARTMENTS, distanceKm, itemKey, itemLabel, type SipcMatch, type SipcStore } from '../domain/sipc';
+import { basketByStore, offers as offersOf, priceTable, usualBasket, type Offer, type StoreDiscount, type When } from '../domain/prices';
+import { addListItem } from '../store/actions';
+import { toast } from '../store/toast';
+import { DEPARTMENTS, distanceKm, itemKey, itemLabel, searchItems, type SipcMatch, type SipcStore } from '../domain/sipc';
 import { storeLabel, type PurchaseLine } from '../domain/spending';
 import type { Product } from '../domain/types';
 import { formatDecimal, locale, m } from '../i18n';
@@ -75,6 +77,9 @@ export function TodayPrices({
   const shown = all || q ? sorted : sorted.slice(0, COLLAPSED);
   const time = sipc.data ? new Date(sipc.data.at).toLocaleString(locale, { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : null;
   const storeId = (key: string) => Number(key.split('-sipc-')[1]);
+  // Al buscar: también todo lo que publica precios.uy (aunque no esté en tus productos)
+  const shownItems = new Set(shown.map((r) => matchOf.get(r.product.id)?.item));
+  const catalog = q && sipc.data ? searchItems(sipc.data, q).filter((x) => !shownItems.has(x.key)) : [];
 
   return (
     <section className="space-y-3">
@@ -128,7 +133,7 @@ export function TodayPrices({
         </div>
       )}
 
-      {sipc.data && rows.length === 0 && <p className="card p-4 text-sm text-muted">{t.noMatches}</p>}
+      {sipc.data && !q && rows.length === 0 && <p className="card p-4 text-sm text-muted">{t.noMatches}</p>}
 
       {shown.length > 0 && (
         <div className="space-y-2">
@@ -178,6 +183,46 @@ export function TodayPrices({
               <Icon name={all ? 'up' : 'down'} size={16} />
             </button>
           )}
+        </div>
+      )}
+
+      {q && sipc.data && (
+        <div className="space-y-2">
+          <h3 className="section-title">{t.searchTitle}</h3>
+          {catalog.length === 0 && !shown.length && <p className="card p-4 text-sm text-muted">{t.searchNone}</p>}
+          <div className="space-y-3">
+            {catalog.map((item) => {
+              const list = offersOf(item.prices, discounts, when);
+              const saving = list.length >= 2 ? 1 - list[0].effective / list[1].effective : 0;
+              const label = itemLabel(item.name);
+              return (
+                <div key={item.key} className="card p-3">
+                  <div className="flex items-center gap-2 px-1">
+                    <span className="min-h-[40px] min-w-0 flex-1 py-2 font-medium">{label}</span>
+                    {saving >= 0.05 && (
+                      <span className="shrink-0 rounded-full bg-ok/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2E7A4A] dark:text-ok">
+                        −{pct(saving)}
+                      </span>
+                    )}
+                  </div>
+                  <ul className="space-y-0.5">
+                    {list.map((o) => (
+                      <TodayLine key={o.store} offer={o} best={o === list[0] && list.length > 1} offer2={item.offers.has(o.store)} />
+                    ))}
+                  </ul>
+                  <button
+                    className="mt-1 flex min-h-[40px] items-center gap-1.5 px-1 text-sm font-medium text-primary"
+                    onClick={() => {
+                      addListItem({ name: label });
+                      toast(m.shopping.soon.added(label));
+                    }}
+                  >
+                    <Icon name="cart" size={16} /> {m.shopping.soon.add}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

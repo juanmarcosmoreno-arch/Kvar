@@ -104,6 +104,8 @@ export const prices = {
     offer: 'oferta',
     brandTitle: (product: string) => `¿Qué ${product} comparás?`,
     brandAuto: 'Automático (la que está en más súper)',
+    searchTitle: 'Todo lo de precios.uy',
+    searchNone: 'precios.uy no publica eso en tus súper. Publica unos 200 artículos básicos: almacén, lácteos, frutas y verduras, carne, limpieza e higiene.',
     fromTickets: 'Según tus tickets',
     fromTicketsHint: 'Lo que pagaste en tus compras: sirve para lo que precios.uy no publica, pero puede estar desactualizado.',
   },

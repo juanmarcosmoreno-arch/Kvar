@@ -105,6 +105,8 @@ export const prices: Messages['prices'] = {
     offer: '特売',
     brandTitle: (product) => `どの${product}を比べますか？`,
     brandAuto: '自動（最も多くのお店にあるもの）',
+    searchTitle: 'precios.uy のすべて',
+    searchNone: 'precios.uy はあなたのお店でそれを公開していません。食料品、乳製品、青果、肉、掃除用品、日用品など約200品目を公開しています。',
     fromTickets: 'レシートから',
     fromTicketsHint: '実際に支払った価格です。precios.uy にない商品に使えますが、古い場合があります。',
   },

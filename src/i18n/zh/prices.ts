@@ -105,6 +105,8 @@ export const prices: Messages['prices'] = {
     offer: '特价',
     brandTitle: (product) => `比较哪种${product}？`,
     brandAuto: '自动（覆盖超市最多的品牌）',
+    searchTitle: 'precios.uy 上的全部商品',
+    searchNone: 'precios.uy 没有公布你所选超市的这个商品。它公布约 200 种基本商品：杂货、乳制品、果蔬、肉类、清洁和个人护理。',
     fromTickets: '根据你的小票',
     fromTicketsHint: '你购物时实际付的价格：适用于 precios.uy 未发布的商品，但可能已过时。',
   },

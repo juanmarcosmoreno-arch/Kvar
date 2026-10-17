@@ -106,6 +106,8 @@ export const prices: Messages['prices'] = {
     offer: 'tilbud',
     brandTitle: (product) => `Hvilken ${product} sammenligner du?`,
     brandAuto: 'Automatisk (den, der findes i flest butikker)',
+    searchTitle: 'Alt på precios.uy',
+    searchNone: 'precios.uy viser ikke det i dine butikker. De viser omkring 200 basisvarer: kolonial, mejeri, frugt og grønt, kød, rengøring og hygiejne.',
     fromTickets: 'Ifølge dine kvitteringer',
     fromTicketsHint: 'Det, du betalte, da du handlede: godt til det, precios.uy ikke offentliggør, men kan være forældet.',
   },

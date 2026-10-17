@@ -106,6 +106,8 @@ export const prices: Messages['prices'] = {
     offer: 'deal',
     brandTitle: (product) => `Which ${product} do you compare?`,
     brandAuto: 'Automatic (the one in most stores)',
+    searchTitle: 'Everything on precios.uy',
+    searchNone: 'precios.uy doesn\'t list that at your stores. It lists about 200 basic items: pantry, dairy, produce, meat, cleaning and personal care.',
     fromTickets: 'From your receipts',
     fromTicketsHint: 'What you paid on your shopping trips: useful for what precios.uy doesn’t publish, but it may be out of date.',
   },

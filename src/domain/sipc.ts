@@ -5,7 +5,7 @@
  * en cada súper. Acá se relaciona cada producto del hogar con un artículo y se convierten los precios de hoy en
  * «líneas de ticket», así el comparador (prices.ts) los usa igual que los tickets.
  */
-import type { PurchaseLine } from './spending';
+import type { PurchaseLine, StorePrice } from './spending';
 import type { Product } from './types';
 
 export interface SipcStore {
@@ -146,6 +146,41 @@ export function sipcLines(data: SipcData, matches: SipcMatch[], householdId = 's
     }
   }
   return lines;
+}
+
+export interface SipcItem {
+  key: string;
+  name: string;
+  /** Precio en cada local elegido (como en el comparador: clave del súper, precio y fecha) */
+  prices: StorePrice[];
+  offers: Set<string>;
+}
+
+/**
+ * Buscar en todo lo que publica precios.uy en los súper elegidos (no solo lo que hay en el hogar).
+ * Todas las palabras tienen que estar en el nombre («queso danbo», «coca»); sin importar tildes ni plurales.
+ */
+export function searchItems(data: SipcData, query: string, limit = 30): SipcItem[] {
+  const words = fold(query)
+    .split(/[^a-z0-9ñ]+/)
+    .filter((w) => w.length >= 2)
+    .map((w) => (w.length > 4 && w.endsWith('es') ? w.slice(0, -2) : w.length > 3 && w.endsWith('s') ? w.slice(0, -1) : w));
+  if (!words.length) return [];
+  const byKey = new Map<string, SipcItem>();
+  for (const store of data.stores) {
+    for (const p of data.prices[store.id] ?? []) {
+      const key = itemKey(p.name);
+      if (!words.every((w) => key.includes(w))) continue;
+      const item = byKey.get(key) ?? { key, name: p.name, prices: [], offers: new Set<string>() };
+      const storeKey = sipcStoreKey(store);
+      item.prices.push({ store: storeKey, name: p.name, price: p.price, at: p.date ?? data.at });
+      if (p.offer) item.offers.add(storeKey);
+      byKey.set(key, item);
+    }
+  }
+  return [...byKey.values()]
+    .sort((a, b) => b.prices.length - a.prices.length || a.name.localeCompare(b.name))
+    .slice(0, limit);
 }
 
 /** Distancia aproximada en km */

@@ -106,6 +106,8 @@ export const prices: Messages['prices'] = {
     offer: 'oferta',
     brandTitle: (product) => `Qual ${product} você compara?`,
     brandAuto: 'Automático (a que está em mais mercados)',
+    searchTitle: 'Tudo do precios.uy',
+    searchNone: 'O precios.uy não publica isso nos seus mercados. Publica uns 200 itens básicos: mercearia, laticínios, hortifrúti, carne, limpeza e higiene.',
     fromTickets: 'Pelos seus cupons',
     fromTicketsHint: 'O que você pagou nas suas compras: serve para o que precios.uy não publica, mas pode estar desatualizado.',
   },

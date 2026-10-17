@@ -106,6 +106,8 @@ export const prices: Messages['prices'] = {
     offer: 'erbjudande',
     brandTitle: (product) => `Vilken ${product} jämför du?`,
     brandAuto: 'Automatiskt (den som finns i flest butiker)',
+    searchTitle: 'Allt på precios.uy',
+    searchNone: 'precios.uy listar inte det i dina butiker. De listar omkring 200 basvaror: skafferi, mejeri, frukt och grönt, kött, städ och hygien.',
     fromTickets: 'Enligt dina kvitton',
     fromTicketsHint: 'Det du betalade när du handlade: bra för det precios.uy inte publicerar, men kan vara inaktuellt.',
   },
