@@ -4,15 +4,21 @@
  * en este teléfono hasta que se ponen viejos (unas horas), para no pedirlos cada vez.
  */
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { matchProducts, sipcLines, sipcStoreKey, type SipcData, type SipcMatch, type SipcPrice, type SipcStore } from '../domain/sipc';
+import { distanceKm, matchProducts, sipcLines, sipcStoreKey, type SipcData, type SipcMatch, type SipcPrice, type SipcStore } from '../domain/sipc';
 import { registerStoreLabels, type PurchaseLine } from '../domain/spending';
 import type { Product } from '../domain/types';
 import { isDemo } from './demo';
 import { supabase } from './supabase';
 
+export interface Place {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 export interface SipcPrefs {
-  /** Zona elegida */
-  place: { name: string; lat: number; lng: number } | null;
+  /** Zonas elegidas (ciudades, tu ubicación): se ven los súper de todas */
+  places: Place[];
   km: number;
   /** Los súper elegidos (hasta MAX_STORES) */
   stores: SipcStore[];
@@ -20,13 +26,13 @@ export interface SipcPrefs {
   pins: Record<string, string>;
 }
 
-export const MAX_STORES = 8;
+export const MAX_STORES = 10;
 const KEY = 'stoka:precios-uy';
 const CACHE_KEY = 'stoka:precios-uy:hoy';
 /** Los precios se actualizan una vez por día: se vuelven a pedir si tienen más de unas horas */
 const FRESH_HOURS = 6;
 
-const EMPTY: SipcPrefs = { place: null, km: 2, stores: [], pins: {} };
+const EMPTY: SipcPrefs = { places: [], km: 2, stores: [], pins: {} };
 
 function readJSON<T>(key: string): T | null {
   try {
@@ -47,7 +53,15 @@ function writeJSON(key: string, value: unknown) {
 
 type Cache = { ids: number[]; prices: Record<number, SipcPrice[]>; at: string };
 
-let prefs: SipcPrefs = { ...EMPTY, ...(readJSON<SipcPrefs>(KEY) ?? {}) };
+function readPrefs(): SipcPrefs {
+  const saved = readJSON<SipcPrefs & { place?: Place | null }>(KEY);
+  if (!saved) return EMPTY;
+  // Antes había una sola zona
+  const { place, ...rest } = saved;
+  return { ...EMPTY, ...rest, places: rest.places ?? (place ? [place] : []) };
+}
+
+let prefs: SipcPrefs = readPrefs();
 let cache: Cache | null = readJSON<Cache>(CACHE_KEY);
 type Status = 'idle' | 'loading' | 'error';
 let status: Status = 'idle';
@@ -100,8 +114,8 @@ export function prettyStoreName(name: string): string {
 }
 label();
 
-export function setPlace(place: SipcPrefs['place'], km = prefs.km) {
-  savePrefs({ ...prefs, place, km });
+export function setPlaces(places: Place[], km = prefs.km) {
+  savePrefs({ ...prefs, places, km });
 }
 
 export function setSipcStores(stores: SipcStore[]) {
@@ -131,7 +145,13 @@ function demo() {
 
 /** Súper cerca de un punto (los más cerca primero) */
 export async function findStores(lat: number, lng: number, km: number): Promise<SipcStore[]> {
-  if (isDemo) return (await demo()).stores;
+  // En la demo: los súper de la foto de ejemplo que quedan cerca de esa zona
+  if (isDemo) {
+    const here = { lat, lng };
+    return (await demo()).stores
+      .filter((s) => distanceKm(here, s) <= km * 1.4)
+      .sort((a, b) => distanceKm(here, a) - distanceKm(here, b));
+  }
   return (await call<{ stores: SipcStore[] }>({ action: 'stores', lat, lng, km })).stores;
 }
 
@@ -168,7 +188,7 @@ async function seedDemo() {
   const d = await demo();
   savePrefs({
     ...prefs,
-    place: { name: 'Pocitos', lat: -34.9085, lng: -56.1445 },
+    places: [{ name: 'Pocitos', lat: -34.9085, lng: -56.1445 }],
     stores: d.selected.map((id) => d.stores.find((s) => s.id === id)).filter((s): s is SipcStore => Boolean(s)),
   });
   void refreshSipc(true);

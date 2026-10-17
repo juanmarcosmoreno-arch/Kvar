@@ -146,7 +146,8 @@ export async function storesNear(lat: number, lng: number, km: number): Promise<
       id: x.data.id,
       name: x.title.replace(/\s+/g, ' ').trim(),
       chain: chainOf(x.title),
-      address: (x.data.direccion ?? '').replace(/\s+/g, ' ').replace(/\bnull\b/g, '').trim(),
+      // precios.uy completa el número de puerta con «0» o «null» cuando no tiene
+      address: (x.data.direccion ?? '').replace(/\s+/g, ' ').replace(/\bnull\b/g, '').trim().replace(/\s+0$/, ''),
       lat: x.lat,
       lng: x.lng,
     }))

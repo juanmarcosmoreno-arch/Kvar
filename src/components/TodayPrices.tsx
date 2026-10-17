@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { basketByStore, priceTable, usualBasket, type Offer, type StoreDiscount, type When } from '../domain/prices';
 import { DEPARTMENTS, distanceKm, itemKey, itemLabel, type SipcMatch, type SipcStore } from '../domain/sipc';
 import { storeLabel, type PurchaseLine } from '../domain/spending';
 import type { Product } from '../domain/types';
 import { formatDecimal, locale, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
-import { findStores, MAX_STORES, pinItem, prettyStoreName, refreshSipc, setPlace, setSipcStores, type SipcState } from '../lib/sipc';
+import { findStores, MAX_STORES, pinItem, prettyStoreName, refreshSipc, setPlaces, setSipcStores, type Place, type SipcState } from '../lib/sipc';
 import { useUI } from '../store/ui';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
@@ -212,27 +212,46 @@ function TodayLine({ offer, best, offer2 }: { offer: Offer; best: boolean; offer
   );
 }
 
-/** Elegir la zona y los súper (hasta MAX_STORES) */
+/** Elegir una o varias zonas (ciudades, tu ubicación) y los súper (hasta MAX_STORES) */
 function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => void; sipc: SipcState }) {
   const t = m.prices.setup;
-  const [place, setPlaceState] = useState(sipc.prefs.place);
+  const [places, setPlacesState] = useState<Place[]>(sipc.prefs.places);
   const [km, setKm] = useState(sipc.prefs.km);
-  const [found, setFound] = useState<SipcStore[] | null>(null);
+  // Zona → súper encontrados
+  const [found, setFound] = useState<Record<string, SipcStore[]>>({});
   const [chosen, setChosen] = useState<SipcStore[]>(sipc.prefs.stores);
   const [busy, setBusy] = useState<'locating' | 'searching' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const search = async (p = place, radius = km) => {
-    if (!p) return;
+  /** Busca en las zonas que todavía no tienen resultados (o en todas, si cambió la distancia) */
+  const search = async (next: Place[], radius = km, all = false) => {
+    setPlacesState(next);
+    setPlaces(next, radius);
+    const missing = next.filter((p) => all || !found[p.name]);
+    if (!missing.length) return;
     setBusy('searching');
     setError(null);
     try {
-      setFound(await findStores(p.lat, p.lng, radius));
-      setPlace(p, radius);
+      const results = await Promise.all(missing.map((p) => findStores(p.lat, p.lng, radius)));
+      setFound((prev) => {
+        const out: Record<string, SipcStore[]> = all ? {} : { ...prev };
+        missing.forEach((p, i) => (out[p.name] = results[i]));
+        return out;
+      });
     } catch {
       setError(t.error);
     }
     setBusy(null);
+  };
+  useEffect(() => {
+    if (open && places.length && !Object.keys(found).length) void search(places);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const addPlace = (p: Place) => void search([...places.filter((x) => x.name !== p.name), p]);
+  const removePlace = (name: string) => {
+    const next = places.filter((x) => x.name !== name);
+    setPlacesState(next);
+    setPlaces(next, km);
   };
 
   const locate = () => {
@@ -241,9 +260,14 @@ function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => vo
     setError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const p = { name: t.myLocation, lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setPlaceState(p);
-        void search(p);
+        setBusy(null);
+        // «Mi ubicación» se reemplaza (y se vuelve a buscar)
+        setFound((prev) => {
+          const out = { ...prev };
+          delete out[t.myLocation];
+          return out;
+        });
+        addPlace({ name: t.myLocation, lat: pos.coords.latitude, lng: pos.coords.longitude });
       },
       () => {
         setBusy(null);
@@ -257,31 +281,52 @@ function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => vo
     const on = chosen.some((x) => x.id === s.id);
     setChosen(on ? chosen.filter((x) => x.id !== s.id) : chosen.length < MAX_STORES ? [...chosen, s] : chosen);
   };
-  // Los elegidos siempre visibles, aunque estén fuera de la búsqueda
-  const list = [...chosen.filter((c) => !found?.some((f) => f.id === c.id)), ...(found ?? [])];
+  // Cada súper una sola vez, en la primera zona donde aparece; los elegidos que no salen en ninguna, aparte
+  const seen = new Set<number>();
+  const groups = places
+    .map((p) => ({ place: p as Place | null, stores: (found[p.name] ?? []).filter((s) => !seen.has(s.id) && seen.add(s.id)) }))
+    .filter((g) => g.stores.length > 0);
+  const others = chosen.filter((c) => !seen.has(c.id));
+  if (others.length) groups.unshift({ place: null, stores: others });
+  const searched = places.length > 0 && places.every((p) => found[p.name]);
 
   return (
     <Sheet open={open} onClose={onClose} title={t.title}>
       <div className="space-y-5 pb-24">
         <div className="space-y-2">
           <span className="text-sm text-muted">{t.where}</span>
+          <p className="text-sm text-muted">{t.zonesHint}</p>
+          {places.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {places.map((p) => (
+                <span key={p.name} className="chip min-h-[40px] border-primary bg-primary/10 pr-1 text-ink">
+                  {p.name}
+                  <button
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted"
+                    aria-label={t.removeZone(p.name)}
+                    onClick={() => removePlace(p.name)}
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
           <button className="btn-ghost w-full" onClick={locate} disabled={busy !== null}>
             <Icon name="search" size={18} /> {busy === 'locating' ? t.locating : t.useLocation}
           </button>
           <label className="block">
-            <span className="sr-only">{t.orPick}</span>
+            <span className="sr-only">{t.addCity}</span>
             <select
               className="field"
-              value={place && DEPARTMENTS.some((d) => d.name === place.name) ? place.name : ''}
+              value=""
               onChange={(e) => {
                 const d = DEPARTMENTS.find((x) => x.name === e.target.value);
-                if (!d) return;
-                setPlaceState(d);
-                void search(d);
+                if (d) addPlace(d);
               }}
             >
-              <option value="">{place && !DEPARTMENTS.some((d) => d.name === place.name) ? place.name : t.orPick}</option>
-              {DEPARTMENTS.map((d) => (
+              <option value="">{t.addCity}</option>
+              {DEPARTMENTS.filter((d) => !places.some((p) => p.name === d.name)).map((d) => (
                 <option key={d.name} value={d.name}>{d.name}</option>
               ))}
             </select>
@@ -295,7 +340,7 @@ function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => vo
                 className={`chip min-h-[40px] ${km === n ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
                 onClick={() => {
                   setKm(n);
-                  if (place) void search(place, n);
+                  void search(places, n, true);
                 }}
               >
                 {t.km(n)}
@@ -306,39 +351,44 @@ function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => vo
 
         {busy === 'searching' && <p className="text-sm text-muted">{t.searching}</p>}
         {error && <p className="rounded-xl bg-out/10 p-3 text-sm text-out">{error}</p>}
-        {found && found.length === 0 && <p className="text-sm text-muted">{t.none}</p>}
+        {searched && !groups.length && <p className="text-sm text-muted">{t.none}</p>}
 
-        {list.length > 0 && (
-          <div className="space-y-2">
+        {groups.length > 0 && (
+          <div className="space-y-3">
             <p className="text-sm text-muted">{t.pick(MAX_STORES)}</p>
-            <ul className="card divide-y divide-line">
-              {list.map((s) => {
-                const on = chosen.some((x) => x.id === s.id);
-                const far = place ? distanceKm(place, s) : null;
-                return (
-                  <li key={s.id}>
-                    <button
-                      role="checkbox"
-                      aria-checked={on}
-                      className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left disabled:opacity-50"
-                      disabled={!on && chosen.length >= MAX_STORES}
-                      onClick={() => toggle(s)}
-                    >
-                      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-[1.5px] ${on ? 'border-primary bg-primary text-on-primary' : 'border-muted/50'}`}>
-                        {on && <Icon name="check" size={14} strokeWidth={2.5} />}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium">{prettyStoreName(s.name)}</span>
-                        <span className="block truncate text-sm text-muted">
-                          {s.address}
-                          {far != null && ` · ${t.distance(formatDecimal(far, 1))}`}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            {groups.map((g) => (
+              <section key={g.place?.name ?? 'elegidos'} className="space-y-1.5">
+                {g.place && places.length > 1 && <h3 className="section-title">{g.place.name}</h3>}
+                <ul className="card divide-y divide-line">
+                  {g.stores.map((s) => {
+                    const on = chosen.some((x) => x.id === s.id);
+                    const far = g.place ? distanceKm(g.place, s) : null;
+                    return (
+                      <li key={s.id}>
+                        <button
+                          role="checkbox"
+                          aria-checked={on}
+                          className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left disabled:opacity-50"
+                          disabled={!on && chosen.length >= MAX_STORES}
+                          onClick={() => toggle(s)}
+                        >
+                          <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-[1.5px] ${on ? 'border-primary bg-primary text-on-primary' : 'border-muted/50'}`}>
+                            {on && <Icon name="check" size={14} strokeWidth={2.5} />}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-medium">{prettyStoreName(s.name)}</span>
+                            <span className="block truncate text-sm text-muted">
+                              {s.address}
+                              {far != null && ` · ${t.distance(formatDecimal(far, 1))}`}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
           </div>
         )}
 

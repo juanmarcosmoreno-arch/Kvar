@@ -356,8 +356,8 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - Al leer un ticket sin súper reconocido, se pregunta de cuál es. «Más barato en X» en la lista usa los descuentos de hoy.
 - **Precios de hoy (precios.uy, solo Uruguay)**: la Edge Function `precios-uy` hace lo mismo que la página del SIPC
   (sesión JSF, locales de una zona del mapa, «Lista de precios» de cada local) y devuelve los locales cerca
-  (sin farmacias, con su cadena) y los precios del día (~130–180 artículos por local, con «oferta»). Se eligen zona
-  (ubicación o ciudad), radio y hasta 8 súper; los precios se guardan en el teléfono 6 horas.
+  (sin farmacias, con su cadena) y los precios del día (~130–180 artículos por local, con «oferta»). Se eligen una o
+  varias zonas (tu ubicación y/o ciudades), radio y hasta 10 súper; los precios se guardan en el teléfono 6 horas.
 - Cada producto se relaciona con un artículo de precios.uy (todas sus palabras, y que el artículo sea eso: «Leche» no
   es «Dulce de leche»); por defecto la marca que está en más súper, y se puede elegir otra. Los precios de hoy se
   convierten en líneas de ticket por local (`cadena-sipc-id`), así canasta, «más barato en», «Estoy en el súper» y
