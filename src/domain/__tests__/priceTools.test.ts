@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAlert, dailyMins, personalInflation, priceVerdict, splitShopping, type PriceAlert, type PriceHistory } from '../priceTools';
+import { checkAlert, checkSeenPrice, dailyMins, personalInflation, priceVerdict, splitShopping, type PriceAlert, type PriceHistory } from '../priceTools';
 import type { PurchaseLine } from '../spending';
 
 const history = (prices: number[], end = '2026-10-17'): PriceHistory => {
@@ -83,5 +83,31 @@ describe('comprar en 2 súper', () => {
   });
   it('nada que comparar', () => {
     expect(splitShopping([])).toBeNull();
+  });
+});
+
+describe('¿a cuánto lo ves?', () => {
+  const prices = [
+    { store: 'tata', price: 120 },
+    { store: 'disco', price: 100 },
+    { store: 'devoto', price: 110 },
+  ];
+  it('contra lo más barato y lo del medio de tus súper', () => {
+    expect(checkSeenPrice(95, prices, null)).toMatchObject({ verdict: 'cheap', cheapest: { store: 'disco', price: 100 }, typical: 110 });
+    expect(checkSeenPrice(101, prices, null)!.verdict).toBe('cheap');
+    expect(checkSeenPrice(108, prices, null)!.verdict).toBe('normal');
+    const high = checkSeenPrice(125, prices, null)!;
+    expect(high.verdict).toBe('expensive');
+    expect(high.diff).toBeCloseTo(0.25, 5);
+  });
+  it('y contra lo normal de los últimos meses', () => {
+    const normal = { verdict: 'normal' as const, low: 100, high: 110, today: 100, diff: 0, days: 10 };
+    expect(checkSeenPrice(90, prices, normal)!.history).toBe('cheap');
+    expect(checkSeenPrice(105, prices, normal)!.history).toBe('normal');
+    expect(checkSeenPrice(130, prices, normal)!.history).toBe('expensive');
+  });
+  it('sin precios para comparar', () => {
+    expect(checkSeenPrice(100, [], null)).toBeNull();
+    expect(checkSeenPrice(0, prices, null)).toBeNull();
   });
 });

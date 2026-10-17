@@ -269,3 +269,35 @@ export function checkAlert(
 export function latestTicketPrices(lines: PurchaseLine[], productId: string, now = new Date()) {
   return pricesByStore(lines.filter((l) => l.product_id === productId), now).get(productId) ?? [];
 }
+
+// --- ¿A cuánto lo ves? --------------------------------------------------------------------------------------------
+
+export interface SeenCheck {
+  /** cheap: igual o menos que lo más barato de tus súper; normal: hasta lo del medio; expensive: más */
+  verdict: Verdict;
+  /** El más barato de tus súper hoy */
+  cheapest: { store: string; price: number };
+  /** Lo del medio de tus súper hoy */
+  typical: number;
+  /** Cuánto se aparta del más barato (−0,1 = 10 % menos; 0,25 = 25 % más) */
+  diff: number;
+  /** Contra lo normal de los últimos meses (si hay historial) */
+  history: Verdict | null;
+}
+
+/** Margen para «igual»: dos precios a menos de un 2 % se consideran lo mismo */
+const SAME = 0.02;
+
+/**
+ * El precio que estás viendo (en otro súper, un almacén, una oferta) contra lo que sale hoy en tus súper y lo normal.
+ * `prices` es lo que pagarías hoy en cada súper (ya con tus descuentos).
+ */
+export function checkSeenPrice(seen: number, prices: { store: string; price: number }[], normal: PriceVerdict | null): SeenCheck | null {
+  const list = prices.filter((p) => p.price > 0).sort((a, b) => a.price - b.price);
+  if (!(seen > 0) || !list.length) return null;
+  const cheapest = list[0];
+  const typical = list[Math.floor((list.length - 1) / 2)].price;
+  const verdict: Verdict = seen <= cheapest.price * (1 + SAME) ? 'cheap' : seen <= typical * (1 + SAME) ? 'normal' : 'expensive';
+  const history: Verdict | null = normal ? (seen < normal.low * (1 - SAME) ? 'cheap' : seen > normal.high * (1 + SAME) ? 'expensive' : 'normal') : null;
+  return { verdict, cheapest, typical, diff: seen / cheapest.price - 1, history };
+}

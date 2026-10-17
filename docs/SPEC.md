@@ -387,6 +387,8 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - **Historial** (`lib/priceHistory.ts`): precios.uy no da historial, así que cada día que se traen los precios de hoy se
   guarda en el teléfono (IndexedDB) el más barato de cada artículo en tus súper; se guardan ~6 meses. Con 5 días o más,
   «¿Está caro?» dice barato / normal / caro contra lo normal (percentiles 25–75 del más barato de cada día).
+  «¿A cuánto lo ves?»: ponés el precio que estás viendo y lo compara con lo más barato y lo del medio de tus súper
+  hoy (con tus descuentos) y con lo normal del historial.
 - **Alertas** (`lib/priceAlerts.ts`, en el teléfono): «baja de $ X», «en oferta» o «X % menos que lo normal». Se revisan
   cada vez que llegan los precios de hoy (al abrir la app, `PriceWatch`); si se cumplen, aviso arriba en Precios y, en
   el iPhone, una notificación local por día y alerta (ids 8000+). Sin servidor: con la app cerrada no se revisa.

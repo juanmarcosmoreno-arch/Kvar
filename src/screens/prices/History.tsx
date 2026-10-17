@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { offers } from '../../domain/prices';
-import { dailyMins, MIN_HISTORY_DAYS, priceVerdict, type Verdict } from '../../domain/priceTools';
+import { checkSeenPrice, dailyMins, MIN_HISTORY_DAYS, priceVerdict, type PriceVerdict, type Verdict } from '../../domain/priceTools';
 import { allItems, itemLabel, type SipcItem } from '../../domain/sipc';
+import { parseAmount } from '../../domain/split';
 import { storeLabel } from '../../domain/spending';
 import { formatDate, formatDecimal, m } from '../../i18n';
 import { Icon } from '../../components/Icon';
@@ -79,15 +80,62 @@ function Detail({ item: picked, c, onBack }: { item: SipcItem; c: ReturnType<typ
         ) : (
           <p className="text-sm text-muted">{t.learning(left)}</p>
         )}
-        {series.length >= 2 && <Chart series={series} today={best.price} low={verdict?.low} high={verdict?.high} />}
-        {verdict && <p className="text-xs text-muted">{t.days(verdict.days)}</p>}
       </section>
+      <SeenPrice item={item} c={c} normal={verdict} />
+      {series.length >= 2 && (
+        <section className="card space-y-2 p-4">
+          <Chart series={series} today={best.price} low={verdict?.low} high={verdict?.high} />
+          {verdict && <p className="text-xs text-muted">{t.days(verdict.days)}</p>}
+        </section>
+      )}
       <button className="btn-ghost w-full" onClick={() => setAlert(true)}>
         <Icon name="bell" size={18} /> {t.alert}
       </button>
       <NewAlertSheet open={alert} onClose={() => setAlert(false)} c={c} initial={item} />
       <p className="text-center text-xs text-muted">{historyRange().since && `${formatDate(historyRange().since!)} → ${formatDate(today)}`}</p>
     </>
+  );
+}
+
+/** «¿A cuánto lo ves?»: el precio que estás viendo contra tus súper de hoy y lo normal */
+function SeenPrice({ item, c, normal }: { item: SipcItem; c: ReturnType<typeof usePriceCenter>; normal: PriceVerdict | null }) {
+  const t = m.priceCenter.history;
+  const [text, setText] = useState('');
+  const prices = offers(item.prices, c.opts.discounts, c.opts.when).map((o) => ({ store: o.store, price: o.effective }));
+  const check = checkSeenPrice(parseAmount(text), prices, normal);
+  return (
+    <section className="card space-y-3 p-4">
+      <div>
+        <h3 className="font-semibold">{t.seen.title}</h3>
+        <p className="text-sm text-muted">{t.seen.hint}</p>
+      </div>
+      <label className="relative block">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">$</span>
+        <input
+          className="field pl-9 tabular-nums"
+          inputMode="decimal"
+          enterKeyHint="done"
+          placeholder={t.seen.placeholder}
+          aria-label={t.seen.title}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+      </label>
+      {check && (
+        <div className="space-y-1.5" role="status">
+          <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${TONE[check.verdict]}`}>{t.verdict[check.verdict]}</span>
+          <p className="font-medium">
+            {check.diff < -0.02
+              ? t.seen.cheaper(pct(check.diff), storeLabel(check.cheapest.store), formatCurrency(check.cheapest.price))
+              : check.diff <= 0.02
+                ? t.seen.same(storeLabel(check.cheapest.store), formatCurrency(check.cheapest.price))
+                : t.seen.pricier(storeLabel(check.cheapest.store), formatCurrency(check.cheapest.price), pct(1 - check.cheapest.price / parseAmount(text)))}
+          </p>
+          {check.verdict !== 'cheap' && check.typical > check.cheapest.price * 1.02 && <p className="text-sm text-muted">{t.seen.typical(formatCurrency(check.typical))}</p>}
+          {check.history && <p className="text-sm text-muted">{t.seen.history[check.history]}</p>}
+        </div>
+      )}
+    </section>
   );
 }
 

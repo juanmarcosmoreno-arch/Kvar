@@ -99,6 +99,16 @@ export const priceCenter: Messages['priceCenter'] = {
     alert: 'Tell me if it drops',
     tickets: 'What you paid',
     other: 'Another product',
+    seen: {
+      title: 'What price do you see?',
+      hint: 'Enter the price you’re seeing (at another store, a corner shop, a deal) and I’ll tell you if it’s worth it.',
+      placeholder: 'Price',
+      cheaper: (pct, store, price) => `It’s ${pct} cheaper than the cheapest of your stores today (${store}: ${price}).`,
+      same: (store, price) => `Same as the cheapest of your stores today (${store}: ${price}).`,
+      pricier: (store, price, pct) => `At ${store} it’s ${price}: ${pct} less.`,
+      typical: (price) => `At your stores it’s usually ${price} today.`,
+      history: { cheap: 'It’s also below the usual price of recent months.', normal: 'For what it usually costs, it’s a normal price.', expensive: 'And it’s above the usual price of recent months.' },
+    },
   },
   inflation: {
     title: 'Your inflation',

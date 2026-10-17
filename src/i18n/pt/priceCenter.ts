@@ -99,6 +99,16 @@ export const priceCenter: Messages['priceCenter'] = {
     alert: 'Me avise se baixar',
     tickets: 'O que você pagou',
     other: 'Outro produto',
+    seen: {
+      title: 'Por quanto você está vendo?',
+      hint: 'Digite o preço que está vendo (em outro mercado, um armazém, uma oferta) e eu digo se compensa.',
+      placeholder: 'Preço',
+      cheaper: (pct, store, price) => `Está ${pct} mais barato que o mais barato dos seus mercados hoje (${store}: ${price}).`,
+      same: (store, price) => `Igual ao mais barato dos seus mercados hoje (${store}: ${price}).`,
+      pricier: (store, price, pct) => `No ${store} está ${price}: ${pct} a menos.`,
+      typical: (price) => `Nos seus mercados costuma estar ${price} hoje.`,
+      history: { cheap: 'Também está abaixo do normal dos últimos meses.', normal: 'Para o que costuma custar, é um preço normal.', expensive: 'E está acima do normal dos últimos meses.' },
+    },
   },
   inflation: {
     title: 'Sua inflação',

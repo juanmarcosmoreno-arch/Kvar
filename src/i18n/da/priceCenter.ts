@@ -99,6 +99,16 @@ export const priceCenter: Messages['priceCenter'] = {
     alert: 'Giv besked, hvis den falder',
     tickets: 'Det, du betalte',
     other: 'En anden vare',
+    seen: {
+      title: 'Hvilken pris ser du?',
+      hint: 'Skriv prisen, du ser (i en anden butik, en kiosk, et tilbud), så siger jeg, om det kan betale sig.',
+      placeholder: 'Pris',
+      cheaper: (pct, store, price) => `Det er ${pct} billigere end det billigste i dine butikker i dag (${store}: ${price}).`,
+      same: (store, price) => `Det samme som det billigste i dine butikker i dag (${store}: ${price}).`,
+      pricier: (store, price, pct) => `Hos ${store} koster det ${price}: ${pct} mindre.`,
+      typical: (price) => `I dine butikker koster det normalt ${price} i dag.`,
+      history: { cheap: 'Det er også under det normale for de seneste måneder.', normal: 'I forhold til hvad det plejer at koste, er det en normal pris.', expensive: 'Og det er over det normale for de seneste måneder.' },
+    },
   },
   inflation: {
     title: 'Din inflation',

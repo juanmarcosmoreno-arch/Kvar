@@ -96,6 +96,16 @@ export const priceCenter: Messages['priceCenter'] = {
     alert: '値下がりしたら通知',
     tickets: 'あなたが支払った価格',
     other: 'ほかの商品',
+    seen: {
+      title: 'いくらで売っていますか？',
+      hint: '見ている価格（別のお店、個人商店、セールなど）を入力すると、お得かどうかをお知らせします。',
+      placeholder: '価格',
+      cheaper: (pct, store, price) => `今日のあなたのお店の最安値より ${pct} 安いです（${store}：${price}）。`,
+      same: (store, price) => `今日のあなたのお店の最安値と同じです（${store}：${price}）。`,
+      pricier: (store, price, pct) => `${store} では ${price}：${pct} 安いです。`,
+      typical: (price) => `あなたのお店では今日はふつう ${price} です。`,
+      history: { cheap: 'ここ数か月の通常価格よりも安いです。', normal: 'いつもの価格と比べると、ふつうの価格です。', expensive: 'そして、ここ数か月の通常価格より高いです。' },
+    },
   },
   inflation: {
     title: 'あなたのインフレ',

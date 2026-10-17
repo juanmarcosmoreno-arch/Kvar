@@ -96,6 +96,16 @@ export const priceCenter: Messages['priceCenter'] = {
     alert: '降价时提醒我',
     tickets: '你实际付的价格',
     other: '其他商品',
+    seen: {
+      title: '你看到的价格是多少？',
+      hint: '输入你看到的价格（其他超市、小店或优惠），我告诉你划不划算。',
+      placeholder: '价格',
+      cheaper: (pct, store, price) => `比你常去的超市今天最便宜的还便宜 ${pct}（${store}：${price}）。`,
+      same: (store, price) => `和你常去的超市今天最便宜的一样（${store}：${price}）。`,
+      pricier: (store, price, pct) => `${store} 卖 ${price}：便宜 ${pct}。`,
+      typical: (price) => `你常去的超市今天一般卖 ${price}。`,
+      history: { cheap: '也低于最近几个月的正常价格。', normal: '和平时的价格相比，这是正常价格。', expensive: '而且高于最近几个月的正常价格。' },
+    },
   },
   inflation: {
     title: '你的通胀',
