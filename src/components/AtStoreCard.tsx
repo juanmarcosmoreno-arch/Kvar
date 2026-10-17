@@ -6,6 +6,8 @@ import { formatDecimal, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { addStore, setHereStore, useHereStore } from '../lib/pricePrefs';
 import { usePriceData } from '../lib/priceData';
+import { useSipc } from '../lib/sipc';
+import { isSipcStore, sipcStoreKey } from '../domain/sipc';
 import { useUI } from '../store/ui';
 import { Icon } from './Icon';
 
@@ -22,20 +24,25 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
   const here = useHereStore();
   const [picking, setPicking] = useState(false);
   const [other, setOther] = useState<string | null>(null);
+  const sipc = useSipc(view.products);
   const today = new Date().getDay();
+  // En un súper de precios.uy se compara con los precios de hoy; si no, con los tickets
+  const lines = here && isSipcStore(here) ? sipc.lines : data.lines;
   const tips = useMemo(
-    () => (here ? atStore(data.lines, view.products, view.list, here, { discounts: data.discounts, when: today }) : null),
-    [data, view.products, view.list, here, today],
+    () => (here ? atStore(lines, view.products, view.list, here, { discounts: data.discounts, when: today }) : null),
+    [lines, data.discounts, view.products, view.list, here, today],
   );
+  // Primero los súper de precios.uy elegidos (precios de hoy), después los de los tickets
+  const choices = [...sipc.prefs.stores.map(sipcStoreKey), ...data.stores];
 
-  if (data.status !== 'ready' || data.stores.length === 0) return null;
+  if (data.status !== 'ready' || choices.length === 0) return null;
 
   if (!here || picking) {
     return (
       <section className="card space-y-3 p-4">
         <h2 className="font-semibold">{t.question}</h2>
         <div className="flex flex-wrap gap-2">
-          {data.stores.map((s) => (
+          {choices.map((s) => (
             <button
               key={s}
               className={`chip min-h-tap ${here === s ? 'border-primary bg-primary text-on-primary' : 'bg-surface'}`}
@@ -76,7 +83,7 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
   }
 
   const discount = discountFor(data.discounts, here, today);
-  const hasPrices = data.lines.some((l) => l.product_id && storeKey(l.store) === here);
+  const hasPrices = lines.some((l) => l.product_id && storeKey(l.store) === here);
   const empty = tips && !tips.buyHere.length && !tips.elsewhere.length && !tips.deals.length;
 
   return (

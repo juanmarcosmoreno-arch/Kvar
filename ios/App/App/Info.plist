@@ -79,6 +79,8 @@
 	<string>Stoka usa el micrófono para que le digas qué compraste o qué se terminó.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Para encontrar los supermercados cerca tuyo y comparar sus precios de hoy.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 </dict>

@@ -3,6 +3,7 @@
  * Todo se calcula en el teléfono.
  */
 import { MIN_SAVING, pricesByStore, storeKey, type PurchaseLine, type StorePrice } from './spending';
+import { chainOfKey } from './sipc';
 import type { Product, ShoppingItem } from './types';
 
 /** «15 % en Disco los martes y jueves con Itaú (tope $1.500 por compra)» */
@@ -30,7 +31,8 @@ export function discountFor(discounts: StoreDiscount[], store: string, when: Whe
   if (when === 'none') return null;
   let best: StoreDiscount | null = null;
   for (const d of discounts) {
-    if (d.store !== store || !(d.percent > 0)) continue;
+    // Los locales de precios.uy («disco-sipc-37») usan los descuentos de su cadena
+    if ((d.store !== store && d.store !== chainOfKey(store)) || !(d.percent > 0)) continue;
     if (when !== 'best' && d.days.length > 0 && !d.days.includes(when)) continue;
     if (!best || d.percent > best.percent) best = d;
   }
@@ -78,6 +80,8 @@ export interface CompareOptions {
   discounts: StoreDiscount[];
   when: When;
   now?: Date;
+  /** Qué productos y cuántos forman la canasta (si no, lo comprado seguido según las mismas líneas) */
+  basket?: Map<string, number>;
 }
 
 /** Todos los productos con algún precio, con sus precios por súper */
@@ -139,7 +143,7 @@ const MIN_KNOWN = 3;
  */
 export function basketByStore(lines: PurchaseLine[], opts: CompareOptions): Basket {
   const now = opts.now ?? new Date();
-  const basket = usualBasket(lines, now);
+  const basket = opts.basket ?? usualBasket(lines, now);
   const prices = pricesByStore(lines, now);
   const ref = new Map<string, number>();
   const byStore = new Map<string, Map<string, number>>();

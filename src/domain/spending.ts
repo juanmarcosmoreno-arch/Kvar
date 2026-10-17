@@ -165,9 +165,15 @@ export function storeKey(store: string | null): string | null {
   return key || null;
 }
 
+/** Nombres de los locales de precios.uy («Disco Chucarro»), los registra la app al traer los precios */
+const extraLabels = new Map<string, string>();
+export function registerStoreLabels(labels: Iterable<[string, string]>) {
+  for (const [k, v] of labels) extraLabels.set(k, v);
+}
+
 /** Nombre para mostrar a partir de la clave */
 export function storeLabel(key: string): string {
-  return KNOWN_STORES[key] ?? key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  return extraLabels.get(key) ?? KNOWN_STORES[key] ?? key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 export interface StorePrice {

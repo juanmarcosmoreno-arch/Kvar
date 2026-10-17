@@ -10,6 +10,8 @@ import { Header } from '../components/Shell';
 import { Sheet } from '../components/Sheet';
 import { formatCurrency } from '../lib/currency';
 import { usePriceData, weekdayName } from '../lib/priceData';
+import { useSipc } from '../lib/sipc';
+import { TodayPrices } from '../components/TodayPrices';
 import { useView } from '../store/store';
 import { useUI } from '../store/ui';
 
@@ -22,6 +24,7 @@ export function Prices() {
   const navigate = useNavigate();
   const ui = useUI();
   const data = usePriceData(view.household.id);
+  const sipc = useSipc(view.products);
   const t = m.prices;
   const today = new Date().getDay();
   const [when, setWhen] = useState<When>(today);
@@ -56,107 +59,117 @@ export function Prices() {
         }
       />
       <div className="space-y-6 px-5 pb-6">
-        {data.status === 'loading' && <p className="text-muted">{m.money.loading}</p>}
-        {data.status === 'error' && <p className="card p-4 text-muted">{m.stats.error}</p>}
-        {data.status === 'ready' && rows.length === 0 && <p className="card p-5 text-muted">{t.empty}</p>}
+        {data.discounts.length > 0 && (
+          <div className="space-y-1.5">
+            <span className="text-sm text-muted">{t.when.label}</span>
+            <div className="flex rounded-full bg-sunken p-1 text-sm" role="radiogroup" aria-label={t.when.label}>
+              {([today, 'best', 'none'] as When[]).map((w) => (
+                <button
+                  key={String(w)}
+                  role="radio"
+                  aria-checked={when === w}
+                  className={`min-h-[36px] flex-1 rounded-full px-2 font-medium ${when === w ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
+                  onClick={() => setWhen(w)}
+                >
+                  {w === 'best' ? t.when.best : w === 'none' ? t.when.none : t.when.today(weekdayName(today))}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {rows.length > 0 && (
-          <>
-            {data.discounts.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-sm text-muted">{t.when.label}</span>
-                <div className="flex rounded-full bg-sunken p-1 text-sm" role="radiogroup" aria-label={t.when.label}>
-                  {([today, 'best', 'none'] as When[]).map((w) => (
-                    <button
-                      key={String(w)}
-                      role="radio"
-                      aria-checked={when === w}
-                      className={`min-h-[36px] flex-1 rounded-full px-2 font-medium ${when === w ? 'bg-surface text-ink shadow-sm' : 'text-muted'}`}
-                      onClick={() => setWhen(w)}
-                    >
-                      {w === 'best' ? t.when.best : w === 'none' ? t.when.none : t.when.today(weekdayName(today))}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+        <label className="relative block">
+          <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            className="field rounded-full pl-12"
+            placeholder={t.searchPlaceholder}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            type="search"
+            enterKeyHint="search"
+          />
+        </label>
 
-            <label className="relative block">
-              <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-              <input
-                className="field rounded-full pl-12"
-                placeholder={t.searchPlaceholder}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                type="search"
-                enterKeyHint="search"
-              />
-            </label>
 
-            {q.trim() ? (
-              found.length ? (
-                <div className="space-y-3">
-                  {found.map((r) => (
-                    <PriceCard key={r.product.id} row={r} onOpen={() => ui.openProduct(r.product.id)} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-sm text-muted">{t.noResults}</p>
-              )
-            ) : (
-              <>
-                {basket.stores.length >= 2 && (
-                  <section className="card space-y-3 p-4">
-                    <div>
-                      <h2 className="font-semibold">{t.basket.title}</h2>
-                      <p className="text-sm text-muted">{t.basket.hint(basket.items)}</p>
-                    </div>
-                    <ul className="divide-y divide-line">
-                      {basket.stores.map((s, i) => (
-                        <li key={s.store} className="flex min-h-[56px] items-center gap-3 py-2">
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate font-medium">{storeLabel(s.store)}</span>
-                            <span className="block truncate text-sm text-muted">
-                              {t.basket.known(s.known, basket.items)}
-                              {s.saved > 0 && ` · ${t.basket.saved(formatCurrency(s.saved))}`}
-                            </span>
-                          </span>
-                          <span className="shrink-0 text-right">
-                            <span className={`block font-semibold tabular-nums ${i === 0 ? 'text-[#2E7A4A] dark:text-ok' : ''}`}>{formatCurrency(s.total)}</span>
-                            <span className={`block text-xs ${i === 0 ? 'text-[#2E7A4A] dark:text-ok' : 'text-muted'}`}>
-                              {i === 0 ? t.basket.cheapest : t.basket.more(formatCurrency(s.total - basket.stores[0].total))}
-                            </span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    {basket.stores.some((s) => s.known < basket.items) && <p className="text-xs text-muted">{t.basket.estimated}</p>}
-                  </section>
-                )}
+        {/* Precios de hoy (precios.uy, solo Uruguay) */}
+        <TodayPrices sipc={sipc} products={view.products} ticketLines={data.lines} discounts={opts.discounts} when={opts.when} query={q} />
 
-                {compared.length > 0 ? (
-                  <section className="space-y-2">
-                    <h2 className="section-title">{t.best.title}</h2>
-                    <p className="text-sm text-muted">{t.best.hint}</p>
+        {/* Lo que pagaste (tickets) */}
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">{t.today.fromTickets}</h2>
+            <p className="text-sm text-muted">{t.today.fromTicketsHint}</p>
+          </div>
+          {data.status === 'loading' && <p className="text-muted">{m.money.loading}</p>}
+          {data.status === 'error' && <p className="card p-4 text-muted">{m.stats.error}</p>}
+          {data.status === 'ready' && rows.length === 0 && <p className="card p-5 text-sm text-muted">{t.empty}</p>}
+          {rows.length > 0 && (
+            <>
+                {q.trim() ? (
+                  found.length ? (
                     <div className="space-y-3">
-                      {shown.map((r) => (
+                      {found.map((r) => (
                         <PriceCard key={r.product.id} row={r} onOpen={() => ui.openProduct(r.product.id)} />
                       ))}
                     </div>
-                    {compared.length > COLLAPSED && (
-                      <button className="flex min-h-tap w-full items-center justify-center gap-1 text-sm font-medium text-primary" onClick={() => setAll(!all)}>
-                        {all ? t.best.less : t.best.more(compared.length - COLLAPSED)}
-                        <Icon name={all ? 'up' : 'down'} size={16} />
-                      </button>
-                    )}
-                  </section>
+                  ) : (
+                    <p className="text-center text-sm text-muted">{t.noResults}</p>
+                  )
                 ) : (
-                  <p className="card p-4 text-sm text-muted">{t.needMore}</p>
+                  <>
+                    {basket.stores.length >= 2 && (
+                      <section className="card space-y-3 p-4">
+                        <div>
+                          <h2 className="font-semibold">{t.basket.title}</h2>
+                          <p className="text-sm text-muted">{t.basket.hint(basket.items)}</p>
+                        </div>
+                        <ul className="divide-y divide-line">
+                          {basket.stores.map((s, i) => (
+                            <li key={s.store} className="flex min-h-[56px] items-center gap-3 py-2">
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium">{storeLabel(s.store)}</span>
+                                <span className="block truncate text-sm text-muted">
+                                  {t.basket.known(s.known, basket.items)}
+                                  {s.saved > 0 && ` · ${t.basket.saved(formatCurrency(s.saved))}`}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-right">
+                                <span className={`block font-semibold tabular-nums ${i === 0 ? 'text-[#2E7A4A] dark:text-ok' : ''}`}>{formatCurrency(s.total)}</span>
+                                <span className={`block text-xs ${i === 0 ? 'text-[#2E7A4A] dark:text-ok' : 'text-muted'}`}>
+                                  {i === 0 ? t.basket.cheapest : t.basket.more(formatCurrency(s.total - basket.stores[0].total))}
+                                </span>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        {basket.stores.some((s) => s.known < basket.items) && <p className="text-xs text-muted">{t.basket.estimated}</p>}
+                      </section>
+                    )}
+
+                    {compared.length > 0 ? (
+                      <section className="space-y-2">
+                        <h2 className="section-title">{t.best.title}</h2>
+                        <p className="text-sm text-muted">{t.best.hint}</p>
+                        <div className="space-y-3">
+                          {shown.map((r) => (
+                            <PriceCard key={r.product.id} row={r} onOpen={() => ui.openProduct(r.product.id)} />
+                          ))}
+                        </div>
+                        {compared.length > COLLAPSED && (
+                          <button className="flex min-h-tap w-full items-center justify-center gap-1 text-sm font-medium text-primary" onClick={() => setAll(!all)}>
+                            {all ? t.best.less : t.best.more(compared.length - COLLAPSED)}
+                            <Icon name={all ? 'up' : 'down'} size={16} />
+                          </button>
+                        )}
+                      </section>
+                    ) : (
+                      <p className="card p-4 text-sm text-muted">{t.needMore}</p>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </section>
 
         <button className="btn-ghost w-full" onClick={() => setSettings(true)}>
           <Icon name="percent" size={18} /> {t.settings.title}

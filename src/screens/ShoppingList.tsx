@@ -10,6 +10,7 @@ import { RunningOutChips } from '../components/RunningOut';
 import { AtStoreCard } from '../components/AtStoreCard';
 import { discountFor, visibleLines, withDiscount } from '../domain/prices';
 import { usePricePrefs } from '../lib/pricePrefs';
+import { useSipc } from '../lib/sipc';
 import { categoryIcon } from '../lib/categoryIcon';
 import { addListItem, checkItem, clearChecked, purchaseItem, removeItem, setItemQuantity, unpurchaseItem, wasAddedHere } from '../store/actions';
 import { suggestedQuantities } from '../domain/suggestQuantity';
@@ -66,13 +67,20 @@ export function ShoppingList() {
   );
   // Dónde conviene cada cosa (según los tickets)
   // Con los descuentos de hoy y sin los súper que no se comparan
+  // Primero los precios de hoy (precios.uy); para lo que no publica, los tickets
   const pricePrefs = usePricePrefs();
+  const sipc = useSipc(view.products);
   const cheaper = useMemo(() => {
-    if (purchases.status !== 'ready') return new Map<string, { store: string; saving: number }>();
     const day = new Date().getDay();
+    const adjust = (store: string, price: number) => withDiscount(price, discountFor(pricePrefs.discounts, store, day));
+    const today = cheaperAt(sipc.lines, new Date(), adjust);
+    if (purchases.status !== 'ready') return today;
     const lines = visibleLines(purchases.lines, new Set(pricePrefs.hidden));
-    return cheaperAt(lines, new Date(), (store, price) => withDiscount(price, discountFor(pricePrefs.discounts, store, day)));
-  }, [purchases, pricePrefs]);
+    const fromTickets = cheaperAt(lines, new Date(), adjust);
+    const priced = new Set(sipc.lines.map((l) => l.product_id));
+    for (const [id, c] of fromTickets) if (!priced.has(id)) today.set(id, c);
+    return today;
+  }, [purchases, pricePrefs, sipc.lines]);
   const cheaperText = (item: ShoppingItem) => {
     const c = item.product_id ? cheaper.get(item.product_id) : undefined;
     return c ? m.shopping.cheaper(storeLabel(c.store), `${formatDecimal(c.saving * 100, 0)} %`) : null;

@@ -125,6 +125,19 @@ npx supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJEC
 
 `AI_PROVIDER` admite `anthropic`, `openai` o `gemini`. En la Fase 1 no hace falta nada de esto.
 
+### 6. Precios de hoy (precios.uy, solo Uruguay)
+La pantalla Precios muestra el precio del día en los súper cerca tuyo, de precios.uy (Sistema de Información de
+Precios al Consumidor, MEF). precios.uy no tiene API ni deja consultarlo desde el teléfono, así que lo hace la Edge
+Function `precios-uy` (no necesita secretos). Para instalarla desde el panel, sin terminal:
+
+1. Supabase → **Edge Functions** → **Deploy a new function** → **Via Editor**.
+2. Nombre: `precios-uy`.
+3. Borrá el ejemplo y pegá todo `supabase/functions/precios-uy/index.ts` (`pbcopy < supabase/functions/precios-uy/index.ts`).
+4. **Deploy function**.
+
+Con la CLI: `npx supabase functions deploy precios-uy`. La app guarda los precios en el teléfono y los vuelve a
+pedir cada unas horas. Si precios.uy cambia su página, la función devuelve un error y la app sigue con los tickets.
+
 ## Despliegue
 
 Es un sitio estático (`npm run build` → `dist/`). Cualquier hosting con HTTPS sirve; hay que redirigir todas las rutas
