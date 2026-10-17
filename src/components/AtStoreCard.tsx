@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { atStore, discountAppliesAt, type StoreTip } from '../domain/prices';
 import { storeKey, storeLabel } from '../domain/spending';
 import type { Snapshot } from '../domain/types';
-import { formatDecimal, m } from '../i18n';
+import { compareText, formatDecimal, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { addStore, setHereStore, useHereStore } from '../lib/pricePrefs';
 import { usePriceData } from '../lib/priceData';
@@ -32,8 +32,8 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
     () => (here ? atStore(lines, view.products, view.list, here, { discounts: data.discounts, when: today }) : null),
     [lines, data.discounts, view.products, view.list, here, today],
   );
-  // Primero los súper de precios.uy elegidos (precios de hoy), después los de los tickets
-  const choices = [...sipc.prefs.stores.map(sipcStoreKey), ...data.stores];
+  // Los súper de precios.uy elegidos (precios de hoy) y los de los tickets, por nombre
+  const choices = [...new Set([...sipc.prefs.stores.map(sipcStoreKey), ...data.stores])].sort((a, b) => compareText(storeLabel(a), storeLabel(b)));
 
   if (data.status !== 'ready' || choices.length === 0) return null;
 

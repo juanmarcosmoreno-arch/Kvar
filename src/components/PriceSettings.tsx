@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { StoreDiscount } from '../domain/prices';
 import { parseAmount } from '../domain/split';
 import { storeLabel } from '../domain/spending';
-import { formatList, m } from '../i18n';
+import { compareText, formatList, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { addStore, deleteDiscount, removeStore, saveDiscount, setStoreCompared } from '../lib/pricePrefs';
 import { pricesPerStore, WEEK, weekdayName, type PriceData } from '../lib/priceData';
@@ -29,8 +29,7 @@ export function StoresEditor({ data }: { data: PriceData }) {
   const [name, setName] = useState('');
   const counts = pricesPerStore(data.all);
   const hidden = new Set(data.prefs.hidden);
-  // Primero los que tienen precios, después los demás
-  const stores = [...data.allStores].sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0) || storeLabel(a).localeCompare(storeLabel(b)));
+  const stores = [...data.allStores].sort((a, b) => compareText(storeLabel(a), storeLabel(b)));
   const add = (e: React.FormEvent) => {
     e.preventDefault();
     if (addStore(name)) setName('');
@@ -135,7 +134,7 @@ function DiscountSheet({
   const [card, setCard] = useState(initial?.card ?? '');
   const [cap, setCap] = useState(initial?.cap ? String(initial.cap) : '');
   const value = Math.min(100, parseAmount(percent));
-  const choices = [...new Set([...(initial?.stores ?? []), ...stores])];
+  const choices = [...new Set([...(initial?.stores ?? []), ...stores])].sort((a, b) => compareText(storeLabel(a), storeLabel(b)));
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();

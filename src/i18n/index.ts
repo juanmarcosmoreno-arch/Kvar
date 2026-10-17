@@ -76,7 +76,7 @@ export function setMessagesForTest(messages: Messages, l: Lang) {
 }
 
 // --- Formatos ---------------------------------------------------------------
-export const compareText = (a: string, b: string) => a.localeCompare(b, locale, { sensitivity: 'base' });
+export const compareText = (a: string, b: string) => a.localeCompare(b, locale, { sensitivity: 'base', numeric: true });
 
 export function formatList(items: string[]): string {
   try {

@@ -5,7 +5,7 @@ import { toast } from '../store/toast';
 import { DEPARTMENTS, distanceKm, itemKey, itemLabel, searchItems, type SipcMatch, type SipcStore } from '../domain/sipc';
 import { storeLabel, type PurchaseLine } from '../domain/spending';
 import type { Product } from '../domain/types';
-import { formatDecimal, locale, m } from '../i18n';
+import { compareText, formatDecimal, locale, m } from '../i18n';
 import { formatCurrency } from '../lib/currency';
 import { findStores, MAX_STORES, pinItem, prettyStoreName, refreshSipc, setPlaces, setSipcStores, type Place, type SipcState } from '../lib/sipc';
 import { useUI } from '../store/ui';
@@ -329,10 +329,15 @@ function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => vo
   // Cada súper una sola vez, en la primera zona donde aparece; los elegidos que no salen en ninguna, aparte
   const seen = new Set<number>();
   const groups = places
-    .map((p) => ({ place: p as Place | null, stores: (found[p.name] ?? []).filter((s) => !seen.has(s.id) && seen.add(s.id)) }))
+    .map((p) => ({
+      place: p as Place | null,
+      stores: (found[p.name] ?? [])
+        .filter((s) => !seen.has(s.id) && seen.add(s.id))
+        .sort((a, b) => compareText(prettyStoreName(a.name), prettyStoreName(b.name))),
+    }))
     .filter((g) => g.stores.length > 0);
   const others = chosen.filter((c) => !seen.has(c.id));
-  if (others.length) groups.unshift({ place: null, stores: others });
+  if (others.length) groups.unshift({ place: null, stores: [...others].sort((a, b) => compareText(prettyStoreName(a.name), prettyStoreName(b.name))) });
   const searched = places.length > 0 && places.every((p) => found[p.name]);
 
   return (
