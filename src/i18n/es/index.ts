@@ -7,6 +7,7 @@ import { shell } from './shell';
 import { stats } from './stats';
 import { money } from './money';
 import { prices } from './prices';
+import { priceCenter } from './priceCenter';
 import { alerts } from './alerts';
 import { shopping } from './shopping';
 import { plan } from './plan';
@@ -26,6 +27,7 @@ export const es = {
   stats,
   money,
   prices,
+  priceCenter,
   alerts,
   shopping,
   plan,

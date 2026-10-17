@@ -1,3 +1,4 @@
+import { alertPrefs } from '../lib/alerts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchProducts } from '../domain/aliases';
 import { itemName, recentlyChecked } from '../domain/shoppingList';
@@ -169,7 +170,7 @@ export function ShoppingList() {
       />
       <div className="space-y-6 px-5 pt-1">
         <SyncBadge />
-        {presence.shoppers.length > 0 && (
+        {presence.shoppers.length > 0 && alertPrefs().shoppers && (
           <div className="card flex items-center gap-3 border-primary/30 bg-primary/5 p-3 text-sm" role="status">
             <Icon name="cart" size={20} className="shrink-0 text-primary" />
             <span>

@@ -11,8 +11,14 @@ export const alerts: Messages['alerts'] = {
     predictedHint: '根据每样东西在家里能用多久。',
     expiry: '快过期的东西',
     expiryHint: '在过期日前两天提醒。',
+    phone: '在 iPhone 上',
+    inApp: '使用 App 时',
+    prices: '价格提醒',
+    pricesHint: '你关注的东西降价或打折时提醒（价格 → 提醒）。',
     others: '其他人的动态',
-    othersHint: '使用 App 时：“Sofía 买了牛奶”。',
+    othersHint: '“Sofía 买了牛奶”。',
+    shoppers: '有人在超市时',
+    shoppersHint: '“Sofía 在超市”：你加到清单上的东西会立刻送达。',
     webNote: '在网页上，只有 App 打开时才会显示其他人的动态。提醒会发送到 iPhone App。',
   },
   notif: {
@@ -25,5 +31,6 @@ export const alerts: Messages['alerts'] = {
   others: {
     bought: (who, what) => `${who}买了${what}。`,
     someone: '有人',
+    shopping: (who) => `${who} 在超市。`,
   },
 };

@@ -5,11 +5,9 @@ import {
 } from '../domain/recipes';
 import type { Product, Recipe, StockStatus } from '../domain/types';
 import { formatList, m } from '../i18n';
-import { recipeCost, sizeOfSipc, ticketRef, type PriceRef } from '../domain/recipeCost';
-import { allItems, matchItems } from '../domain/sipc';
+import { recipeCost } from '../domain/recipeCost';
 import { formatCurrency } from '../lib/currency';
-import { useSipc } from '../lib/sipc';
-import { usePurchases } from '../lib/stats';
+import { useIngredientPrices } from '../lib/recipePrices';
 import { addMissingToList, cookedRecipe, deleteRecipe, dismissRecipe } from '../store/actions';
 import { useView } from '../store/store';
 import { toast } from '../store/toast';
@@ -146,29 +144,8 @@ function Body({
 /** Costo aproximado: precio de hoy (precios.uy) del producto o del ingrediente; si no, el último de los tickets */
 function useRecipeCost(lines: IngredientLine[], factor: number) {
   const view = useView()!;
-  const sipc = useSipc(view.products);
-  const purchases = usePurchases(view.household.id);
-  return useMemo(() => {
-    const items = sipc.data ? allItems(sipc.data) : [];
-    const byKey = new Map(items.map((x) => [x.key, x]));
-    const names = items.map((x) => x.name);
-    const keyOf = new Map(items.map((x) => [x.name, x.key]));
-    const fromItem = (key: string | undefined): PriceRef | null => {
-      const item = key ? byKey.get(key) : undefined;
-      if (!item?.prices.length) return null;
-      return { price: Math.min(...item.prices.map((p) => p.price)), ...sizeOfSipc(item.name) };
-    };
-    const ticketLines = purchases.status === 'ready' ? purchases.lines : [];
-    const priceFor = (line: IngredientLine): PriceRef | null => {
-      if (line.product) {
-        const match = sipc.matches.find((x) => x.product.id === line.product!.id);
-        const ref = fromItem(match?.item) ?? ticketRef(ticketLines, line.product.id);
-        if (ref) return ref;
-      }
-      return fromItem(keyOf.get(matchItems(line.ingredient.name, names)[0] ?? ''));
-    };
-    return recipeCost(lines, factor, priceFor);
-  }, [lines, factor, sipc, purchases]);
+  const priceFor = useIngredientPrices(view);
+  return useMemo(() => recipeCost(lines, factor, priceFor), [lines, factor, priceFor]);
 }
 
 function Ingredient({ line }: { line: IngredientLine }) {

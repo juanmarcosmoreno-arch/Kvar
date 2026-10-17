@@ -3,7 +3,7 @@ import {
   Apple, Archive, Image as ImageIcon, BadgePercent, Store, Tag, BarChart3, Camera, Barcode, ReceiptText, Mic, Baby, Bath, Beef, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CloudOff,
   CookingPot, Copy, Croissant, CupSoda, Fish, House, Leaf, Milk, Minus, Package, PawPrint, Pencil, Plus,
   Refrigerator, RefreshCw, ScanBarcode, Search, Settings, Share, ShoppingBasket, Snowflake, Soup, SprayCan,
-  Star, Trash2, Undo2, Wheat, X, type LucideIcon,
+  Star, Trash2, Undo2, Wheat, X, Bell, ChartLine, TrendingUp, Split, type LucideIcon,
 } from 'lucide-react';
 import type { SVGProps } from 'react';
 
@@ -57,6 +57,10 @@ const icons = {
   percent: BadgePercent,
   store: Store,
   image: ImageIcon,
+  bell: Bell,
+  history: ChartLine,
+  trend: TrendingUp,
+  split: Split,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;

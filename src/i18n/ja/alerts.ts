@@ -11,8 +11,14 @@ export const alerts: Messages['alerts'] = {
     predictedHint: 'それぞれが家でどれくらいもつかをもとにします。',
     expiry: '期限が近いもの',
     expiryHint: '期限の2日前にお知らせします。',
+    phone: 'iPhoneで',
+    inApp: 'アプリの使用中',
+    prices: '価格アラート',
+    pricesHint: '気になる商品が値下がりしたりセールになったとき（価格 → アラート）。',
     others: 'ほかの人の動き',
-    othersHint: 'アプリの使用中：「Sofíaが牛乳を買いました」',
+    othersHint: '「Sofíaが牛乳を買いました」',
+    shoppers: '誰かがお店にいるとき',
+    shoppersHint: '「Sofíaがお店にいます」：リストに追加したものがすぐに届きます。',
     webNote: 'Webでは、アプリを開いている間だけほかの人の動きを表示します。通知はiPhoneアプリに届きます。',
   },
   notif: {
@@ -25,5 +31,6 @@ export const alerts: Messages['alerts'] = {
   others: {
     bought: (who, what) => `${who}が${what}を買いました。`,
     someone: '誰か',
+    shopping: (who) => `${who}がお店にいます。`,
   },
 };

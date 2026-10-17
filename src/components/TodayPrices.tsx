@@ -252,7 +252,7 @@ export function TodayPrices({
 }
 
 /** Un artículo de precios.uy (aunque no esté en tus productos), con su precio en cada súper y «A la lista» */
-function CatalogCard({ item, discounts, when }: { item: SipcItem; discounts: StoreDiscount[]; when: When }) {
+export function CatalogCard({ item, discounts, when }: { item: SipcItem; discounts: StoreDiscount[]; when: When }) {
   const list = offersOf(item.prices, discounts, when);
   const saving = list.length >= 2 ? 1 - list[0].effective / list[1].effective : 0;
   const label = itemLabel(item.name);
@@ -304,7 +304,7 @@ function TodayLine({ offer, best, offer2 }: { offer: Offer; best: boolean; offer
 }
 
 /** Elegir una o varias zonas (ciudades, tu ubicación) y los súper (hasta MAX_STORES) */
-function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => void; sipc: SipcState }) {
+export function StoresSheet({ open, onClose, sipc }: { open: boolean; onClose: () => void; sipc: SipcState }) {
   const t = m.prices.setup;
   const [places, setPlacesState] = useState<Place[]>(sipc.prefs.places);
   const [km, setKm] = useState(sipc.prefs.km);

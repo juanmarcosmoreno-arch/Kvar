@@ -379,6 +379,26 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
 - Mientras está: no aparece en «Se termina pronto», ni en «Aprovechá» / «Buen precio acá» de «Estoy en el súper»; si
   estaba en la lista se saca, y si alguien lo agrega igual se avisa «Ojo: hay de sobra».
 
+### Centro de precios (implementado)
+- `/precios` es un tablero: arriba «Hoy te conviene» (tu canasta con los precios de hoy, o con tus tickets si no hay
+  súper de precios.uy) y las alertas que se cumplen; abajo nueve botones cuadrados, cada uno con su dato del día:
+  Comparar hoy (`/precios/comparar`, la pantalla de antes), Tu canasta, Ofertas, Alertas, ¿Está caro?, Tu inflación,
+  Compra en 2 súper, Cocinar barato y Descuentos. El engranaje junta súper de precios.uy, descuentos y súper de tickets.
+- **Historial** (`lib/priceHistory.ts`): precios.uy no da historial, así que cada día que se traen los precios de hoy se
+  guarda en el teléfono (IndexedDB) el más barato de cada artículo en tus súper; se guardan ~6 meses. Con 5 días o más,
+  «¿Está caro?» dice barato / normal / caro contra lo normal (percentiles 25–75 del más barato de cada día).
+- **Alertas** (`lib/priceAlerts.ts`, en el teléfono): «baja de $ X», «en oferta» o «X % menos que lo normal». Se revisan
+  cada vez que llegan los precios de hoy (al abrir la app, `PriceWatch`); si se cumplen, aviso arriba en Precios y, en
+  el iPhone, una notificación local por día y alerta (ids 8000+). Sin servidor: con la app cerrada no se revisa.
+- **Tu inflación**: por mes, el cambio de precio promedio de cada producto contra el mes anterior, pesado por lo gastado
+  en él (tickets). Y lo que más cambió en 3 meses.
+- **Compra en 2 súper**: lo de la lista con precio de hoy (y tus descuentos); el súper que más cubre contra repartirlo
+  con otro, y solo lo propone si ahorra más que el mínimo elegido ($ 200 / 300 / 500).
+- **Cocinar barato**: todas las recetas por costo por porción (mismo cálculo que en la receta); solo las que tienen
+  precio para casi todo.
+- **Avisos por tipo** (Ajustes → Avisos): en el iPhone (se termina, vence, alertas de precio) y en la app (lo que hacen
+  los demás, «Sofía está en el súper»), cada uno se prende o apaga.
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

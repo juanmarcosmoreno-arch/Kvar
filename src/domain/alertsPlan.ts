@@ -8,6 +8,10 @@ export interface AlertPrefs {
   predicted: boolean;
   expiry: boolean;
   others: boolean;
+  /** Alertas de precio (Precios → Alertas) */
+  prices: boolean;
+  /** «Sofía está en el súper» */
+  shoppers: boolean;
 }
 
 const DAY = 86_400_000;

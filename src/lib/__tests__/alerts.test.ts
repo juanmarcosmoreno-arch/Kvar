@@ -3,7 +3,7 @@ import { planAlerts } from '../../domain/alertsPlan';
 import { product, snapshot } from '../../domain/__tests__/fixtures';
 import type { StockEvent } from '../../domain/stats';
 
-const prefs = { enabled: true, predicted: true, expiry: true, others: true };
+const prefs = { enabled: true, predicted: true, expiry: true, others: true, prices: true, shoppers: true };
 const now = new Date(2026, 9, 15, 9, 0);
 
 describe('avisos', () => {

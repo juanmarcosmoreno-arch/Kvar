@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { searchProducts } from '../domain/aliases';
 import { basketByStore, priceTable, type Offer, type PriceRow, type When } from '../domain/prices';
 import { storeLabel } from '../domain/spending';
 import { formatDate, formatDecimal, m } from '../i18n';
 import { Icon } from '../components/Icon';
-import { DiscountsEditor, StoresEditor } from '../components/PriceSettings';
-import { Header } from '../components/Shell';
-import { Sheet } from '../components/Sheet';
+import { PriceHeader, PriceSettingsSheet } from './prices/common';
 import { formatCurrency } from '../lib/currency';
 import { usePriceData, weekdayName } from '../lib/priceData';
 import { useSipc } from '../lib/sipc';
@@ -18,10 +16,10 @@ import { useUI } from '../store/ui';
 const pct = (x: number) => `${formatDecimal(Math.abs(x) * 100, 0)} %`;
 const COLLAPSED = 8;
 
-/** Comparador de precios: tu canasta en cada súper, dónde conviene cada cosa y un buscador. */
+/** Comparar hoy: precios de hoy en tus súper, lo que pagaste en tus tickets y un buscador. */
 export function Prices() {
   const view = useView()!;
-  const navigate = useNavigate();
+  const [params] = useSearchParams();
   const ui = useUI();
   const data = usePriceData(view.household.id);
   const sipc = useSipc(view.products);
@@ -45,15 +43,10 @@ export function Prices() {
 
   return (
     <>
-      <Header
-        title={t.title}
-        left={
-          <button className="-ml-3 flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.common.back} onClick={() => navigate(-1)}>
-            <Icon name="back" />
-          </button>
-        }
+      <PriceHeader
+        title={m.priceCenter.tiles.compare}
         right={
-          <button className="-mr-2 flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={t.settings.open} onClick={() => setSettings(true)}>
+          <button className="-mr-2 flex min-h-tap min-w-tap items-center justify-center text-muted" aria-label={m.priceCenter.settings} onClick={() => setSettings(true)}>
             <Icon name="gear" />
           </button>
         }
@@ -87,6 +80,7 @@ export function Prices() {
             onChange={(e) => setQ(e.target.value)}
             type="search"
             enterKeyHint="search"
+            autoFocus={params.get('buscar') === '1'}
           />
         </label>
 
@@ -171,25 +165,9 @@ export function Prices() {
           )}
         </section>
 
-        <button className="btn-ghost w-full" onClick={() => setSettings(true)}>
-          <Icon name="percent" size={18} /> {t.settings.title}
-        </button>
       </div>
 
-      <Sheet open={settings} onClose={() => setSettings(false)} title={t.settings.title}>
-        <div className="space-y-6 pb-6">
-          <section className="space-y-2">
-            <h3 className="section-title">{t.discounts.title}</h3>
-            <p className="text-sm text-muted">{t.discounts.hint}</p>
-            <DiscountsEditor data={data} />
-          </section>
-          <section className="space-y-2">
-            <h3 className="section-title">{t.stores.title}</h3>
-            <p className="text-sm text-muted">{t.stores.hint}</p>
-            <StoresEditor data={data} />
-          </section>
-        </div>
-      </Sheet>
+      <PriceSettingsSheet open={settings} onClose={() => setSettings(false)} data={data} sipc={sipc} />
     </>
   );
 }

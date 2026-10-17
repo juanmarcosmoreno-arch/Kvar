@@ -11,8 +11,14 @@ export const alerts: Messages['alerts'] = {
     predictedHint: 'Based on how long each thing lasts in your home.',
     expiry: 'What expires soon',
     expiryHint: 'Two days before the expiration date.',
+    phone: 'On your iPhone',
+    inApp: 'While you’re using the app',
+    prices: 'Price alerts',
+    pricesHint: 'When something you follow drops in price or goes on sale (Prices → Alerts).',
     others: 'What others do',
-    othersHint: 'While you’re using the app: “Sofía bought the milk.”',
+    othersHint: '“Sofía bought the milk.”',
+    shoppers: 'When someone is at the store',
+    shoppersHint: '“Sofía is at the store”: anything you add to the list reaches them instantly.',
     webNote: 'On the web I only show you what others do while the app is open. Notifications arrive in the iPhone app.',
   },
   notif: {
@@ -25,5 +31,6 @@ export const alerts: Messages['alerts'] = {
   others: {
     bought: (who, what) => `${who} bought ${what}.`,
     someone: 'Someone',
+    shopping: (who) => `${who} is at the store.`,
   },
 };

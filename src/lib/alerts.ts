@@ -14,7 +14,7 @@ export type { AlertPrefs } from '../domain/alertsPlan';
 import type { AlertPrefs } from '../domain/alertsPlan';
 
 const KEY = 'stoka:avisos';
-const DEFAULTS: AlertPrefs = { enabled: false, predicted: true, expiry: true, others: true };
+const DEFAULTS: AlertPrefs = { enabled: false, predicted: true, expiry: true, others: true, prices: true, shoppers: true };
 import { ID_MAX, ID_MIN } from '../domain/alertsPlan';
 
 export function alertPrefs(): AlertPrefs {

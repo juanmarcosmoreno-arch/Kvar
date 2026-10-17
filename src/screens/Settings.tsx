@@ -462,18 +462,18 @@ function AlertsSettings() {
     <div className="card divide-y divide-line px-4">
       <Toggle checked={prefs.enabled} onChange={(v) => void toggleAll(v)} label={prefs.enabled ? t.enabled : t.enable} />
       {denied && <p className="py-3 text-sm text-[#B53A2A] dark:text-out">{t.denied}</p>}
-      {prefs.enabled && (
+      {prefs.enabled && canNotify && (
         <>
-          {canNotify && (
-            <>
-              <Toggle checked={prefs.predicted} onChange={(v) => update({ ...prefs, predicted: v })} label={t.predicted} hint={t.predictedHint} />
-              <Toggle checked={prefs.expiry} onChange={(v) => update({ ...prefs, expiry: v })} label={t.expiry} hint={t.expiryHint} />
-            </>
-          )}
-          <Toggle checked={prefs.others} onChange={(v) => update({ ...prefs, others: v })} label={t.others} hint={t.othersHint} />
-          {!canNotify && <p className="py-3 text-sm text-muted">{t.webNote}</p>}
+          <p className="pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-muted">{t.phone}</p>
+          <Toggle checked={prefs.predicted} onChange={(v) => update({ ...prefs, predicted: v })} label={t.predicted} hint={t.predictedHint} />
+          <Toggle checked={prefs.expiry} onChange={(v) => update({ ...prefs, expiry: v })} label={t.expiry} hint={t.expiryHint} />
+          <Toggle checked={prefs.prices} onChange={(v) => update({ ...prefs, prices: v })} label={t.prices} hint={t.pricesHint} />
         </>
       )}
+      {prefs.enabled && !canNotify && <p className="py-3 text-sm text-muted">{t.webNote}</p>}
+      <p className="pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-muted">{t.inApp}</p>
+      <Toggle checked={prefs.others} onChange={(v) => update({ ...prefs, others: v })} label={t.others} hint={t.othersHint} />
+      <Toggle checked={prefs.shoppers} onChange={(v) => update({ ...prefs, shoppers: v })} label={t.shoppers} hint={t.shoppersHint} />
     </div>
   );
 }

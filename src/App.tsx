@@ -14,6 +14,15 @@ import { applyTheme } from './lib/theme';
 import { Cook } from './screens/Cook';
 import { Stats } from './screens/Stats';
 import { Prices } from './screens/Prices';
+import { PricesHub } from './screens/prices/PricesHub';
+import { BasketScreen } from './screens/prices/BasketScreen';
+import { Offers } from './screens/prices/Offers';
+import { Alerts } from './screens/prices/Alerts';
+import { History } from './screens/prices/History';
+import { Inflation } from './screens/prices/Inflation';
+import { Split } from './screens/prices/Split';
+import { CookCheap } from './screens/prices/CookCheap';
+import { Discounts } from './screens/prices/Discounts';
 import { Home } from './screens/Home';
 import { Inventory } from './screens/Inventory';
 import { Login } from './screens/Login';
@@ -28,10 +37,11 @@ import { closeHousehold, openHousehold, useStore, useView } from './store/store'
 import { toast } from './store/toast';
 import { m } from './i18n';
 import { alertPrefs, scheduleAlerts } from './lib/alerts';
-import { startPresence, stopPresence } from './lib/presence';
+import { startPresence, stopPresence, usePresence } from './lib/presence';
 import { setMe } from './lib/me';
 import { ListActivitySync } from './components/ListActivitySync';
 import { WatchExtrasSync } from './components/WatchExtrasSync';
+import { PriceWatch } from './components/PriceWatch';
 import { request as requestEvents } from './lib/stats';
 import type { Snapshot } from './domain/types';
 
@@ -190,13 +200,23 @@ function Main({ userId, onSwitchHousehold }: { userId: string; onSwitchHousehold
     <Shell>
       <ListActivitySync view={view} />
       <WatchExtrasSync view={view} />
+      <PriceWatch view={view} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/inventario" element={<Inventory />} />
         <Route path="/lista" element={<ShoppingList />} />
         <Route path="/cocino" element={<Cook />} />
         <Route path="/estadisticas" element={<Stats />} />
-        <Route path="/precios" element={<Prices />} />
+        <Route path="/precios" element={<PricesHub />} />
+        <Route path="/precios/comparar" element={<Prices />} />
+        <Route path="/precios/canasta" element={<BasketScreen />} />
+        <Route path="/precios/ofertas" element={<Offers />} />
+        <Route path="/precios/alertas" element={<Alerts />} />
+        <Route path="/precios/historial" element={<History />} />
+        <Route path="/precios/inflacion" element={<Inflation />} />
+        <Route path="/precios/dos-super" element={<Split />} />
+        <Route path="/precios/cocinar" element={<CookCheap />} />
+        <Route path="/precios/descuentos" element={<Discounts />} />
         <Route path="/ajustes" element={<Settings userId={userId} onSwitchHousehold={onSwitchHousehold} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -219,6 +239,16 @@ function Splash({ message }: { message?: string }) {
  */
 function useHouseholdAlerts(view: Snapshot | null, userId: string) {
   const prevList = useRef<Snapshot['list'] | null>(null);
+  const presence = usePresence();
+  const prevShoppers = useRef<string[]>([]);
+  // «Sofía está en el súper» (si no lo apagaron en Ajustes → Avisos)
+  useEffect(() => {
+    const before = new Set(prevShoppers.current);
+    prevShoppers.current = presence.shoppers;
+    if (!alertPrefs().shoppers) return;
+    for (const who of presence.shoppers) if (!before.has(who)) toast(m.alerts.others.shopping(who));
+  }, [presence.shoppers]);
+
   useEffect(() => {
     if (!view || !alertPrefs().enabled) return;
     const t = setTimeout(() => {

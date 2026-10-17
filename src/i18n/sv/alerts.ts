@@ -11,8 +11,14 @@ export const alerts: Messages['alerts'] = {
     predictedHint: 'Utifrån hur länge varje sak brukar räcka hemma.',
     expiry: 'Det som snart går ut',
     expiryHint: 'Två dagar före bäst före-datumet.',
+    phone: 'På iPhone',
+    inApp: 'Medan du använder appen',
+    prices: 'Prisbevakningar',
+    pricesHint: 'När något du bevakar sjunker i pris eller är på rea (Priser → Bevakningar).',
     others: 'Vad de andra gör',
-    othersHint: 'Medan du använder appen: ”Sofía köpte mjölken”.',
+    othersHint: '”Sofía köpte mjölken”.',
+    shoppers: 'När någon är i butiken',
+    shoppersHint: '”Sofía är i butiken”: det du lägger till på listan når hen direkt.',
     webNote: 'På webben visar jag bara vad de andra gör medan appen är öppen. Notiserna kommer i iPhone-appen.',
   },
   notif: {
@@ -25,5 +31,6 @@ export const alerts: Messages['alerts'] = {
   others: {
     bought: (who, what) => `${who} köpte ${what}.`,
     someone: 'Någon',
+    shopping: (who) => `${who} är i butiken.`,
   },
 };
