@@ -60,6 +60,7 @@ export function TodayPrices({
           </span>
           <span>
             <h2 className="font-semibold">{t.title}</h2>
+            {query.trim() && <p className="mb-1 text-sm font-medium text-ink">{t.searchNeedsStores}</p>}
             <p className="text-sm text-muted">{t.intro}</p>
           </span>
         </div>
@@ -185,6 +186,8 @@ export function TodayPrices({
           )}
         </div>
       )}
+
+      {q && !sipc.data && sipc.status !== 'loading' && <p className="card p-4 text-sm text-muted">{t.searchNoData}</p>}
 
       {q && sipc.data && (
         <div className="space-y-2">

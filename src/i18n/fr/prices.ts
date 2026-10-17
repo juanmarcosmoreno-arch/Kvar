@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automatique (celui présent dans le plus de magasins)',
     searchTitle: 'Tout precios.uy',
     searchNone: 'precios.uy ne publie pas cela dans vos magasins. Il publie environ 200 articles de base : épicerie, produits laitiers, fruits et légumes, viande, entretien et hygiène.',
+    searchNeedsStores: 'Pour chercher sur precios.uy, choisissez d\'abord vos magasins.',
+    searchNoData: 'Il n\'y a pas encore de prix du jour à chercher. Touchez ↻ en haut pour les charger ; si cela ne marche toujours pas, vérifiez que la fonction precios-uy est installée dans Supabase.',
     fromTickets: 'D’après vos tickets',
     fromTicketsHint: 'Ce que vous avez payé lors de vos achats : utile pour ce que precios.uy ne publie pas, mais peut-être pas à jour.',
   },

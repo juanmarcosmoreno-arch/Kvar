@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automatisk (den, der findes i flest butikker)',
     searchTitle: 'Alt på precios.uy',
     searchNone: 'precios.uy viser ikke det i dine butikker. De viser omkring 200 basisvarer: kolonial, mejeri, frugt og grønt, kød, rengøring og hygiejne.',
+    searchNeedsStores: 'For at søge på precios.uy skal du først vælge dine butikker.',
+    searchNoData: 'Der er endnu ingen dagens priser at søge i. Tryk på ↻ ovenfor for at hente dem; hvis det stadig ikke virker, så tjek at funktionen precios-uy er installeret i Supabase.',
     fromTickets: 'Ifølge dine kvitteringer',
     fromTicketsHint: 'Det, du betalte, da du handlede: godt til det, precios.uy ikke offentliggør, men kan være forældet.',
   },

@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automatiskt (den som finns i flest butiker)',
     searchTitle: 'Allt på precios.uy',
     searchNone: 'precios.uy listar inte det i dina butiker. De listar omkring 200 basvaror: skafferi, mejeri, frukt och grönt, kött, städ och hygien.',
+    searchNeedsStores: 'För att söka på precios.uy, välj först dina butiker.',
+    searchNoData: 'Det finns inga dagens priser att söka i än. Tryck på ↻ ovan för att hämta dem; om det fortfarande inte fungerar, kontrollera att funktionen precios-uy är installerad i Supabase.',
     fromTickets: 'Enligt dina kvitton',
     fromTicketsHint: 'Det du betalade när du handlade: bra för det precios.uy inte publicerar, men kan vara inaktuellt.',
   },

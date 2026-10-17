@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automatico (quella presente in più supermercati)',
     searchTitle: 'Tutto su precios.uy',
     searchNone: 'precios.uy non pubblica questo nei tuoi supermercati. Pubblica circa 200 articoli di base: dispensa, latticini, frutta e verdura, carne, pulizia e igiene.',
+    searchNeedsStores: 'Per cercare su precios.uy, scegli prima i tuoi supermercati.',
+    searchNoData: 'Non ci sono ancora prezzi di oggi da cercare. Tocca ↻ in alto per caricarli; se non funziona ancora, controlla che la funzione precios-uy sia installata in Supabase.',
     fromTickets: 'Dai tuoi scontrini',
     fromTicketsHint: 'Quello che hai pagato nei tuoi acquisti: utile per ciò che precios.uy non pubblica, ma potrebbe non essere aggiornato.',
   },

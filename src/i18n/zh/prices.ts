@@ -107,6 +107,8 @@ export const prices: Messages['prices'] = {
     brandAuto: '自动（覆盖超市最多的品牌）',
     searchTitle: 'precios.uy 上的全部商品',
     searchNone: 'precios.uy 没有公布你所选超市的这个商品。它公布约 200 种基本商品：杂货、乳制品、果蔬、肉类、清洁和个人护理。',
+    searchNeedsStores: '要在 precios.uy 中搜索，请先选择你的超市。',
+    searchNoData: '还没有今天的价格可供搜索。点上方的 ↻ 获取；如果仍然不行，请检查 Supabase 中是否已安装 precios-uy 函数。',
     fromTickets: '根据你的小票',
     fromTicketsHint: '你购物时实际付的价格：适用于 precios.uy 未发布的商品，但可能已过时。',
   },

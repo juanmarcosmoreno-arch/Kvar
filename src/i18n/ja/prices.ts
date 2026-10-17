@@ -107,6 +107,8 @@ export const prices: Messages['prices'] = {
     brandAuto: '自動（最も多くのお店にあるもの）',
     searchTitle: 'precios.uy のすべて',
     searchNone: 'precios.uy はあなたのお店でそれを公開していません。食料品、乳製品、青果、肉、掃除用品、日用品など約200品目を公開しています。',
+    searchNeedsStores: 'precios.uy で検索するには、まずお店を選んでください。',
+    searchNoData: '検索できる今日の価格がまだありません。上の ↻ をタップして取得してください。それでも動かない場合は、Supabase に precios-uy 関数がインストールされているか確認してください。',
     fromTickets: 'レシートから',
     fromTicketsHint: '実際に支払った価格です。precios.uy にない商品に使えますが、古い場合があります。',
   },

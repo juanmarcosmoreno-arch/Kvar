@@ -106,6 +106,8 @@ export const prices = {
     brandAuto: 'Automático (la que está en más súper)',
     searchTitle: 'Todo lo de precios.uy',
     searchNone: 'precios.uy no publica eso en tus súper. Publica unos 200 artículos básicos: almacén, lácteos, frutas y verduras, carne, limpieza e higiene.',
+    searchNeedsStores: 'Para buscar en precios.uy, primero elegí tus súper.',
+    searchNoData: 'Todavía no hay precios de hoy para buscar. Tocá ↻ arriba para traerlos; si sigue sin andar, revisá que la función precios-uy esté instalada en Supabase.',
     fromTickets: 'Según tus tickets',
     fromTicketsHint: 'Lo que pagaste en tus compras: sirve para lo que precios.uy no publica, pero puede estar desactualizado.',
   },

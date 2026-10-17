@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automatic (the one in most stores)',
     searchTitle: 'Everything on precios.uy',
     searchNone: 'precios.uy doesn\'t list that at your stores. It lists about 200 basic items: pantry, dairy, produce, meat, cleaning and personal care.',
+    searchNeedsStores: 'To search precios.uy, first choose your stores.',
+    searchNoData: 'There are no prices from today to search yet. Tap ↻ above to load them; if it still doesn\'t work, check that the precios-uy function is installed in Supabase.',
     fromTickets: 'From your receipts',
     fromTicketsHint: 'What you paid on your shopping trips: useful for what precios.uy doesn’t publish, but it may be out of date.',
   },

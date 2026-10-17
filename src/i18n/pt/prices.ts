@@ -108,6 +108,8 @@ export const prices: Messages['prices'] = {
     brandAuto: 'Automático (a que está em mais mercados)',
     searchTitle: 'Tudo do precios.uy',
     searchNone: 'O precios.uy não publica isso nos seus mercados. Publica uns 200 itens básicos: mercearia, laticínios, hortifrúti, carne, limpeza e higiene.',
+    searchNeedsStores: 'Para buscar no precios.uy, primeiro escolha seus mercados.',
+    searchNoData: 'Ainda não há preços de hoje para buscar. Toque em ↻ acima para trazê-los; se continuar sem funcionar, confira se a função precios-uy está instalada no Supabase.',
     fromTickets: 'Pelos seus cupons',
     fromTicketsHint: 'O que você pagou nas suas compras: serve para o que precios.uy não publica, mas pode estar desatualizado.',
   },
