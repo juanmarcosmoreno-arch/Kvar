@@ -157,6 +157,7 @@ export const stock: Messages['stock'] = {
 
   photo: {
     take: '拍张照片',
+    gallery: '从相册选择',
     failed: '无法处理照片，请换一张试试。',
     cropping: '正在裁剪…',
   },

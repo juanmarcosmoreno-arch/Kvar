@@ -158,6 +158,7 @@ export const stock: Messages['stock'] = {
 
   photo: {
     take: 'Tag et foto',
+    gallery: 'Fra billedbiblioteket',
     failed: 'Kunne ikke behandle fotoet. Prøv et andet.',
     cropping: 'Beskærer…',
   },

@@ -157,6 +157,7 @@ export const stock = {
 
   photo: {
     take: 'Sacale una foto',
+    gallery: 'De la galería',
     failed: 'No pude procesar la foto. Probá con otra.',
     cropping: 'Recortando…',
   },

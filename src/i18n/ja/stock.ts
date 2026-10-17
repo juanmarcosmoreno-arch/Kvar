@@ -157,6 +157,7 @@ export const stock: Messages['stock'] = {
 
   photo: {
     take: '写真を撮る',
+    gallery: '写真から選ぶ',
     failed: '写真を処理できませんでした。別の写真でお試しください。',
     cropping: '切り抜き中…',
   },

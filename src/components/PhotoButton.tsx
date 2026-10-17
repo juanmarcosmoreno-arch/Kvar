@@ -5,13 +5,14 @@ import { Icon } from './Icon';
 import { m } from '../i18n';
 
 /**
- * «Sacale una foto»: abre la cámara, recorta el producto sin fondo y devuelve la imagen.
- * Usa el selector nativo del sistema (cámara o biblioteca), igual en web y en la app.
+ * «Sacale una foto» (cámara) o «De la galería»: recorta el producto sin fondo y devuelve la imagen.
+ * Dos botones porque `capture` abre directo la cámara del iPhone y no deja elegir una foto guardada.
  */
 export function PhotoButton({
   onPhoto, label, className = 'btn-ghost w-full',
 }: { onPhoto: (blob: Blob, cutout: boolean) => void; label?: string; className?: string }) {
-  const input = useRef<HTMLInputElement>(null);
+  const camera = useRef<HTMLInputElement>(null);
+  const gallery = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
   const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,11 +32,18 @@ export function PhotoButton({
 
   return (
     <>
-      <input ref={input} type="file" accept="image/*" capture="environment" className="hidden" onChange={onChange} />
-      <button type="button" className={className} onClick={() => input.current?.click()} disabled={busy}>
+      <input ref={camera} type="file" accept="image/*" capture="environment" className="hidden" onChange={onChange} />
+      <input ref={gallery} type="file" accept="image/*" className="hidden" onChange={onChange} />
+      <button type="button" className={className} onClick={() => camera.current?.click()} disabled={busy}>
         <Icon name="camera" size={20} />
         {busy ? m.stock.photo.cropping : label ?? m.stock.photo.take}
       </button>
+      {!busy && (
+        <button type="button" className={className} onClick={() => gallery.current?.click()}>
+          <Icon name="image" size={20} />
+          {m.stock.photo.gallery}
+        </button>
+      )}
     </>
   );
 }

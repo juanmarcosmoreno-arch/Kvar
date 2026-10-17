@@ -158,6 +158,7 @@ export const stock: Messages['stock'] = {
 
   photo: {
     take: 'Take a photo',
+    gallery: 'From library',
     failed: 'Couldn’t process the photo. Try another one.',
     cropping: 'Cropping…',
   },
