@@ -4,6 +4,7 @@ export const store = {
     statusOut: (product: string, out: string) => `${product}: ${out}. Lo agregué a la lista.`,
     status: (product: string, status: string) => `${product}: ${status}`,
     deleted: (name: string) => `Borré ${name}.`,
+    surplusAdded: (name: string) => `Ojo: de ${name} hay de sobra en casa.`,
     recipeDismissed: (title: string) => `Listo, no te propongo ${title} por un tiempo.`,
     syncRejected: 'No se pudo guardar un cambio. Se actualizó con lo último del hogar.',
   },

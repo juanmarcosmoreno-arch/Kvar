@@ -65,6 +65,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: '定番',
+    surplus: 'たくさん',
     unidentified: '未確認',
     minusOne: (name) => `${name}を1つ減らす（長押しで数を選択）`,
     plusOne: (name) => `${name}を1つ増やす（長押しで数を選択）`,
@@ -74,6 +75,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: '写真を変更',
+    surplus: 'たくさんある',
+    surplusHint: '今は買わなくて大丈夫：おすすめせず、リストにも入れません。「残り少ない」か「なし」になると自動で外れます。',
+    surplusOn: (name) => `${name}：たくさんあります。しばらくおすすめしません。`,
+    surplusOff: (name) => `${name}：「たくさんある」を外しました。`,
     noCutoutNative: '背景から商品を切り抜けなかったため、写真全体を保存しました。',
     noCutoutWeb: '写真を保存しました。背景の切り抜きはiPhoneアプリで使えます。',
     anotherBarcode: '別のバーコード',

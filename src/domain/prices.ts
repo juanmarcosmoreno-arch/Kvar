@@ -261,7 +261,7 @@ export function atStore(
     }
   }
   for (const productId of usualBasket(lines, now).keys()) {
-    if (onList.has(productId)) continue;
+    if (onList.has(productId) || byId.get(productId)?.surplus) continue;
     const c = compare(productId);
     if (!c) continue;
     const saving = 1 - c.here.effective / c.other.effective;

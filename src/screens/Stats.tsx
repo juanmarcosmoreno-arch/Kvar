@@ -148,7 +148,7 @@ export function Stats() {
                 <h2 className="section-title">{t.soon.title}</h2>
                 <p className="text-sm text-muted">{t.soon.hint}</p>
                 <ul className="card divide-y divide-line">
-                  {stats.soon.slice(0, 6).map(({ product, at }) => {
+                  {stats.soon.filter(({ product }) => !product.surplus).slice(0, 6).map(({ product, at }) => {
                     const days = daysFrom(at);
                     const inList = Boolean(openItemFor(view.list, product.id));
                     return (

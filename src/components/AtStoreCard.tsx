@@ -89,7 +89,8 @@ export function AtStoreCard({ view }: { view: Snapshot }) {
   const hasPrices = lines.some((l) => l.product_id && storeKey(l.store) === here);
   // Buen precio acá: de todo precios.uy (no solo lo tuyo), sin repetir lo que ya aparece arriba
   const shown = new Set([...(tips?.buyHere ?? []), ...(tips?.elsewhere ?? []), ...(tips?.deals ?? [])].map((x) => x.productId));
-  const exclude = new Set(sipc.matches.filter((x) => shown.has(x.product.id)).map((x) => x.item));
+  // …ni lo que en casa sobra
+  const exclude = new Set(sipc.matches.filter((x) => shown.has(x.product.id) || x.product.surplus).map((x) => x.item));
   const buys = isSipcStore(here) && sipc.data ? goodBuysAt(sipc.data, here, { discounts: data.discounts, when: today, exclude }) : [];
   const empty = tips && !tips.buyHere.length && !tips.elsewhere.length && !tips.deals.length && !buys.length;
 

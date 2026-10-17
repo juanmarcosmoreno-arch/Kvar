@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Basvara',
+    surplus: 'Gott om',
     unidentified: 'Oidentifierad',
     minusOne: (name) => `Ta bort en ${name} (håll in för att välja antal)`,
     plusOne: (name) => `Lägg till en ${name} (håll in för att välja antal)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Byt foto',
+    surplus: 'Finns gott om',
+    surplusHint: 'Inget behov av att köpa just nu: föreslås inte och läggs inte på listan. Tas bort av sig själv när den går till Snart slut eller Slut.',
+    surplusOn: (name) => `${name}: finns gott om. Jag föreslår den inte just nu.`,
+    surplusOff: (name) => `${name}: inte längre markerad som gott om.`,
     noCutoutNative: 'Kunde inte skilja produkten från bakgrunden, så hela fotot sparades.',
     noCutoutWeb: 'Fotot sparades. Bakgrundsborttagning finns i iPhone-appen.',
     anotherBarcode: 'En till kod',

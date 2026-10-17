@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Essentiel',
+    surplus: 'En trop',
     unidentified: 'Non identifié',
     minusOne: (name) => `Retirer un ${name} (maintenez pour choisir combien)`,
     plusOne: (name) => `Ajouter un ${name} (maintenez pour choisir combien)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Changer la photo',
+    surplus: 'Il y en a trop',
+    surplusHint: 'Pas besoin d\'en acheter pour l\'instant : je ne le suggère pas et ne l\'ajoute pas à la liste. S\'enlève tout seul quand il passe à Bientôt fini ou Épuisé.',
+    surplusOn: (name) => `${name} : il y en a trop. Je ne le suggérerai pas pour l’instant.`,
+    surplusOff: (name) => `${name} : n’est plus marqué en trop.`,
     noCutoutNative: 'Impossible de détourer le produit : la photo entière a été enregistrée.',
     noCutoutWeb: 'Photo enregistrée. Le détourage est disponible dans l’app iPhone.',
     anotherBarcode: 'Autre code',

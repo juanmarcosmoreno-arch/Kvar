@@ -367,6 +367,12 @@ del nombre del producto se aprende como alias de voz. En la web se puede escribi
   convierten en líneas de ticket por local (`cadena-sipc-id`), así canasta, «más barato en», «Estoy en el súper» y
   los descuentos de la cadena funcionan igual. Para lo que precios.uy no publica, siguen los tickets.
 
+### Hay de sobra (implementado)
+- Marca del producto (`products.surplus`), no un cuarto estado: sigue en «Hay». Se activa desde la ficha (solo con «Hay»),
+  se comparte con el hogar y la quita la base (trigger) cuando pasa a «Queda poco» o «No hay».
+- Mientras está: no aparece en «Se termina pronto», ni en «Aprovechá» / «Buen precio acá» de «Estoy en el súper»; si
+  estaba en la lista se saca, y si alguien lo agrega igual se avisa «Ojo: hay de sobra».
+
 ### Fase 4 — Vencimientos, predicción, push
 - Vencimiento opcional por producto/lote; bloque «Vence pronto» y aviso «Vence en 3 días».
 - Edge Function programada (cron) que calcula `avg_days_to_low/out` y `predicted_low_at` desde `product_events`, y

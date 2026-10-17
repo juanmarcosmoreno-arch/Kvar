@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Basisvare',
+    surplus: 'Rigeligt',
     unidentified: 'Ikke identificeret',
     minusOne: (name) => `Fjern én ${name} (hold nede for at vælge antal)`,
     plusOne: (name) => `Tilføj én ${name} (hold nede for at vælge antal)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Skift foto',
+    surplus: 'Der er rigeligt',
+    surplusHint: 'Ingen grund til at købe lige nu: foreslås ikke og kommer ikke på listen. Fjernes af sig selv, når den går til Næsten tom eller Tom.',
+    surplusOn: (name) => `${name}: der er rigeligt. Jeg foreslår den ikke lige nu.`,
+    surplusOff: (name) => `${name}: ikke længere markeret som rigeligt.`,
     noCutoutNative: 'Kunne ikke skille produktet fra baggrunden, så hele fotoet blev gemt.',
     noCutoutWeb: 'Fotoet er gemt. Fjernelse af baggrund findes i iPhone-appen.',
     anotherBarcode: 'En kode mere',

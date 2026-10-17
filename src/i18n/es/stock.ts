@@ -65,6 +65,7 @@ export const stock = {
 
   row: {
     staple: 'Básico',
+    surplus: 'De sobra',
     unidentified: 'Sin identificar',
     minusOne: (name: string) => `Restar uno de ${name} (mantené apretado para elegir cuántos)`,
     plusOne: (name: string) => `Sumar uno de ${name} (mantené apretado para elegir cuántos)`,
@@ -74,6 +75,10 @@ export const stock = {
 
   product: {
     changePhoto: 'Cambiar foto',
+    surplus: 'Hay de sobra',
+    surplusHint: 'Por ahora no hace falta comprar: no te lo sugiero ni lo pongo en la lista. Se quita solo cuando pase a Queda poco o No hay.',
+    surplusOn: (name: string) => `${name}: hay de sobra. No te lo voy a sugerir por ahora.`,
+    surplusOff: (name: string) => `${name}: ya no está marcado como de sobra.`,
     noCutoutNative: 'No pude separar el producto del fondo: guardé la foto entera.',
     noCutoutWeb: 'Guardé la foto. El recorte sin fondo está en la app de iPhone.',
     anotherBarcode: 'Otro código',

@@ -79,6 +79,11 @@ export function ProductRow({
             <span className="flex items-center gap-1.5">
               <span className="truncate font-medium">{product.name}</span>
               {product.is_staple && <Icon name="star" size={14} className="shrink-0 text-low" fill="currentColor" aria-label={m.stock.row.staple} />}
+              {product.surplus && product.status === 'ok' && (
+                <span className="shrink-0 rounded-full bg-sky-100 px-1.5 text-[11px] font-medium leading-5 text-sky-800 dark:bg-sky-950 dark:text-sky-200">
+                  {m.stock.row.surplus}
+                </span>
+              )}
             </span>
             <span className="block truncate text-sm text-muted">
               {subtitle ??

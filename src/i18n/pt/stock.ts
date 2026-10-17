@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Básico',
+    surplus: 'De sobra',
     unidentified: 'Não identificado',
     minusOne: (name) => `Tirar um de ${name} (segure para escolher quantos)`,
     plusOne: (name) => `Somar um de ${name} (segure para escolher quantos)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Trocar foto',
+    surplus: 'Tem de sobra',
+    surplusHint: 'Por enquanto não precisa comprar: não vou sugerir nem pôr na lista. Sai sozinho quando passar para Está acabando ou Acabou.',
+    surplusOn: (name) => `${name}: tem de sobra. Não vou sugerir por enquanto.`,
+    surplusOff: (name) => `${name}: não está mais marcado como de sobra.`,
     noCutoutNative: 'Não consegui separar o produto do fundo: salvei a foto inteira.',
     noCutoutWeb: 'Foto salva. O recorte sem fundo está no app para iPhone.',
     anotherBarcode: 'Outro código',

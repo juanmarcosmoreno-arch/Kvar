@@ -45,11 +45,15 @@ do $$ begin
   assert (select count(*) from public.product_events where type = 'status_changed') = 1, 'idempotente';
 end $$;
 
+-- «Hay de sobra» se quita sola cuando deja de haber
+update public.products set surplus = true where name = 'Café';
+
 -- Café es básico: con "Queda poco" entra a la lista
 select 1 as x from public.set_product_status((select id from public.products where name = 'Café'), 'low', null, 'manual',
   '10000000-0000-0000-0000-000000000002', now()) \gset ignored_
 do $$ begin
   assert (select count(*) from public.shopping_list_items where checked_at is null) = 2, 'básico en lista';
+  assert (select surplus from public.products where name = 'Café') = false, 'de sobra se quita al pasar a Queda poco';
 end $$;
 
 -- Cambio offline viejo no pisa el estado actual

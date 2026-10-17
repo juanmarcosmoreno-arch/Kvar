@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Staple',
+    surplus: 'Plenty',
     unidentified: 'Unidentified',
     minusOne: (name) => `Remove one ${name} (press and hold to choose how many)`,
     plusOne: (name) => `Add one ${name} (press and hold to choose how many)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Change photo',
+    surplus: 'Plenty at home',
+    surplusHint: 'No need to buy it for now: it won\'t be suggested or added to the list. Clears itself when it goes to Running low or Out.',
+    surplusOn: (name) => `${name}: plenty at home. I won't suggest it for now.`,
+    surplusOff: (name) => `${name}: no longer marked as plenty.`,
     noCutoutNative: 'Couldn’t separate the product from the background, so I saved the whole photo.',
     noCutoutWeb: 'Photo saved. Background removal is available in the iPhone app.',
     anotherBarcode: 'Another barcode',

@@ -65,7 +65,9 @@ function upsert<T extends { id: string }>(arr: T[], row: T): T[] {
 
 function withStock(s: Snapshot, product: Product, wanted: { status?: StockStatus; quantity?: number | null }, at: string): Snapshot {
   const next = resolveStock(product, wanted);
-  const updated: Product = { ...product, status: next.status, quantity: next.quantity, status_changed_at: at };
+  // «Hay de sobra» se quita solo cuando deja de haber (igual que en la base)
+  const surplus = next.status === 'ok' ? product.surplus : false;
+  const updated: Product = { ...product, status: next.status, quantity: next.quantity, status_changed_at: at, surplus };
   const list = applyStatusToList(s.list, updated, next.status, {
     listOnLow: s.household.list_on_low,
     now: at,

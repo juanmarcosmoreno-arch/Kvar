@@ -66,6 +66,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: 'Essenziale',
+    surplus: 'In abbondanza',
     unidentified: 'Non identificato',
     minusOne: (name) => `Togli uno di ${name} (tieni premuto per scegliere quanti)`,
     plusOne: (name) => `Aggiungi uno di ${name} (tieni premuto per scegliere quanti)`,
@@ -75,6 +76,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: 'Cambia foto',
+    surplus: 'Ce n\'è in abbondanza',
+    surplusHint: 'Per ora non serve comprarlo: non te lo suggerisco né lo metto in lista. Si toglie da solo quando passa a Sta finendo o Finito.',
+    surplusOn: (name) => `${name}: ce n’è in abbondanza. Per ora non te lo suggerisco.`,
+    surplusOff: (name) => `${name}: non è più segnato in abbondanza.`,
     noCutoutNative: 'Non sono riuscito a separare il prodotto dallo sfondo: ho salvato la foto intera.',
     noCutoutWeb: 'Foto salvata. Lo scontorno è disponibile nell’app per iPhone.',
     anotherBarcode: 'Altro codice',

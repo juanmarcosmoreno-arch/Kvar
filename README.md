@@ -64,6 +64,8 @@ Opción A — **SQL Editor** (lo más simple): pegá y ejecutá, **en este orden
 6. [`20261020000000_plan_semanal.sql`](supabase/migrations/20261020000000_plan_semanal.sql) (Menú de la semana)
 7. [`20261021000000_dividir_gastos.sql`](supabase/migrations/20261021000000_dividir_gastos.sql) (Cuentas: quién
    pagó, cómo se divide y «Saldar»)
+8. [`20261022000000_de_sobra.sql`](supabase/migrations/20261022000000_de_sobra.sql) («Hay de sobra»: no sugerir
+   ni poner en la lista lo que sobra; se quita solo al pasar a Queda poco o No hay).
 
 Se pueden volver a correr sin problema: ninguna borra ni duplica nada.
 

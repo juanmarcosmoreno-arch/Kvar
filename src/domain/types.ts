@@ -54,6 +54,8 @@ export interface Product {
   low_threshold: number;
   unit: string | null;
   is_staple: boolean;
+  /** «Hay de sobra»: no hace falta comprar (no se sugiere); se quita al pasar a «Queda poco» o «No hay» */
+  surplus?: boolean;
   unidentified: boolean;
   expires_on: string | null;
   /** Imagen externa (Open Food Facts) */

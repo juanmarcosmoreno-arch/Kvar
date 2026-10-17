@@ -65,6 +65,7 @@ export const stock: Messages['stock'] = {
 
   row: {
     staple: '常备品',
+    surplus: '充足',
     unidentified: '未识别',
     minusOne: (name) => `${name}减一（长按选择数量）`,
     plusOne: (name) => `${name}加一（长按选择数量）`,
@@ -74,6 +75,10 @@ export const stock: Messages['stock'] = {
 
   product: {
     changePhoto: '更换照片',
+    surplus: '库存充足',
+    surplusHint: '暂时不用买：不会推荐，也不会加入清单。变成“快用完了”或“没有了”时自动取消。',
+    surplusOn: (name) => `${name}：库存充足，暂时不推荐。`,
+    surplusOff: (name) => `${name}：已取消“库存充足”。`,
     noCutoutNative: '无法把商品从背景中分离出来，已保存整张照片。',
     noCutoutWeb: '照片已保存。去背景功能仅在 iPhone 应用中提供。',
     anotherBarcode: '再添加条码',

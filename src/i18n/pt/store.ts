@@ -5,6 +5,7 @@ export const store: Messages['store'] = {
     statusOut: (product, out) => `${product}: ${out}. Adicionei à lista.`,
     status: (product, status) => `${product}: ${status}`,
     deleted: (name) => `Apaguei ${name}.`,
+    surplusAdded: (name) => `Atenção: tem ${name} de sobra em casa.`,
     recipeDismissed: (title) => `Certo, não vou sugerir ${title} por um tempo.`,
     syncRejected: 'Não deu para salvar uma alteração. Atualizei com o mais recente da casa.',
   },

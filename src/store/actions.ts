@@ -118,6 +118,8 @@ export function addListItem(input: {
   };
   addedHere.add(item.id);
   dispatch({ kind: 'add_item', ...base(), item });
+  const product = input.productId ? view.products.find((p) => p.id === input.productId) : undefined;
+  if (product?.surplus && product.status === 'ok') setTimeout(() => toast(m.store.toasts.surplusAdded(product.name)), 0);
 }
 
 export function purchaseItem(item: ShoppingItem) {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { openItemFor } from '../domain/shoppingList';
 import type { Product } from '../domain/types';
 import { categoryIcon, locationIcon } from '../lib/categoryIcon';
-import { addListItem, deleteProduct, removeAlias, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
+import { addListItem, deleteProduct, removeAlias, removeItem, setProductPhoto, setQuantity, setStatus, updateProduct } from '../store/actions';
 import { useUI } from '../store/ui';
 import { ExpiryField } from './ExpiryField';
 import { MergeSheet } from './MergeSheet';
@@ -76,6 +76,22 @@ function Body({ product, onClose }: { product: Product; onClose: () => void }) {
       </div>
 
       <StatusPicker value={product.status} onChange={(s) => setStatus(product, s, 'manual', false)} />
+
+      {product.status === 'ok' && (
+        <div className="card px-4">
+          <Toggle
+            checked={Boolean(product.surplus)}
+            label={m.stock.product.surplus}
+            hint={m.stock.product.surplusHint}
+            onChange={(v) => {
+              updateProduct(product.id, { surplus: v });
+              // Si estaba en la lista, ya no hace falta
+              if (v && listItem) removeItem(listItem);
+              toast(v ? m.stock.product.surplusOn(product.name) : m.stock.product.surplusOff(product.name));
+            }}
+          />
+        </div>
+      )}
 
       <ExpiryField product={product} />
 

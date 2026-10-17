@@ -54,7 +54,7 @@ function seed(): Snapshot {
     P('p5', pn.sunflowerOil, 'c4', 'l2', 'low'),
     P('p6', pn.diapers, 'c9', 'l3', 'ok', { track_quantity: true, quantity: 12, low_threshold: 5, unit: d.units.diapers }),
     P('p7', pn.bread, 'c1', 'l2', 'ok', { image_url: pan }),
-    P('p8', pn.detergent, 'c7', 'l4', 'ok'),
+    P('p8', pn.detergent, 'c7', 'l4', 'ok', { surplus: true }),
     P('p9', pn.eggs, 'c3', 'l0', 'low', { track_quantity: true, quantity: 3, low_threshold: 4, unit: d.units.eggs, is_staple: true, image_url: huevos }),
     P('p10', pn.rice, 'c4', 'l2', 'ok'),
     P('p11', pn.gratedCheese, 'c3', 'l0', 'ok', { expires_on: date(4), image_url: queso }),

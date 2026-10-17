@@ -6,8 +6,8 @@ import { removeImage, UploadError, uploadImage } from './images';
 import { demoServer, isDemo } from './demo';
 import { supabase } from './supabase';
 
-const PRODUCT_COLS =
-  'id,household_id,name,category_id,location_id,status,track_quantity,quantity,low_threshold,unit,is_staple,unidentified,expires_on,image_url,image_path,brand,notes,status_changed_at,created_at,updated_at';
+// Todas las columnas: así las nuevas (surplus) llegan sin romper a quien todavía no corrió la migración
+const PRODUCT_COLS = '*';
 const ITEM_COLS = 'id,household_id,product_id,name,quantity,note,reason,checked_at,checked_by,created_at';
 
 export class PermanentError extends Error {}
@@ -174,7 +174,14 @@ export async function sendOp(op: Op, householdId: string): Promise<void> {
     }
     case 'update_product': {
       const { id: _i, household_id: _h, created_at: _c, updated_at: _u, ...patch } = op.patch;
-      check(await supabase.from('products').update(patch).eq('id', op.productId));
+      const res = await supabase.from('products').update(patch).eq('id', op.productId);
+      // Sin la migración de «Hay de sobra» todavía: se guarda lo demás
+      if (res.error && 'surplus' in patch && /surplus|PGRST204|42703/.test(`${res.error.code} ${res.error.message}`)) {
+        const { surplus: _s, ...rest } = patch;
+        if (Object.keys(rest).length) check(await supabase.from('products').update(rest).eq('id', op.productId));
+        return;
+      }
+      check(res);
       return;
     }
     case 'delete_product':

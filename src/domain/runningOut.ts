@@ -32,7 +32,7 @@ export function runningOutSoon(
   const { soon } = householdStats(events, products, { now, months: 6, soonDays: within });
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   return soon
-    .filter(({ product }) => product.status === 'ok' && !onList.has(product.id))
+    .filter(({ product }) => product.status === 'ok' && !product.surplus && !onList.has(product.id))
     .filter(({ product }) => {
       const until = opts.snoozed?.[product.id];
       return !until || Date.parse(until) <= now.getTime();

@@ -232,3 +232,16 @@ describe('nombre de cada uno', () => {
     expect(next.members.map((x) => x.display_name)).toEqual(['Sofía', 'Juan']);
   });
 });
+
+describe('hay de sobra', () => {
+  it('se quita solo cuando deja de haber', () => {
+    const p = product({ id: 'sobra', status: 'ok' });
+    const s = snapshot({ products: [p] });
+    const marked = applyOp(s, { kind: 'update_product', id: 'u1', at: '2026-10-17T10:00:00Z', productId: p.id, patch: { surplus: true } } as never);
+    expect(marked.products[0].surplus).toBe(true);
+    const ok = applyOp(marked, { kind: 'set_status', id: 's1', at: '2026-10-17T11:00:00Z', productId: p.id, status: 'ok' } as never);
+    expect(ok.products[0].surplus).toBe(true);
+    const low = applyOp(marked, { kind: 'set_status', id: 's2', at: '2026-10-17T11:00:00Z', productId: p.id, status: 'low' } as never);
+    expect(low.products[0].surplus).toBe(false);
+  });
+});

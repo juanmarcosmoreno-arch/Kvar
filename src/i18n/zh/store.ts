@@ -5,6 +5,7 @@ export const store: Messages['store'] = {
     statusOut: (product, out) => `${product}：${out}。已加入清单。`,
     status: (product, status) => `${product}：${status}`,
     deleted: (name) => `已删除${name}。`,
+    surplusAdded: (name) => `注意：家里的${name}库存充足。`,
     recipeDismissed: (title) => `好的，近期不再推荐${title}。`,
     syncRejected: '有一项更改未能保存。已更新为家庭的最新数据。',
   },
